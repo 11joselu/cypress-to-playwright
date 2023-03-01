@@ -4,7 +4,9 @@
   "description": "Automatic migration from cypress to playwright",
   "main": "index.js",
   "scripts": {
+    "postinstall": "git config --local core.hooksPath .githooks/",
     "lint": "eslint **/*.ts --fix",
+    "lint-staged": "lint-staged",
     "test": "npm run test"
   },
   "repository": {
@@ -29,6 +31,7 @@
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "lint-staged": "^13.1.2",
     "prettier": "^2.8.4"
   }
 }
