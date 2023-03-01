@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import * as assert from 'assert';
 
 function convert(s: string) {
+  if (s.trim() === '') return s;
   return s;
 }
 
@@ -11,8 +12,13 @@ describe('Converter', () => {
     assert.strictEqual(result, '');
   });
 
-  it('Parse a JavaScript code', () => {
+  it('Accepts JavaScript code', () => {
     const result = convert(`function hello() {}`);
     assert.strictEqual(result, 'function hello() {}');
+  });
+
+  it('Accepts TypeScript code', () => {
+    const result = convert(`function hello(): void {}`);
+    assert.strictEqual(result, 'function hello(): void {}');
   });
 });
