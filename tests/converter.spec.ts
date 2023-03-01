@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
 
-function convert(s: string) {
-  if (s.trim() === '') return s;
-  return s;
+function convert(code: string) {
+  if (code.trim() === '') return code;
+  return code;
 }
 
 describe('Converter', () => {
