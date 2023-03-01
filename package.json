@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "git config --local core.hooksPath .githooks/",
+    "build": "tsc",
     "lint": "eslint **/*.ts --fix",
     "lint-staged": "lint-staged",
     "test": "npm run test"
