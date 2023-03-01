@@ -1,0 +1,34 @@
+{
+  "name": "cypress-to-playwright",
+  "version": "0.0.1",
+  "description": "Automatic migration from cypress to playwright",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint **/*.ts --fix",
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/11joselu/cypress-to-playwright.git"
+  },
+  "keywords": [
+    "Cypress",
+    "Playwright",
+    "e2e",
+    "test"
+  ],
+  "author": "Jose Cabrera",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/11joselu/cypress-to-playwright/issues"
+  },
+  "homepage": "https://github.com/11joselu/cypress-to-playwright#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.35.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.4"
+  }
+}
