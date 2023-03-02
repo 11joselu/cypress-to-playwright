@@ -30,7 +30,7 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ) {
           const newExpression = context.factory.createPropertyAccessExpression(
             context.factory.createIdentifier('test'),
-            context.factory.createIdentifier('only')
+            node.expression.expression.name
           );
           return createExpressionStatement(
             context,

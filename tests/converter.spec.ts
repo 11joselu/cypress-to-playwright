@@ -25,7 +25,7 @@ describe('Converter', () => {
   it('Transform "it" block in a "test" block', () => {
     const result = convert(`it('test_case', () => {});`);
 
-    assert.strictEqual(format(result), format(`test('test_case', () => { });`));
+    assert.strictEqual(format(result), format(`test('test_case', () => {});`));
   });
 
   it('Do not transform call expression when is not "it" block into "test" block', () => {
@@ -33,7 +33,7 @@ describe('Converter', () => {
 
     assert.strictEqual(
       format(result),
-      format(`callFunction('test_case', () => { });`)
+      format(`callFunction('test_case', () => {});`)
     );
   });
 
@@ -59,7 +59,7 @@ describe('Converter', () => {
 
     assert.strictEqual(
       format(result),
-      format(`test.only('test_case', () => { });`)
+      format(`test.only('test_case', () => {});`)
     );
   });
 
@@ -69,6 +69,24 @@ describe('Converter', () => {
     assert.strictEqual(
       format(result),
       format(`fn.only('a simple function', () => {});`)
+    );
+  });
+
+  it('Transform "it.skip" block into "test.skip" block', () => {
+    const result = convert(`it.skip('test_case', () => {});`);
+
+    assert.strictEqual(
+      format(result),
+      format(`test.skip('test_case', () => {});`)
+    );
+  });
+
+  it('Do not transform "fn.skip" block into "test.skip" block', () => {
+    const result = convert(`fn.skip('test_case', () => {});`);
+
+    assert.strictEqual(
+      format(result),
+      format(`fn.skip('test_case', () => {});`)
     );
   });
 });
