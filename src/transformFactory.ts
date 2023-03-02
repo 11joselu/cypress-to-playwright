@@ -20,7 +20,14 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
           );
         }
 
-        if (ts.isPropertyAccessExpression(node.expression.expression)) {
+        if (!ts.isPropertyAccessExpression(node.expression.expression)) {
+          return node;
+        }
+
+        if (
+          isItBlock(node.expression) ||
+          isItBlock(node.expression.expression)
+        ) {
           const newExpression = context.factory.createPropertyAccessExpression(
             context.factory.createIdentifier('test'),
             context.factory.createIdentifier('only')
@@ -40,7 +47,9 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   };
 };
 
-function isItBlock(callExpression: ts.CallExpression) {
+function isItBlock(
+  callExpression: ts.CallExpression | ts.PropertyAccessExpression
+) {
   return (
     ts.isIdentifier(callExpression.expression) &&
     callExpression.expression.escapedText === 'it'

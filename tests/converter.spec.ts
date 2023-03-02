@@ -62,4 +62,13 @@ describe('Converter', () => {
       format(`test.only('test_case', () => { });`)
     );
   });
+
+  it('Do not transform "fn.only" into "test.only" block', () => {
+    const result = convert(`fn.only('a simple function', () => {});`);
+
+    assert.strictEqual(
+      format(result),
+      format(`fn.only('a simple function', () => {});`)
+    );
+  });
 });
