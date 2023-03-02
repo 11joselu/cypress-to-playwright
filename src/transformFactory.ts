@@ -1,9 +1,5 @@
 import ts from 'typescript';
 
-function isACypressCommand(expressionName: string) {
-  return expressionName.startsWith('cy');
-}
-
 export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
@@ -44,39 +40,44 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
           );
         }
 
+        if (!isACypressCommand(expressionName)) return node;
+
         if (!ts.isPropertyAccessExpression(callExpression.expression)) {
           return node;
         }
 
-        if (!isACypressCommand(expressionName)) return node;
-
         if (isVisitCallExpressions(expressionName)) {
-          return factory.createAwaitExpression(
-            factory.createCallExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier('page'),
-                factory.createIdentifier('goto')
-              ),
-              callExpression.typeArguments,
-              callExpression.arguments
-            )
+          const expression = factory.createPropertyAccessExpression(
+            factory.createIdentifier('page'),
+            factory.createIdentifier('goto')
+          );
+          const typeArguments = callExpression.typeArguments;
+          const argumentsArr = callExpression.arguments;
+          return createAwaitExpression(
+            factory,
+            expression,
+            typeArguments,
+            argumentsArr
           );
         }
 
         if (isClickCallExpression(expressionName)) {
           const getCallExpression = callExpression.expression.expression;
+          const expression = factory.createPropertyAccessExpression(
+            factory.createIdentifier('page'),
+            factory.createIdentifier('click')
+          );
+          const typeArguments = ts.isCallExpression(getCallExpression)
+            ? getCallExpression.typeArguments
+            : undefined;
+          const argumentsArr = ts.isCallExpression(getCallExpression)
+            ? getCallExpression.arguments
+            : [];
           return factory.createAwaitExpression(
             factory.createCallExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier('page'),
-                factory.createIdentifier('click')
-              ),
-              ts.isCallExpression(getCallExpression)
-                ? getCallExpression.typeArguments
-                : undefined,
-              ts.isCallExpression(getCallExpression)
-                ? getCallExpression.arguments
-                : []
+              expression,
+              typeArguments,
+              argumentsArr
             )
           );
         }
@@ -88,6 +89,12 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
     return ts.visitNode(rootNode, visit);
   };
 };
+
+function getFormattedExpressionName(
+  expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression
+) {
+  return getExpressionName(expressions).reverse().join('.');
+}
 
 function isItBlock(expressionName: string) {
   return 'it' === expressionName || isItSkipOrOnly(expressionName);
@@ -111,18 +118,27 @@ function createExpressionStatement(
   );
 }
 
+function isACypressCommand(expressionName: string) {
+  return expressionName.startsWith('cy');
+}
+
 function isVisitCallExpressions(expressionName: string) {
   return expressionName === 'cy.visit';
 }
 
-function isClickCallExpression(expressionName: string) {
-  return expressionName === 'cy.get.click';
+function createAwaitExpression(
+  factory: ts.NodeFactory,
+  expression: ts.PropertyAccessExpression,
+  typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+  argumentsArray: ts.NodeArray<ts.Expression>
+) {
+  return factory.createAwaitExpression(
+    factory.createCallExpression(expression, typeArguments, argumentsArray)
+  );
 }
 
-function getFormattedExpressionName(
-  expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression
-) {
-  return getExpressionName(expressions).reverse().join('.');
+function isClickCallExpression(expressionName: string) {
+  return expressionName === 'cy.get.click';
 }
 
 function getExpressionName(
