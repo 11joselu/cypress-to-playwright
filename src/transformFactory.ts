@@ -1,5 +1,9 @@
 import ts from 'typescript';
 
+const enum PLAYWRIGHT_ACTIONS {
+  CLICK = 'click',
+  GOTO = 'goto',
+}
 export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
@@ -47,7 +51,11 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         }
 
         if (isVisitCallExpressions(expressionName)) {
-          return createAwaitPlaywrightCommand(callExpression, factory, 'goto');
+          return createAwaitPlaywrightCommand(
+            callExpression,
+            factory,
+            PLAYWRIGHT_ACTIONS.GOTO
+          );
         }
 
         if (isClickCallExpression(expressionName)) {
@@ -55,7 +63,7 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
           return createAwaitPlaywrightCommand(
             cyGetCallExpression,
             factory,
-            'click'
+            PLAYWRIGHT_ACTIONS.CLICK
           );
         }
       }
@@ -121,7 +129,7 @@ function isClickCallExpression(expressionName: string) {
 function createAwaitPlaywrightCommand(
   callExpression: ts.CallExpression | ts.LeftHandSideExpression,
   factory: ts.NodeFactory,
-  commandName: string
+  commandName: PLAYWRIGHT_ACTIONS
 ) {
   const typeArguments = ts.isCallExpression(callExpression)
     ? callExpression.typeArguments
