@@ -23,8 +23,24 @@ describe('Converter', () => {
     assert.strictEqual(result, `test('test_case', () => { });`);
   });
 
-  it('Do not transform call expression when is not "it" block in a "test" block', () => {
+  it('Do not transform call expression when is not "it" block into "test" block', () => {
     const result = convert(`callFunction('test_case', () => {});`);
     assert.strictEqual(result, `callFunction('test_case', () => { });`);
+  });
+
+  it('Transform "it" block wrapped in a describe into a "test" block', () => {
+    const result = convert(`
+      describe('test_suite', () => {
+        it('test_case', () => {});
+      });
+    `);
+    assert.strictEqual(
+      result,
+      `
+      describe('test_suite', () => {
+        test('test_case', () => {});
+      });
+    `
+    );
   });
 });

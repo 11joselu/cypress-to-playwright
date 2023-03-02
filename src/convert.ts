@@ -15,7 +15,9 @@ export function convert(code: string) {
   const transformationResult = ts.transform(sourceFile, [transformerFactory]);
   const transformedSourceFile = transformationResult.transformed[0];
 
-  return printer
-    .printNode(ts.EmitHint.Unspecified, transformedSourceFile, sourceFile)
-    .trim();
+  return printer.printNode(
+    ts.EmitHint.Unspecified,
+    transformedSourceFile,
+    sourceFile
+  );
 }
