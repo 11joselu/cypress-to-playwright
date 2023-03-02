@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
 import { convert } from '../src/convert';
-import * as prettier from 'prettier';
+import { format } from './format';
 
 describe('Converter', () => {
   it('Returns empty string when there are not code', () => {
@@ -54,13 +54,3 @@ describe('Converter', () => {
     );
   });
 });
-
-function format(result: string) {
-  return prettier.format(result, {
-    trailingComma: 'es5',
-    tabWidth: 2,
-    semi: true,
-    singleQuote: true,
-    parser: 'babel',
-  });
-}
