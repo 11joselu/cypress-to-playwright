@@ -11,7 +11,9 @@ export function convert(code: string) {
     true
   );
 
-  const printer = ts.createPrinter();
+  const printer = ts.createPrinter({
+    newLine: ts.NewLineKind.LineFeed,
+  });
   const transformationResult = ts.transform(sourceFile, [transformerFactory]);
   const transformedSourceFile = transformationResult.transformed[0];
 
