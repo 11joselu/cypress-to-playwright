@@ -11,26 +11,36 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ts.isExpressionStatement(node) &&
         ts.isCallExpression(node.expression)
       ) {
-        const callExpression = node.expression;
-        if (
-          ts.isIdentifier(callExpression.expression) &&
-          callExpression.expression.escapedText !== 'it'
-        ) {
+        if (isItBlock(node.expression)) {
           return node;
         }
 
-        return context.factory.createExpressionStatement(
-          context.factory.createCallExpression(
-            context.factory.createIdentifier('test'),
-            callExpression.typeArguments,
-            callExpression.arguments
-          )
-        );
-      } else {
-        return node;
+        return createTestBlock(context, node.expression);
       }
+
+      return node;
     }
 
     return ts.visitNode(rootNode, visit);
   };
 };
+
+function isItBlock(callExpression: ts.CallExpression) {
+  return (
+    ts.isIdentifier(callExpression.expression) &&
+    callExpression.expression.escapedText !== 'it'
+  );
+}
+
+function createTestBlock(
+  context: ts.TransformationContext,
+  callExpression: ts.CallExpression
+) {
+  return context.factory.createExpressionStatement(
+    context.factory.createCallExpression(
+      context.factory.createIdentifier('test'),
+      callExpression.typeArguments,
+      callExpression.arguments
+    )
+  );
+}
