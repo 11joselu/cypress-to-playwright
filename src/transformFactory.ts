@@ -47,38 +47,15 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         }
 
         if (isVisitCallExpressions(expressionName)) {
-          const expression = factory.createPropertyAccessExpression(
-            factory.createIdentifier('page'),
-            factory.createIdentifier('goto')
-          );
-          const typeArguments = callExpression.typeArguments;
-          const argumentsArr = callExpression.arguments;
-          return createAwaitExpression(
-            factory,
-            expression,
-            typeArguments,
-            argumentsArr
-          );
+          return createAwaitPlaywrightCommand(callExpression, factory, 'goto');
         }
 
         if (isClickCallExpression(expressionName)) {
-          const getCallExpression = callExpression.expression.expression;
-          const expression = factory.createPropertyAccessExpression(
-            factory.createIdentifier('page'),
-            factory.createIdentifier('click')
-          );
-          const typeArguments = ts.isCallExpression(getCallExpression)
-            ? getCallExpression.typeArguments
-            : undefined;
-          const argumentsArr = ts.isCallExpression(getCallExpression)
-            ? getCallExpression.arguments
-            : [];
-          return factory.createAwaitExpression(
-            factory.createCallExpression(
-              expression,
-              typeArguments,
-              argumentsArr
-            )
+          const cyGetCallExpression = callExpression.expression.expression;
+          return createAwaitPlaywrightCommand(
+            cyGetCallExpression,
+            factory,
+            'click'
           );
         }
       }
@@ -139,6 +116,28 @@ function createAwaitExpression(
 
 function isClickCallExpression(expressionName: string) {
   return expressionName === 'cy.get.click';
+}
+
+function createAwaitPlaywrightCommand(
+  callExpression: ts.CallExpression | ts.LeftHandSideExpression,
+  factory: ts.NodeFactory,
+  commandName: string
+) {
+  const typeArguments = ts.isCallExpression(callExpression)
+    ? callExpression.typeArguments
+    : undefined;
+  const argumentsArr = ts.isCallExpression(callExpression)
+    ? callExpression.arguments
+    : ([] as unknown as ts.NodeArray<ts.Expression>);
+  return createAwaitExpression(
+    factory,
+    factory.createPropertyAccessExpression(
+      factory.createIdentifier('page'),
+      factory.createIdentifier(commandName)
+    ),
+    typeArguments,
+    argumentsArr
+  );
 }
 
 function getExpressionName(
