@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { convert } from '../src/convert';
 import { format } from './format';
 
-describe('Converter: Cypress', () => {
+describe('Converter: Cypress', { concurrency: true }, () => {
   it('Replace cy.visit by awaited page.goto', () => {
     const result = convert('cy.visit("http://localhost")');
 

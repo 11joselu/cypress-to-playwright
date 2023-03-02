@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { convert } from '../src/convert';
 import { format } from './format';
 
-describe('Converter: Test Hooks', () => {
+describe('Converter: Test Hooks', { concurrency: true }, () => {
   it('Transform "it" block in a "test" block', () => {
     const result = convert(`it('test_case', () => {});`);
 

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { convert } from '../src/convert';
 import { format } from './format';
 
-describe('Converter', () => {
+describe('Converter', { concurrency: true }, () => {
   it('Returns empty string when there are not code', () => {
     const result = convert('');
 
