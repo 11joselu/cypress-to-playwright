@@ -38,6 +38,19 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
             node.expression
           );
         }
+
+        if (isVisitCallExpressions(node.expression.expression)) {
+          return context.factory.createAwaitExpression(
+            context.factory.createCallExpression(
+              context.factory.createPropertyAccessExpression(
+                context.factory.createIdentifier('page'),
+                context.factory.createIdentifier('goto')
+              ),
+              node.expression.typeArguments,
+              node.expression.arguments
+            )
+          );
+        }
       }
 
       return node;
@@ -67,5 +80,13 @@ function createExpressionStatement(
       callExpression.typeArguments,
       callExpression.arguments
     )
+  );
+}
+
+function isVisitCallExpressions(expression: ts.PropertyAccessExpression) {
+  return (
+    expression.name.escapedText === 'visit' &&
+    ts.isIdentifier(expression.expression) &&
+    expression.expression.escapedText === 'cy'
   );
 }
