@@ -12,10 +12,8 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ts.isCallExpression(node.expression)
       ) {
         if (isItBlock(node.expression)) {
-          return node;
+          return createTestBlock(context, node.expression);
         }
-
-        return createTestBlock(context, node.expression);
       }
 
       return node;
@@ -28,7 +26,7 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
 function isItBlock(callExpression: ts.CallExpression) {
   return (
     ts.isIdentifier(callExpression.expression) &&
-    callExpression.expression.escapedText !== 'it'
+    callExpression.expression.escapedText === 'it'
   );
 }
 
