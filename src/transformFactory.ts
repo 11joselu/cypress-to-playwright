@@ -4,6 +4,8 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
   return (rootNode) => {
+    const factory = context.factory;
+
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
 
@@ -11,43 +13,42 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ts.isExpressionStatement(node) &&
         ts.isCallExpression(node.expression)
       ) {
-        if (isItBlock(node.expression)) {
-          const newExpression = context.factory.createIdentifier('test');
+        const callExpression = node.expression;
+
+        if (isItBlock(callExpression)) {
+          const newExpression = factory.createIdentifier('test');
           return createExpressionStatement(
             context,
             newExpression,
-            node.expression
+            callExpression
           );
         }
 
-        if (!ts.isPropertyAccessExpression(node.expression.expression)) {
+        if (!ts.isPropertyAccessExpression(callExpression.expression)) {
           return node;
         }
 
-        if (
-          isItBlock(node.expression) ||
-          isItBlock(node.expression.expression)
-        ) {
-          const newExpression = context.factory.createPropertyAccessExpression(
-            context.factory.createIdentifier('test'),
-            node.expression.expression.name
+        if (isItBlock(callExpression) || isItBlock(callExpression.expression)) {
+          const newExpression = factory.createPropertyAccessExpression(
+            factory.createIdentifier('test'),
+            callExpression.expression.name
           );
           return createExpressionStatement(
             context,
             newExpression,
-            node.expression
+            callExpression
           );
         }
 
-        if (isVisitCallExpressions(node.expression.expression)) {
-          return context.factory.createAwaitExpression(
-            context.factory.createCallExpression(
-              context.factory.createPropertyAccessExpression(
-                context.factory.createIdentifier('page'),
-                context.factory.createIdentifier('goto')
+        if (isVisitCallExpressions(callExpression.expression)) {
+          return factory.createAwaitExpression(
+            factory.createCallExpression(
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier('page'),
+                factory.createIdentifier('goto')
               ),
-              node.expression.typeArguments,
-              node.expression.arguments
+              callExpression.typeArguments,
+              callExpression.arguments
             )
           );
         }
