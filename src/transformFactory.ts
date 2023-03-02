@@ -25,21 +25,20 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
             if (!ts.isPropertyAccessExpression(callExpression.expression)) {
               return node;
             }
-            const newExpression = factory.createPropertyAccessExpression(
-              factory.createIdentifier('test'),
-              callExpression.expression.name
-            );
+
             return createExpressionStatement(
               context,
-              newExpression,
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier('test'),
+                callExpression.expression.name
+              ),
               callExpression
             );
           }
 
-          const newExpression = factory.createIdentifier('test');
           return createExpressionStatement(
             context,
-            newExpression,
+            factory.createIdentifier('test'),
             callExpression
           );
         }
@@ -59,9 +58,8 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         }
 
         if (isClickCallExpression(expressionName)) {
-          const cyGetCallExpression = callExpression.expression.expression;
           return createAwaitPlaywrightCommand(
-            cyGetCallExpression,
+            callExpression.expression.expression,
             factory,
             PLAYWRIGHT_ACTIONS.CLICK
           );
