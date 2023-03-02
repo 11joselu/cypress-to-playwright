@@ -1,5 +1,9 @@
 import ts from 'typescript';
 
+function isACypressCommand(expressionName: string) {
+  return expressionName.startsWith('cy');
+}
+
 export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
@@ -40,7 +44,13 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
           );
         }
 
-        if (isVisitCallExpressions(callExpression.expression)) {
+        const expressionName = formatExpression(
+          getExpressionName(callExpression)
+        );
+
+        if (!isACypressCommand(expressionName)) return node;
+
+        if (isVisitCallExpressions(expressionName)) {
           return factory.createAwaitExpression(
             factory.createCallExpression(
               factory.createPropertyAccessExpression(
@@ -53,7 +63,7 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
           );
         }
 
-        if (isClickCallExpression(callExpression.expression)) {
+        if (isClickCallExpression(expressionName)) {
           const getCallExpression = callExpression.expression.expression;
           return factory.createAwaitExpression(
             factory.createCallExpression(
@@ -102,19 +112,33 @@ function createExpressionStatement(
   );
 }
 
-function isVisitCallExpressions(expression: ts.PropertyAccessExpression) {
-  return (
-    expression.name.escapedText === 'visit' &&
-    ts.isIdentifier(expression.expression) &&
-    expression.expression.escapedText === 'cy'
-  );
+function isVisitCallExpressions(expressionName: string) {
+  return expressionName === 'cy.visit';
 }
 
-function isClickCallExpression(expression: ts.PropertyAccessExpression) {
-  return (
-    expression.name.escapedText === 'click' &&
-    ts.isExpressionStatement(expression.expression) &&
-    ts.isIdentifier(expression.expression.expression) &&
-    expression.expression.expression.escapedText === 'get'
-  );
+function isClickCallExpression(expressionName: string) {
+  return expressionName === 'cy.get.click';
+}
+
+function getExpressionName(
+  expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression
+) {
+  const result: string[] = [];
+  if ('name' in expression) {
+    result.push(expression.name.escapedText.toString());
+  }
+
+  if ('escapedText' in expression) {
+    result.push(expression.escapedText as string);
+  }
+
+  if ('expression' in expression) {
+    result.push(...getExpressionName(expression.expression));
+  }
+
+  return result;
+}
+
+function formatExpression(expressions: string[]) {
+  return expressions.reverse().join('.');
 }
