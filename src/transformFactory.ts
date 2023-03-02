@@ -12,19 +12,23 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ts.isCallExpression(node.expression)
       ) {
         if (isItBlock(node.expression)) {
-          return createTestBlock(context, node.expression);
+          const newExpression = context.factory.createIdentifier('test');
+          return createExpressionStatement(
+            context,
+            newExpression,
+            node.expression
+          );
         }
 
         if (ts.isPropertyAccessExpression(node.expression.expression)) {
-          return context.factory.createExpressionStatement(
-            context.factory.createCallExpression(
-              context.factory.createPropertyAccessExpression(
-                context.factory.createIdentifier('test'),
-                context.factory.createIdentifier('only')
-              ),
-              node.expression.typeArguments,
-              node.expression.arguments
-            )
+          const newExpression = context.factory.createPropertyAccessExpression(
+            context.factory.createIdentifier('test'),
+            context.factory.createIdentifier('only')
+          );
+          return createExpressionStatement(
+            context,
+            newExpression,
+            node.expression
           );
         }
       }
@@ -43,13 +47,14 @@ function isItBlock(callExpression: ts.CallExpression) {
   );
 }
 
-function createTestBlock(
+function createExpressionStatement(
   context: ts.TransformationContext,
+  newExpression: ts.Expression,
   callExpression: ts.CallExpression
 ) {
   return context.factory.createExpressionStatement(
     context.factory.createCallExpression(
-      context.factory.createIdentifier('test'),
+      newExpression,
       callExpression.typeArguments,
       callExpression.arguments
     )
