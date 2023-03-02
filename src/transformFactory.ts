@@ -18,8 +18,24 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         ts.isCallExpression(node.expression)
       ) {
         const callExpression = node.expression;
+        const expressionName = getFormattedExpressionName(callExpression);
 
-        if (isItBlock(callExpression)) {
+        if (isItBlock(expressionName)) {
+          if (isItSkipOrOnly(expressionName)) {
+            if (!ts.isPropertyAccessExpression(callExpression.expression)) {
+              return node;
+            }
+            const newExpression = factory.createPropertyAccessExpression(
+              factory.createIdentifier('test'),
+              callExpression.expression.name
+            );
+            return createExpressionStatement(
+              context,
+              newExpression,
+              callExpression
+            );
+          }
+
           const newExpression = factory.createIdentifier('test');
           return createExpressionStatement(
             context,
@@ -31,22 +47,6 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         if (!ts.isPropertyAccessExpression(callExpression.expression)) {
           return node;
         }
-
-        if (isItBlock(callExpression) || isItBlock(callExpression.expression)) {
-          const newExpression = factory.createPropertyAccessExpression(
-            factory.createIdentifier('test'),
-            callExpression.expression.name
-          );
-          return createExpressionStatement(
-            context,
-            newExpression,
-            callExpression
-          );
-        }
-
-        const expressionName = formatExpression(
-          getExpressionName(callExpression)
-        );
 
         if (!isACypressCommand(expressionName)) return node;
 
@@ -89,13 +89,12 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
   };
 };
 
-function isItBlock(
-  callExpression: ts.CallExpression | ts.PropertyAccessExpression
-) {
-  return (
-    ts.isIdentifier(callExpression.expression) &&
-    callExpression.expression.escapedText === 'it'
-  );
+function isItBlock(expressionName: string) {
+  return 'it' === expressionName || isItSkipOrOnly(expressionName);
+}
+
+function isItSkipOrOnly(expressionName: string) {
+  return ['it.only', 'it.skip'].includes(expressionName);
 }
 
 function createExpressionStatement(
@@ -120,6 +119,12 @@ function isClickCallExpression(expressionName: string) {
   return expressionName === 'cy.get.click';
 }
 
+function getFormattedExpressionName(
+  expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression
+) {
+  return getExpressionName(expressions).reverse().join('.');
+}
+
 function getExpressionName(
   expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression
 ) {
@@ -137,8 +142,4 @@ function getExpressionName(
   }
 
   return result;
-}
-
-function formatExpression(expressions: string[]) {
-  return expressions.reverse().join('.');
 }
