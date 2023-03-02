@@ -14,9 +14,9 @@ describe('Converter: Cypress', () => {
   });
 
   it('Do not replace fn.visit by awaited page.goto', () => {
-    const result = convert('fn.visit("http://localhost");');
+    const result = convert('fn.visit("http://localhost")');
 
-    assert.strictEqual(format(result), format('fn.visit("http://localhost");'));
+    assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
 
   it('Replace cy.get(selector).click() by awaited page.click(selector)', () => {
