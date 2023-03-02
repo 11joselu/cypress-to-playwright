@@ -111,5 +111,10 @@ function isVisitCallExpressions(expression: ts.PropertyAccessExpression) {
 }
 
 function isClickCallExpression(expression: ts.PropertyAccessExpression) {
-  return expression.name.escapedText === 'click';
+  return (
+    expression.name.escapedText === 'click' &&
+    ts.isExpressionStatement(expression.expression) &&
+    ts.isIdentifier(expression.expression.expression) &&
+    expression.expression.expression.escapedText === 'get'
+  );
 }

@@ -24,4 +24,10 @@ describe('Converter: Cypress', () => {
 
     assert.strictEqual(format(result), format('await page.click("selector")'));
   });
+
+  it('Do not replace cy.fn(selector).click() by awaited page.click(selector)', () => {
+    const result = convert('cy.fn("selector").click()');
+
+    assert.strictEqual(format(result), format('cy.fn("selector").click()'));
+  });
 });
