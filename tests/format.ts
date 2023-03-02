@@ -1,11 +1,7 @@
-import * as prettier from 'prettier';
+import { js as beautify } from 'js-beautify';
 
 export function format(result: string) {
-  return prettier.format(result, {
-    trailingComma: 'es5',
-    tabWidth: 2,
-    semi: true,
-    singleQuote: true,
-    parser: 'babel',
+  return beautify(result, {
+    indent_size: 2,
   });
 }
