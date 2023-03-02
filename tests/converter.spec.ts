@@ -53,4 +53,13 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Transform "it.only" block into "test.only" block', () => {
+    const result = convert(`it.only('test_case', () => {});`);
+
+    assert.strictEqual(
+      format(result),
+      format(`test.only('test_case', () => { });`)
+    );
+  });
 });

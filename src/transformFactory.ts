@@ -14,6 +14,19 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
         if (isItBlock(node.expression)) {
           return createTestBlock(context, node.expression);
         }
+
+        if (ts.isPropertyAccessExpression(node.expression.expression)) {
+          return context.factory.createExpressionStatement(
+            context.factory.createCallExpression(
+              context.factory.createPropertyAccessExpression(
+                context.factory.createIdentifier('test'),
+                context.factory.createIdentifier('only')
+              ),
+              node.expression.typeArguments,
+              node.expression.arguments
+            )
+          );
+        }
       }
 
       return node;
