@@ -52,6 +52,24 @@ export const transformerFactory: ts.TransformerFactory<ts.Node> = (
             )
           );
         }
+
+        if (isClickCallExpression(callExpression.expression)) {
+          const getCallExpression = callExpression.expression.expression;
+          return factory.createAwaitExpression(
+            factory.createCallExpression(
+              factory.createPropertyAccessExpression(
+                factory.createIdentifier('page'),
+                factory.createIdentifier('click')
+              ),
+              ts.isCallExpression(getCallExpression)
+                ? getCallExpression.typeArguments
+                : undefined,
+              ts.isCallExpression(getCallExpression)
+                ? getCallExpression.arguments
+                : []
+            )
+          );
+        }
       }
 
       return node;
@@ -90,4 +108,8 @@ function isVisitCallExpressions(expression: ts.PropertyAccessExpression) {
     ts.isIdentifier(expression.expression) &&
     expression.expression.escapedText === 'cy'
   );
+}
+
+function isClickCallExpression(expression: ts.PropertyAccessExpression) {
+  return expression.name.escapedText === 'click';
 }
