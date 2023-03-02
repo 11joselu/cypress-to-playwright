@@ -9,18 +9,25 @@ const transformerFactory: ts.TransformerFactory<ts.Node> = (
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
 
-      if (ts.isExpressionStatement(node)) {
-        const expression = node.expression;
-        if (ts.isCallExpression(expression)) {
-          return context.factory.createExpressionStatement(
-            context.factory.createCallExpression(
-              context.factory.createIdentifier('test'),
-              expression.typeArguments,
-              expression.arguments
-            )
-          );
+      if (
+        ts.isExpressionStatement(node) &&
+        ts.isCallExpression(node.expression)
+      ) {
+        const callExpression = node.expression;
+        if (
+          ts.isIdentifier(callExpression.expression) &&
+          callExpression.expression.escapedText !== 'it'
+        ) {
+          return node;
         }
-        return node;
+
+        return context.factory.createExpressionStatement(
+          context.factory.createCallExpression(
+            context.factory.createIdentifier('test'),
+            callExpression.typeArguments,
+            callExpression.arguments
+          )
+        );
       } else {
         return node;
       }
@@ -68,5 +75,10 @@ describe('Converter', () => {
   it('Transform "it" block in a "test" block', () => {
     const result = convert(`it('test_case', () => {});`);
     assert.strictEqual(result, `test('test_case', () => { });`);
+  });
+
+  it('Do not transform call expression when is not "it" block in a "test" block', () => {
+    const result = convert(`callFunction('test_case', () => {});`);
+    assert.strictEqual(result, `callFunction('test_case', () => { });`);
   });
 });
