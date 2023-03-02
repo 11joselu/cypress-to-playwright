@@ -8,7 +8,7 @@
     "build": "tsc",
     "lint": "eslint **/*.ts --fix",
     "lint-staged": "lint-staged",
-    "test": "node --loader tsx --test tests/*.spec.ts"
+    "test": "node --loader tsx  --test-reporter=spec --test tests/*.spec.ts"
   },
   "repository": {
     "type": "git",
