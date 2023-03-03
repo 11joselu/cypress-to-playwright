@@ -124,4 +124,23 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
 
     assert.strictEqual(format(result), format(`fn.skip('test_case', () => {});`));
   });
+
+  describe('beforeEach', () => {
+    test('Convert beforeEach with visit into beforeEach with page.goto', () => {
+      const result = converter(`
+        beforeEach(() => {
+          cy.visit('http://localhost')
+        })
+      `);
+
+      assert.strictEqual(
+        format(result),
+        format(`
+            beforeEach(async({page}) => {
+              await page.goto('http://localhost')
+            })
+        `)
+      );
+    });
+  });
 });

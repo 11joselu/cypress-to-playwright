@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { nodeCreator } from './node-creator';
-import { COMMANDS, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
+import { COMMANDS, HOOKS, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -35,6 +35,17 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
               ),
             ])
           );
+        }
+
+        if (isBeforeEach(expressionName)) {
+          const expression = creator.identifier(HOOKS.BEFORE_EACH);
+          return creator.callExpression(expression, call.typeArguments, [
+            creator.arrowFunction(
+              getBodyOfCall(context.factory, call),
+              [creator.destructuringParameter('page')],
+              [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)]
+            ),
+          ]);
         }
 
         if (!isCypressCommand(expressionName)) return node;
@@ -87,6 +98,10 @@ function getFormattedExpressionName(expressions: ts.PropertyAccessExpression | t
 
 function isItBlock(expressionName: string) {
   return 'it' === expressionName || isItSkipOrOnly(expressionName);
+}
+
+function isBeforeEach(expressionName: string) {
+  return 'beforeEach' === expressionName;
 }
 
 function isItSkipOrOnly(expressionName: string) {
