@@ -28,7 +28,11 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
             expression,
             creator.callExpression(call.expression, call.typeArguments, [
               call.arguments[0],
-              creator.arrowFunction(getBodyOfCall(context.factory, call), [creator.destructuringParameter('page')]),
+              creator.arrowFunction(
+                getBodyOfCall(context.factory, call),
+                [creator.destructuringParameter('page')],
+                [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)]
+              ),
             ])
           );
         }

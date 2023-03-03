@@ -7,7 +7,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
   test('Transform "it" and inject "page" parameter into "test"', () => {
     const result = converter(`it('test_case', () => {});`);
 
-    assert.strictEqual(format(result), format(`test('test_case', ({page}) => {});`));
+    assert.strictEqual(format(result), format(`test('test_case', async({page}) => {});`));
   });
 
   test('Do not transform call expression when is not "it" block into "test" block', () => {
@@ -26,7 +26,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`
-        test('test_case', ({page}) => {
+        test('test_case', async({page}) => {
           console.log('Function body');
         });
     `)
@@ -43,7 +43,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`
-        test('test_case', ({page}) => {
+        test('test_case', async({page}) => {
           console.log('Function body');
         });
     `)
@@ -61,7 +61,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
       format(result),
       format(`
       describe('test_suite', () => {
-        test('test_case', ({page}) => {});
+        test('test_case', async({page}) => {});
       });
     `)
     );
@@ -70,7 +70,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
   test('Transform "it.only" block into "test.only" block', () => {
     const result = converter(`it.only('test_case', () => {});`);
 
-    assert.strictEqual(format(result), format(`test.only('test_case', ({page}) => {});`));
+    assert.strictEqual(format(result), format(`test.only('test_case', async({page}) => {});`));
   });
 
   test('Keeps test body after a transformation of it.only', () => {
@@ -83,7 +83,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`
-        test.only('test_case', ({page}) => {
+        test.only('test_case', async({page}) => {
           console.log('Function body');
         });
       `)
@@ -99,7 +99,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
   test('Transform "it.skip" block into "test.skip" block', () => {
     const result = converter(`it.skip('test_case', () => {});`);
 
-    assert.strictEqual(format(result), format(`test.skip('test_case', ({page}) => {});`));
+    assert.strictEqual(format(result), format(`test.skip('test_case', async({page}) => {});`));
   });
 
   test('Keeps test body after a transformation of it.skip', () => {
@@ -112,7 +112,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`
-        test.skip('test_case', ({page}) => {
+        test.skip('test_case', async({page}) => {
           console.log('Function body');
         });
       `)

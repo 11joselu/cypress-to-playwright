@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import ts, { Modifier } from 'typescript';
 import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
 
 export const nodeCreator = (factory: ts.NodeFactory) => {
@@ -55,9 +55,9 @@ function createPropertyAccessExpression(factory: ts.NodeFactory) {
 }
 
 function createArrowFunction(factory: ts.NodeFactory) {
-  return (body: ts.Block, parameters: ts.ParameterDeclaration[]) => {
+  return (body: ts.Block, parameters: ts.ParameterDeclaration[], modifiers?: ts.Modifier[]) => {
     return factory.createArrowFunction(
-      undefined,
+      modifiers,
       undefined,
       parameters,
       undefined,
