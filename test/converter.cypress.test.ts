@@ -7,10 +7,7 @@ describe('Converter: Cypress', { concurrency: true }, () => {
   test('Replace cy.visit by awaited page.goto', () => {
     const result = converter('cy.visit("http://localhost")');
 
-    assert.strictEqual(
-      format(result),
-      format('await page.goto("http://localhost")')
-    );
+    assert.strictEqual(format(result), format('await page.goto("http://localhost")'));
   });
 
   test('Do not replace fn.visit by awaited page.goto', () => {

@@ -16,23 +16,14 @@ export const nodeCreator = (factory: ts.NodeFactory) => {
 function createExpressionStatement(factory: ts.NodeFactory) {
   return (newExpression: ts.Expression, callExpression: ts.CallExpression) => {
     return factory.createExpressionStatement(
-      factory.createCallExpression(
-        newExpression,
-        callExpression.typeArguments,
-        callExpression.arguments
-      )
+      factory.createCallExpression(newExpression, callExpression.typeArguments, callExpression.arguments)
     );
   };
 }
 
 function createAwaitPlaywrightCommand(factory: ts.NodeFactory) {
-  return (
-    callExpression: ts.CallExpression | ts.LeftHandSideExpression,
-    commandName: Playwright
-  ) => {
-    const typeArguments = ts.isCallExpression(callExpression)
-      ? callExpression.typeArguments
-      : undefined;
+  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: Playwright) => {
+    const typeArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
     const argumentsArr = ts.isCallExpression(callExpression)
       ? callExpression.arguments
       : ([] as unknown as ts.NodeArray<ts.Expression>);
@@ -47,16 +38,13 @@ function createAwaitPlaywrightCommand(factory: ts.NodeFactory) {
     );
   };
 }
-
 function createAwaitExpression(
   factory: ts.NodeFactory,
   expression: ts.PropertyAccessExpression,
   typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
   argumentsArray: ts.NodeArray<ts.Expression>
 ) {
-  return factory.createAwaitExpression(
-    factory.createCallExpression(expression, typeArguments, argumentsArray)
-  );
+  return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, argumentsArray));
 }
 
 function createIdentifier(factory: ts.NodeFactory) {
@@ -67,10 +55,7 @@ function createIdentifier(factory: ts.NodeFactory) {
 
 function createPropertyAccessExpression(factory: ts.NodeFactory) {
   return (identifierName: string, name: string | ts.MemberName) => {
-    return factory.createPropertyAccessExpression(
-      createIdentifier(factory)(identifierName),
-      name
-    );
+    return factory.createPropertyAccessExpression(createIdentifier(factory)(identifierName), name);
   };
 }
 
@@ -93,11 +78,7 @@ function createCallExpression(factory: ts.NodeFactory) {
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
     argumentsArray: ts.NodeArray<ts.Expression> | ts.Expression[]
   ) => {
-    return factory.createCallExpression(
-      expression,
-      typeArguments,
-      argumentsArray
-    );
+    return factory.createCallExpression(expression, typeArguments, argumentsArray);
   };
 }
 
@@ -107,11 +88,7 @@ function createDestructuringParameter(factory: ts.NodeFactory) {
       [],
       undefined,
       factory.createObjectBindingPattern([
-        factory.createBindingElement(
-          undefined,
-          undefined,
-          factory.createIdentifier(parameterName)
-        ),
+        factory.createBindingElement(undefined, undefined, factory.createIdentifier(parameterName)),
       ])
     );
   };
