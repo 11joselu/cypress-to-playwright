@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { nodeCreator } from './node-creator';
-import { Playwright } from './playwright';
+import { Playwright, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
 
 export const transform: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
@@ -25,7 +25,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (
 
             return factory.expressionStatement(
               factory.propertyAccessExpression(
-                'test',
+                PLAYWRIGHT_TEST_CASE_NAME,
                 callExpression.expression.name
               ),
               callExpression
@@ -33,12 +33,12 @@ export const transform: ts.TransformerFactory<ts.Node> = (
           }
 
           return factory.expressionStatement(
-            factory.identifier('test'),
+            factory.identifier(PLAYWRIGHT_TEST_CASE_NAME),
             callExpression
           );
         }
 
-        if (!isACypressCommand(expressionName)) return node;
+        if (!isCypressCommand(expressionName)) return node;
 
         if (!ts.isPropertyAccessExpression(callExpression.expression)) {
           return node;
@@ -80,7 +80,7 @@ function isItSkipOrOnly(expressionName: string) {
   return ['it.only', 'it.skip'].includes(expressionName);
 }
 
-function isACypressCommand(expressionName: string) {
+function isCypressCommand(expressionName: string) {
   return expressionName.startsWith('cy');
 }
 

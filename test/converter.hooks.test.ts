@@ -4,7 +4,7 @@ import { converter } from '../src/converter';
 import { format } from './format';
 
 describe('Converter: Test Hooks', { concurrency: true }, () => {
-  it('Transform "it" block in a "test" block', () => {
+  it('Transform "it" block into "test" block', () => {
     const result = converter(`it('test_case', () => {});`);
 
     assert.strictEqual(format(result), format(`test('test_case', () => {});`));
@@ -19,7 +19,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     );
   });
 
-  it('Transform "it" block wrapped in a describe into a "test" block', () => {
+  it('Transform "it" block wrapped into describe into a "test" block', () => {
     const result = converter(`
       describe('test_suite', () => {
         it('test_case', () => {});
