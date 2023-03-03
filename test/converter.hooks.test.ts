@@ -82,6 +82,23 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     );
   });
 
+  test('Keeps test body after a transformation of it.only', () => {
+    const result = converter(`
+      it.only('test_case', () => {
+        console.log('Function body');
+      });
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.only('test_case', ({page}) => {
+          console.log('Function body');
+        });
+      `)
+    );
+  });
+
   test('Do not transform "fn.only" into "test.only" block', () => {
     const result = converter(`fn.only('a simple function', () => {});`);
 
@@ -97,6 +114,23 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`test.skip('test_case', ({page}) => {});`)
+    );
+  });
+
+  test('Keeps test body after a transformation of it.skip', () => {
+    const result = converter(`
+      it.skip('test_case', () => {
+        console.log('Function body');
+      });
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.skip('test_case', ({page}) => {
+          console.log('Function body');
+        });
+      `)
     );
   });
 
