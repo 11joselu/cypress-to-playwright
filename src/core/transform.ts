@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { Creator, nodeCreator } from './node-creator';
-import { COMMANDS, HOOKS, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
+import { COMMANDS, HOOKS } from './playwright';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -73,9 +73,9 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
     if (isItSkipOrOnly(expressionName)) {
       if (!ts.isPropertyAccessExpression(call.expression)) return node;
 
-      expression = creator.propertyAccessExpression(PLAYWRIGHT_TEST_CASE_NAME, call.expression.name);
+      expression = creator.propertyAccessExpression(HOOKS.TEST, call.expression.name);
     } else {
-      expression = creator.identifier(PLAYWRIGHT_TEST_CASE_NAME);
+      expression = creator.identifier(HOOKS.TEST);
     }
 
     const [title] = call.arguments;

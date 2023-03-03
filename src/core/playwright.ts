@@ -9,8 +9,8 @@ export const enum VALIDATION {
 }
 
 export const PLAYWRIGHT_PAGE_NAME = 'page';
-export const PLAYWRIGHT_TEST_CASE_NAME = 'test';
 
 export const enum HOOKS {
   BEFORE_EACH = 'beforeEach',
+  TEST = 'test',
 }
