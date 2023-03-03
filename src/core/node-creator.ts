@@ -4,12 +4,13 @@ import { PLAYWRIGHT_PAGE_NAME, Playwright } from './playwright';
 export const nodeCreator = (factory: ts.NodeFactory) => {
   return {
     expressionStatement: createExpressionStatement(factory),
-    awaitPlaywrightCommand: createAwaitPlaywrightCommand(factory),
+    playwrightCommand: createPlaywrightCommand(factory),
     identifier: createIdentifier(factory),
     propertyAccessExpression: createPropertyAccessExpression(factory),
     arrowFunction: createArrowFunction(factory),
     callExpression: createCallExpression(factory),
     destructuringParameter: createDestructuringParameter(factory),
+    awaitExpression: createAwaitExpression(factory),
   };
 };
 
@@ -21,30 +22,23 @@ function createExpressionStatement(factory: ts.NodeFactory) {
   };
 }
 
-function createAwaitPlaywrightCommand(factory: ts.NodeFactory) {
+function createPlaywrightCommand(factory: ts.NodeFactory) {
   return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: Playwright) => {
-    const typeArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
-    const argumentsArr = ts.isCallExpression(callExpression)
-      ? callExpression.arguments
-      : ([] as unknown as ts.NodeArray<ts.Expression>);
-    return createAwaitExpression(
-      factory,
-      factory.createPropertyAccessExpression(
-        factory.createIdentifier(PLAYWRIGHT_PAGE_NAME),
-        factory.createIdentifier(commandName)
-      ),
-      typeArguments,
-      argumentsArr
+    return factory.createPropertyAccessExpression(
+      factory.createIdentifier(PLAYWRIGHT_PAGE_NAME),
+      factory.createIdentifier(commandName)
     );
   };
 }
-function createAwaitExpression(
-  factory: ts.NodeFactory,
-  expression: ts.PropertyAccessExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-  argumentsArray: ts.NodeArray<ts.Expression>
-) {
-  return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, argumentsArray));
+
+function createAwaitExpression(factory: ts.NodeFactory) {
+  return (
+    expression: ts.PropertyAccessExpression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+    argumentsArray: ts.NodeArray<ts.Expression>
+  ) => {
+    return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, argumentsArray));
+  };
 }
 
 function createIdentifier(factory: ts.NodeFactory) {

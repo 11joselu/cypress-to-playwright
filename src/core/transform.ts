@@ -38,11 +38,20 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         if (!ts.isPropertyAccessExpression(call.expression)) return node;
 
         if (isVisitCallExpressions(expressionName)) {
-          return creator.awaitPlaywrightCommand(call, Playwright.GOTO);
+          return creator.awaitExpression(
+            creator.playwrightCommand(call, Playwright.GOTO),
+            call.typeArguments,
+            call.arguments
+          );
         }
 
         if (isClickCallExpression(expressionName)) {
-          return creator.awaitPlaywrightCommand(call.expression.expression, Playwright.CLICK);
+          const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(call.expression);
+          return creator.awaitExpression(
+            creator.playwrightCommand(call.expression.expression, Playwright.CLICK),
+            typeArguments,
+            argumentsArr
+          );
         }
       }
 
@@ -86,6 +95,15 @@ function getBodyOfCall(factory: ts.NodeFactory, callExpression: ts.CallExpressio
   }
 
   return factory.createBlock([], false);
+}
+
+function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
+  const callExpression = expression1.expression;
+  const typeArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
+  const argumentsArr = ts.isCallExpression(callExpression)
+    ? callExpression.arguments
+    : ([] as unknown as ts.NodeArray<ts.Expression>);
+  return { typeArguments, argumentsArr };
 }
 
 function getExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
