@@ -22,9 +22,26 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     );
   });
 
-  test('Keeps callback body after transform "it" into "test"', () => {
+  test('Keeps arrow callback body after transform "it" into "test"', () => {
     const result = converter(`
       it('test_case', () => {
+        console.log('Function body');
+      });
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test('test_case', ({page}) => {
+          console.log('Function body');
+        });
+    `)
+    );
+  });
+
+  test('Override "anonymous function" callback keeping function body', () => {
+    const result = converter(`
+      it('test_case', function() {
         console.log('Function body');
       });
     `);
