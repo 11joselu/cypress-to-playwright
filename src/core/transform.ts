@@ -105,14 +105,17 @@ function getBodyOfCall(
   factory: ts.NodeFactory,
   callExpression: ts.CallExpression
 ): ts.Block {
-  const callbackArgument = callExpression.arguments.find(
-    (arg) => ts.isArrowFunction(arg) || ts.isFunctionExpression(arg)
+  const callbackArgument = callExpression.arguments.find((arg) =>
+    ts.isFunctionLike(arg)
   );
   const foundCallback = callbackArgument
-    ? (callbackArgument as ts.ArrowFunction)
+    ? (callbackArgument as ts.FunctionExpression)
     : undefined;
 
-  if (foundCallback?.body) return foundCallback.body as ts.Block;
+  if (foundCallback?.body) {
+    return foundCallback.body as ts.Block;
+  }
+
   return factory.createBlock([], false);
 }
 
