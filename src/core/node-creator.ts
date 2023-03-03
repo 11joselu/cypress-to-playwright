@@ -1,7 +1,32 @@
-import ts, { Modifier } from 'typescript';
+import ts from 'typescript';
 import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
 
-export const nodeCreator = (factory: ts.NodeFactory) => {
+export type Creator = {
+  playwrightCommand: (
+    callExpression: ts.CallExpression | ts.LeftHandSideExpression,
+    commandName: COMMANDS
+  ) => ts.PropertyAccessExpression;
+  identifier: (name: string) => ts.Identifier;
+  expect: (expression: ts.LeftHandSideExpression) => ts.AwaitExpression;
+  awaitExpression: (
+    expression: ts.PropertyAccessExpression | ts.CallExpression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+    argumentsArray: ts.NodeArray<ts.Expression>
+  ) => ts.AwaitExpression;
+  callExpression: (
+    expression: ts.Expression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+    argumentsArray: ts.NodeArray<ts.Expression> | ts.Expression[]
+  ) => ts.CallExpression;
+  expressionStatement: (newExpression: ts.Expression, callExpression: ts.CallExpression) => ts.ExpressionStatement;
+  destructuringParameter: (parameterName: string) => ts.ParameterDeclaration;
+  propertyAccessExpression: (identifierName: string, name: string | ts.MemberName) => ts.PropertyAccessExpression;
+  arrowFunction: (body: ts.Block, parameters: ts.ParameterDeclaration[], modifiers?: ts.Modifier[]) => ts.ArrowFunction;
+  emptyBlock: () => ts.Block;
+  asyncToken: () => ts.ModifierToken<ts.SyntaxKind.AsyncKeyword>;
+};
+
+export const nodeCreator = (factory: ts.NodeFactory): Creator => {
   return {
     expressionStatement: createExpressionStatement(factory),
     playwrightCommand: createPlaywrightCommand(factory),
@@ -12,6 +37,8 @@ export const nodeCreator = (factory: ts.NodeFactory) => {
     destructuringParameter: createDestructuringParameter(factory),
     awaitExpression: createAwaitExpression(factory),
     expect: playwrightExpect(factory),
+    emptyBlock: createEmptyBlock(factory),
+    asyncToken: createAsyncToken(factory),
   };
 };
 
@@ -100,5 +127,17 @@ function playwrightExpect(factory: ts.NodeFactory) {
       undefined,
       [] as unknown as ts.NodeArray<ts.Expression>
     );
+  };
+}
+
+function createEmptyBlock(factory: ts.NodeFactory) {
+  return () => {
+    return factory.createBlock([], false);
+  };
+}
+
+function createAsyncToken(factory: ts.NodeFactory) {
+  return () => {
+    return factory.createToken(ts.SyntaxKind.AsyncKeyword);
   };
 }

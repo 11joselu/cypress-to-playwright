@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { nodeCreator } from './node-creator';
+import { Creator, nodeCreator } from './node-creator';
 import { COMMANDS, HOOKS, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
@@ -12,45 +12,11 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         const call = node.expression;
         const expressionName = getFormattedExpressionName(call);
 
-        if (isItBlock(expressionName)) {
-          let expression: ts.Expression;
-          if (isItSkipOrOnly(expressionName)) {
-            if (!ts.isPropertyAccessExpression(call.expression)) {
-              return node;
-            }
-
-            expression = creator.propertyAccessExpression(PLAYWRIGHT_TEST_CASE_NAME, call.expression.name);
-          } else {
-            expression = creator.identifier(PLAYWRIGHT_TEST_CASE_NAME);
-          }
-
-          return creator.expressionStatement(
-            expression,
-            creator.callExpression(call.expression, call.typeArguments, [
-              call.arguments[0],
-              creator.arrowFunction(
-                getBodyOfCall(context.factory, call),
-                [creator.destructuringParameter('page')],
-                [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)]
-              ),
-            ])
-          );
+        if (isTestHook(expressionName)) {
+          return parseTestHook(expressionName, node, creator);
         }
 
-        if (isBeforeEach(expressionName)) {
-          const expression = creator.identifier(HOOKS.BEFORE_EACH);
-          return creator.callExpression(expression, call.typeArguments, [
-            creator.arrowFunction(
-              getBodyOfCall(context.factory, call),
-              [creator.destructuringParameter('page')],
-              [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)]
-            ),
-          ]);
-        }
-
-        if (!isCypressCommand(expressionName)) return node;
-
-        if (!ts.isPropertyAccessExpression(call.expression)) return node;
+        if (!isCypressCommand(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
 
         if (isVisitCallExpressions(expressionName)) {
           return creator.awaitExpression(
@@ -96,12 +62,56 @@ function getFormattedExpressionName(expressions: ts.PropertyAccessExpression | t
   return getExpressionName(expressions).reverse().join('.');
 }
 
-function isItBlock(expressionName: string) {
-  return 'it' === expressionName || isItSkipOrOnly(expressionName);
+function isTestHook(expressionName: string) {
+  return isBeforeEach(expressionName) || isItBlock(expressionName);
+}
+
+function parseTestHook(expressionName: string, node: ts.ExpressionStatement, creator: Creator) {
+  const call = node.expression as ts.CallExpression;
+  if (isItBlock(expressionName)) {
+    let expression: ts.Expression;
+    if (isItSkipOrOnly(expressionName)) {
+      if (!ts.isPropertyAccessExpression(call.expression)) return node;
+
+      expression = creator.propertyAccessExpression(PLAYWRIGHT_TEST_CASE_NAME, call.expression.name);
+    } else {
+      expression = creator.identifier(PLAYWRIGHT_TEST_CASE_NAME);
+    }
+
+    const [title] = call.arguments;
+    return creator.expressionStatement(
+      expression,
+      creator.callExpression(call.expression, call.typeArguments, [
+        title,
+        creator.arrowFunction(
+          getBodyOfCall(call, creator),
+          [creator.destructuringParameter('page')],
+          [creator.asyncToken()]
+        ),
+      ])
+    );
+  }
+
+  if (isBeforeEach(expressionName)) {
+    const expression = creator.identifier(HOOKS.BEFORE_EACH);
+    return creator.callExpression(expression, call.typeArguments, [
+      creator.arrowFunction(
+        getBodyOfCall(call, creator),
+        [creator.destructuringParameter('page')],
+        [creator.asyncToken()]
+      ),
+    ]);
+  }
+
+  return node;
 }
 
 function isBeforeEach(expressionName: string) {
   return 'beforeEach' === expressionName;
+}
+
+function isItBlock(expressionName: string) {
+  return 'it' === expressionName || isItSkipOrOnly(expressionName);
 }
 
 function isItSkipOrOnly(expressionName: string) {
@@ -128,7 +138,7 @@ function isCyGet(expressionName: string) {
   return 'cy.get' === expressionName;
 }
 
-function getBodyOfCall(factory: ts.NodeFactory, callExpression: ts.CallExpression): ts.Block {
+function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.Block {
   const callbackArgument = callExpression.arguments.find((arg) => ts.isFunctionLike(arg));
   const foundCallback = callbackArgument ? (callbackArgument as ts.FunctionExpression) : undefined;
 
@@ -136,7 +146,7 @@ function getBodyOfCall(factory: ts.NodeFactory, callExpression: ts.CallExpressio
     return foundCallback.body as ts.Block;
   }
 
-  return factory.createBlock([], false);
+  return creator.emptyBlock();
 }
 
 function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
