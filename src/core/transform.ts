@@ -1,15 +1,12 @@
 import ts from 'typescript';
+import { nodeCreator } from './node-creator';
+import { Playwright } from './playwright';
 
-const enum PLAYWRIGHT_ACTIONS {
-  CLICK = 'click',
-  GOTO = 'goto',
-}
 export const transform: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
+  const factory = nodeCreator(context.factory);
   return (rootNode) => {
-    const factory = context.factory;
-
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
 
@@ -26,19 +23,17 @@ export const transform: ts.TransformerFactory<ts.Node> = (
               return node;
             }
 
-            return createExpressionStatement(
-              context,
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier('test'),
+            return factory.expressionStatement(
+              factory.propertyAccessExpression(
+                'test',
                 callExpression.expression.name
               ),
               callExpression
             );
           }
 
-          return createExpressionStatement(
-            context,
-            factory.createIdentifier('test'),
+          return factory.expressionStatement(
+            factory.identifier('test'),
             callExpression
           );
         }
@@ -50,18 +45,16 @@ export const transform: ts.TransformerFactory<ts.Node> = (
         }
 
         if (isVisitCallExpressions(expressionName)) {
-          return createAwaitPlaywrightCommand(
+          return factory.awaitPlaywrightCommand(
             callExpression,
-            factory,
-            PLAYWRIGHT_ACTIONS.GOTO
+            Playwright.GOTO
           );
         }
 
         if (isClickCallExpression(expressionName)) {
-          return createAwaitPlaywrightCommand(
+          return factory.awaitPlaywrightCommand(
             callExpression.expression.expression,
-            factory,
-            PLAYWRIGHT_ACTIONS.CLICK
+            Playwright.CLICK
           );
         }
       }
@@ -87,20 +80,6 @@ function isItSkipOrOnly(expressionName: string) {
   return ['it.only', 'it.skip'].includes(expressionName);
 }
 
-function createExpressionStatement(
-  context: ts.TransformationContext,
-  newExpression: ts.Expression,
-  callExpression: ts.CallExpression
-) {
-  return context.factory.createExpressionStatement(
-    context.factory.createCallExpression(
-      newExpression,
-      callExpression.typeArguments,
-      callExpression.arguments
-    )
-  );
-}
-
 function isACypressCommand(expressionName: string) {
   return expressionName.startsWith('cy');
 }
@@ -108,44 +87,9 @@ function isACypressCommand(expressionName: string) {
 function isVisitCallExpressions(expressionName: string) {
   return expressionName === 'cy.visit';
 }
-
-function createAwaitExpression(
-  factory: ts.NodeFactory,
-  expression: ts.PropertyAccessExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-  argumentsArray: ts.NodeArray<ts.Expression>
-) {
-  return factory.createAwaitExpression(
-    factory.createCallExpression(expression, typeArguments, argumentsArray)
-  );
-}
-
 function isClickCallExpression(expressionName: string) {
   return expressionName === 'cy.get.click';
 }
-
-function createAwaitPlaywrightCommand(
-  callExpression: ts.CallExpression | ts.LeftHandSideExpression,
-  factory: ts.NodeFactory,
-  commandName: PLAYWRIGHT_ACTIONS
-) {
-  const typeArguments = ts.isCallExpression(callExpression)
-    ? callExpression.typeArguments
-    : undefined;
-  const argumentsArr = ts.isCallExpression(callExpression)
-    ? callExpression.arguments
-    : ([] as unknown as ts.NodeArray<ts.Expression>);
-  return createAwaitExpression(
-    factory,
-    factory.createPropertyAccessExpression(
-      factory.createIdentifier('page'),
-      factory.createIdentifier(commandName)
-    ),
-    typeArguments,
-    argumentsArr
-  );
-}
-
 function getExpressionName(
   expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression
 ) {
