@@ -5,7 +5,7 @@ import { Playwright, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
 export const transform: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
-  const factory = nodeCreator(context.factory);
+  const creator = nodeCreator(context.factory);
   return (rootNode) => {
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
@@ -23,8 +23,8 @@ export const transform: ts.TransformerFactory<ts.Node> = (
               return node;
             }
 
-            return factory.expressionStatement(
-              factory.propertyAccessExpression(
+            return creator.expressionStatement(
+              creator.propertyAccessExpression(
                 PLAYWRIGHT_TEST_CASE_NAME,
                 callExpression.expression.name
               ),
@@ -32,9 +32,18 @@ export const transform: ts.TransformerFactory<ts.Node> = (
             );
           }
 
-          return factory.expressionStatement(
-            factory.identifier(PLAYWRIGHT_TEST_CASE_NAME),
-            callExpression
+          const newArgument = creator.arrowFunction(
+            context.factory.createBlock([], false),
+            [creator.destructuringParameter('page')]
+          );
+
+          return creator.expressionStatement(
+            creator.identifier(PLAYWRIGHT_TEST_CASE_NAME),
+            creator.callExpression(
+              callExpression.expression,
+              callExpression.typeArguments,
+              [callExpression.arguments[0], newArgument]
+            )
           );
         }
 
@@ -45,14 +54,14 @@ export const transform: ts.TransformerFactory<ts.Node> = (
         }
 
         if (isVisitCallExpressions(expressionName)) {
-          return factory.awaitPlaywrightCommand(
+          return creator.awaitPlaywrightCommand(
             callExpression,
             Playwright.GOTO
           );
         }
 
         if (isClickCallExpression(expressionName)) {
-          return factory.awaitPlaywrightCommand(
+          return creator.awaitPlaywrightCommand(
             callExpression.expression.expression,
             Playwright.CLICK
           );
@@ -87,9 +96,11 @@ function isCypressCommand(expressionName: string) {
 function isVisitCallExpressions(expressionName: string) {
   return expressionName === 'cy.visit';
 }
+
 function isClickCallExpression(expressionName: string) {
   return expressionName === 'cy.get.click';
 }
+
 function getExpressionName(
   expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression
 ) {

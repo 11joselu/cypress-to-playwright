@@ -4,10 +4,13 @@ import { converter } from '../src/converter';
 import { format } from './format';
 
 describe('Converter: Test Hooks', { concurrency: true }, () => {
-  test('Transform "it" block into "test" block', () => {
+  test('Transform "it" and inject "page" parameter into "test"', () => {
     const result = converter(`it('test_case', () => {});`);
 
-    assert.strictEqual(format(result), format(`test('test_case', () => {});`));
+    assert.strictEqual(
+      format(result),
+      format(`test('test_case', ({page}) => {});`)
+    );
   });
 
   test('Do not transform call expression when is not "it" block into "test" block', () => {
@@ -30,7 +33,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
       format(result),
       format(`
       describe('test_suite', () => {
-        test('test_case', () => {});
+        test('test_case', ({page}) => {});
       });
     `)
     );

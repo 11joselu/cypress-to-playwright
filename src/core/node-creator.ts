@@ -7,6 +7,9 @@ export const nodeCreator = (factory: ts.NodeFactory) => {
     awaitPlaywrightCommand: createAwaitPlaywrightCommand(factory),
     identifier: createIdentifier(factory),
     propertyAccessExpression: createPropertyAccessExpression(factory),
+    arrowFunction: createArrowFunction(factory),
+    callExpression: createCallExpression(factory),
+    destructuringParameter: createDestructuringParameter(factory),
   };
 };
 
@@ -67,6 +70,49 @@ function createPropertyAccessExpression(factory: ts.NodeFactory) {
     return factory.createPropertyAccessExpression(
       createIdentifier(factory)(identifierName),
       name
+    );
+  };
+}
+
+function createArrowFunction(factory: ts.NodeFactory) {
+  return (body: ts.Block, parameters: ts.ParameterDeclaration[]) => {
+    return factory.createArrowFunction(
+      undefined,
+      undefined,
+      parameters,
+      undefined,
+      factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+      body
+    );
+  };
+}
+
+function createCallExpression(factory: ts.NodeFactory) {
+  return (
+    expression: ts.Expression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+    argumentsArray: ts.NodeArray<ts.Expression> | ts.Expression[]
+  ) => {
+    return factory.createCallExpression(
+      expression,
+      typeArguments,
+      argumentsArray
+    );
+  };
+}
+
+function createDestructuringParameter(factory: ts.NodeFactory) {
+  return (parameterName: string) => {
+    return factory.createParameterDeclaration(
+      [],
+      undefined,
+      factory.createObjectBindingPattern([
+        factory.createBindingElement(
+          undefined,
+          undefined,
+          factory.createIdentifier(parameterName)
+        ),
+      ])
     );
   };
 }
