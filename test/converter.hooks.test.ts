@@ -78,7 +78,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
 
     assert.strictEqual(
       format(result),
-      format(`test.only('test_case', () => {});`)
+      format(`test.only('test_case', ({page}) => {});`)
     );
   });
 
@@ -96,7 +96,7 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
 
     assert.strictEqual(
       format(result),
-      format(`test.skip('test_case', () => {});`)
+      format(`test.skip('test_case', ({page}) => {});`)
     );
   });
 

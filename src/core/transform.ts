@@ -23,12 +23,21 @@ export const transform: ts.TransformerFactory<ts.Node> = (
               return node;
             }
 
+            const newArgument = creator.arrowFunction(
+              getBodyOfCall(context.factory, callExpression),
+              [creator.destructuringParameter('page')]
+            );
+
             return creator.expressionStatement(
               creator.propertyAccessExpression(
                 PLAYWRIGHT_TEST_CASE_NAME,
                 callExpression.expression.name
               ),
-              callExpression
+              creator.callExpression(
+                callExpression.expression,
+                callExpression.typeArguments,
+                [callExpression.arguments[0], newArgument]
+              )
             );
           }
 
