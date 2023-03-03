@@ -35,7 +35,7 @@ describe('Converter: Cypress', { concurrency: true }, () => {
   });
 
   describe('Replace Cypress validation cy.get(...).should', () => {
-    test('be.visible by expect().toBeVisible', { only: true }, () => {
+    test('be.visible by expect().toBeVisible', () => {
       const result = converter('cy.get("selector").should("be.visible")');
 
       assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
