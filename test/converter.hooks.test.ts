@@ -22,6 +22,23 @@ describe('Converter: Test Hooks', { concurrency: true }, () => {
     );
   });
 
+  test('Keeps callback body after transform "it" into "test"', () => {
+    const result = converter(`
+      it('test_case', () => {
+        console.log('Function body');
+      });
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test('test_case', ({page}) => {
+          console.log('Function body');
+        });
+    `)
+    );
+  });
+
   test('Transform "it" block wrapped into describe into a "test" block', () => {
     const result = converter(`
       describe('test_suite', () => {

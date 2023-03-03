@@ -33,7 +33,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (
           }
 
           const newArgument = creator.arrowFunction(
-            context.factory.createBlock([], false),
+            getBodyOfCall(context.factory, callExpression),
             [creator.destructuringParameter('page')]
           );
 
@@ -99,6 +99,18 @@ function isVisitCallExpressions(expressionName: string) {
 
 function isClickCallExpression(expressionName: string) {
   return expressionName === 'cy.get.click';
+}
+
+function getBodyOfCall(
+  factory: ts.NodeFactory,
+  callExpression: ts.CallExpression
+): ts.Block {
+  const callbackArgument = callExpression.arguments.find((arg) =>
+    ts.isArrowFunction(arg)
+  ) as ts.ArrowFunction;
+
+  if (callbackArgument?.body) return callbackArgument.body as ts.Block;
+  return factory.createBlock([], false);
 }
 
 function getExpressionName(
