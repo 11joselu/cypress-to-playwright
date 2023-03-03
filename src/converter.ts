@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { transformerFactory } from './transformFactory';
+import { transform } from './core/transform';
 
-export function convert(code: string) {
+export function converter(code: string) {
   if (code.trim() === '') return code;
 
   const sourceFile = ts.createSourceFile(
@@ -14,7 +14,7 @@ export function convert(code: string) {
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
   });
-  const transformationResult = ts.transform(sourceFile, [transformerFactory]);
+  const transformationResult = ts.transform(sourceFile, [transform]);
   const transformedSourceFile = transformationResult.transformed[0];
 
   return printer.printNode(

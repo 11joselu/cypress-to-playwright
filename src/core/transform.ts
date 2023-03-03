@@ -4,7 +4,7 @@ const enum PLAYWRIGHT_ACTIONS {
   CLICK = 'click',
   GOTO = 'goto',
 }
-export const transformerFactory: ts.TransformerFactory<ts.Node> = (
+export const transform: ts.TransformerFactory<ts.Node> = (
   context: ts.TransformationContext
 ) => {
   return (rootNode) => {
