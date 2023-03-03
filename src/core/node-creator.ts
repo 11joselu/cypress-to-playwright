@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { PLAYWRIGHT_PAGE_NAME, Playwright } from './playwright';
+import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
 
 export const nodeCreator = (factory: ts.NodeFactory) => {
   return {
@@ -11,6 +11,7 @@ export const nodeCreator = (factory: ts.NodeFactory) => {
     callExpression: createCallExpression(factory),
     destructuringParameter: createDestructuringParameter(factory),
     awaitExpression: createAwaitExpression(factory),
+    expect: playwrightExpect(factory),
   };
 };
 
@@ -23,7 +24,7 @@ function createExpressionStatement(factory: ts.NodeFactory) {
 }
 
 function createPlaywrightCommand(factory: ts.NodeFactory) {
-  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: Playwright) => {
+  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: COMMANDS) => {
     return factory.createPropertyAccessExpression(
       factory.createIdentifier(PLAYWRIGHT_PAGE_NAME),
       factory.createIdentifier(commandName)
@@ -33,7 +34,7 @@ function createPlaywrightCommand(factory: ts.NodeFactory) {
 
 function createAwaitExpression(factory: ts.NodeFactory) {
   return (
-    expression: ts.PropertyAccessExpression,
+    expression: ts.PropertyAccessExpression | ts.CallExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
     argumentsArray: ts.NodeArray<ts.Expression>
   ) => {
@@ -84,6 +85,20 @@ function createDestructuringParameter(factory: ts.NodeFactory) {
       factory.createObjectBindingPattern([
         factory.createBindingElement(undefined, undefined, factory.createIdentifier(parameterName)),
       ])
+    );
+  };
+}
+
+function playwrightExpect(factory: ts.NodeFactory) {
+  return (expression: ts.LeftHandSideExpression) => {
+    const awaitExpression = createAwaitExpression(factory);
+    return awaitExpression(
+      factory.createPropertyAccessExpression(
+        factory.createCallExpression(factory.createIdentifier(VALIDATION.EXPECT), undefined, [expression]),
+        factory.createIdentifier('toBeVisible')
+      ),
+      undefined,
+      [] as unknown as ts.NodeArray<ts.Expression>
     );
   };
 }

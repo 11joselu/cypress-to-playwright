@@ -22,7 +22,6 @@
     "linebreak-style": [
       "error",
       "unix"
-    ],
-    "max-lines": ["error", 140]
+    ]
   }
 }

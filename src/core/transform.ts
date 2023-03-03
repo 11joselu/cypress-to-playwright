@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { nodeCreator } from './node-creator';
-import { Playwright, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
+import { COMMANDS, PLAYWRIGHT_TEST_CASE_NAME } from './playwright';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -39,7 +39,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
 
         if (isVisitCallExpressions(expressionName)) {
           return creator.awaitExpression(
-            creator.playwrightCommand(call, Playwright.GOTO),
+            creator.playwrightCommand(call, COMMANDS.GOTO),
             call.typeArguments,
             call.arguments
           );
@@ -48,10 +48,25 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         if (isClickCallExpression(expressionName)) {
           const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(call.expression);
           return creator.awaitExpression(
-            creator.playwrightCommand(call.expression.expression, Playwright.CLICK),
+            creator.playwrightCommand(call.expression.expression, COMMANDS.CLICK),
             typeArguments,
             argumentsArr
           );
+        }
+
+        if (isCyValidation(expressionName)) {
+          const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(call.expression);
+          const cyCommandName = getFormattedExpressionName(call.expression.expression);
+          let expression = call.expression.expression;
+          if (isCyGet(cyCommandName)) {
+            expression = creator.callExpression(
+              creator.playwrightCommand(call.expression.expression, COMMANDS.LOCATOR),
+              typeArguments,
+              argumentsArr
+            );
+          }
+
+          return creator.expect(expression);
         }
       }
 
@@ -79,11 +94,19 @@ function isCypressCommand(expressionName: string) {
 }
 
 function isVisitCallExpressions(expressionName: string) {
-  return expressionName === 'cy.visit';
+  return 'cy.visit' === expressionName;
 }
 
 function isClickCallExpression(expressionName: string) {
-  return expressionName === 'cy.get.click';
+  return 'cy.get.click' === expressionName;
+}
+
+function isCyValidation(expressionName: string) {
+  return 'cy.get.should' === expressionName;
+}
+
+function isCyGet(expressionName: string) {
+  return 'cy.get' === expressionName;
 }
 
 function getBodyOfCall(factory: ts.NodeFactory, callExpression: ts.CallExpression): ts.Block {

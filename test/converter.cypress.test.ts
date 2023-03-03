@@ -33,4 +33,12 @@ describe('Converter: Cypress', { concurrency: true }, () => {
 
     assert.strictEqual(format(result), format('cy.fn("selector").click()'));
   });
+
+  describe('Replace Cypress validation cy.get(...).should', () => {
+    test('be.visible by expect().toBeVisible', { only: true }, () => {
+      const result = converter('cy.get("selector").should("be.visible")');
+
+      assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
+    });
+  });
 });
