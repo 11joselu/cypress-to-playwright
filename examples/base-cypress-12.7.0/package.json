@@ -1,0 +1,16 @@
+{
+  "name": "cypress-to-playwright-validation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
+  },
+  "keywords": [],
+  "author": "Jose Cabrera",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^12.7.0"
+  }
+}
