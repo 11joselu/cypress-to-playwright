@@ -92,6 +92,42 @@ describe('Converter: Cypress validation with .should', () => {
     });
   });
 
+  [
+    createOption('should("not.be.visible")', 'toBeVisible()'),
+    createOption('should("not.have.length", 2)', 'toHaveCount(2)'),
+    createOption('should("not.have.text", "text")', 'toHaveText("text")'),
+    createOption('should("not.have.class", "aClass")', 'toHaveClass("aClass")'),
+    createOption('should("not.have.value", "a text message")', 'toHaveValue("a text message")'),
+    createOption('should("not.contain", "a text message")', 'toContainText("a text message")'),
+    createOption('should("not.be.checked")', 'toBeChecked()'),
+    createOption('should("not.be.disabled")', 'toBeDisabled()'),
+    createOption('should("not.have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
+  ].forEach((option) => {
+    it(`Transform negative cy.get().${option.cy} by  cy.get().not.${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").${option.cy}`);
+
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).not.${option.playwright}`));
+    });
+
+    it(`Transform cy.get().first().${option.cy} by page.locator().first().not.${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").first().${option.cy}`);
+
+      assert.strictEqual(
+        format(result),
+        format(`await expect(page.locator("selector").first()).not.${option.playwright}`)
+      );
+    });
+
+    it(`Transform cy.get().last().${option.cy} by page.locator().last().not.${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").last().${option.cy}`);
+
+      assert.strictEqual(
+        format(result),
+        format(`await expect(page.locator("selector").last()).not.${option.playwright}`)
+      );
+    });
+  });
+
   it('Throws error for unknown validation', () => {
     assert.throws(() => {
       converter('cy.get("selector").should("be.foo")');

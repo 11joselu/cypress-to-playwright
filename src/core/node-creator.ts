@@ -33,7 +33,8 @@ export type Creator = {
   expect(
     validationValues: ts.LeftHandSideExpression,
     validationType: Omit<VALIDATION, 'EXPECT'>,
-    args?: Args
+    validationArgs?: Args,
+    isNegative?: boolean
   ): ts.AwaitExpression;
   playwrightCommand(
     callExpression: ts.CallExpression | ts.LeftHandSideExpression,
@@ -206,14 +207,29 @@ function createPlaywrightExpect(factory: ts.NodeFactory) {
   return (
     expression: ts.LeftHandSideExpression,
     validationType: Omit<VALIDATION, 'EXPECT'>,
-    args:
+    validationArgs:
       | ts.NodeArray<ts.Expression>
       | ts.NumericLiteral[]
-      | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
+      | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>,
+    isNegative = false
   ) => {
     const awaitExpression = createAwaitCallExpression(factory);
     const identifier = createIdentifier(factory);
     const callExpression = createCallExpression(factory);
+
+    if (isNegative) {
+      return awaitExpression(
+        factory.createPropertyAccessExpression(
+          factory.createPropertyAccessExpression(
+            callExpression(identifier(VALIDATION.EXPECT), undefined, [expression]),
+            factory.createIdentifier('not')
+          ),
+          identifier(validationType as string)
+        ),
+        undefined,
+        validationArgs
+      );
+    }
 
     return awaitExpression(
       factory.createPropertyAccessExpression(
@@ -221,7 +237,7 @@ function createPlaywrightExpect(factory: ts.NodeFactory) {
         identifier(validationType as string)
       ),
       undefined,
-      args
+      validationArgs
     );
   };
 }

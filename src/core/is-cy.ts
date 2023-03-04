@@ -49,6 +49,9 @@ export const isCy = {
     haveAttr(expressionName: string) {
       return 'have.attr' === expressionName;
     },
+    isNegativeValidation(expressionName: string) {
+      return expressionName.startsWith('not.');
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;

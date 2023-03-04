@@ -156,47 +156,63 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     }
   }
 
-  if (isCy.validation.haveLength(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_COUNT, [creator.numeric(callArgs[1])]);
-  }
+  let shouldCyValidation = callArgs[0];
+  const isNegativeValidation = isCy.validation.isNegativeValidation(shouldCyValidation);
 
-  if (isCy.validation.toHaveText(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [creator.string(callArgs[1])]);
-  }
+  if (isNegativeValidation) shouldCyValidation = shouldCyValidation.replace('not.', '');
 
-  if (isCy.validation.toHaveClass(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [creator.string(callArgs[1])]);
-  }
-
-  if (isCy.validation.beVisible(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE);
-  }
-
-  if (isCy.validation.toHaveValue(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [creator.string(callArgs[1])]);
-  }
-
-  if (isCy.validation.toContain(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [creator.string(callArgs[1])]);
-  }
-
-  if (isCy.validation.beChecked(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.BE_CHECKED);
-  }
-
-  if (isCy.validation.beDisabled(callArgs[0])) {
-    return creator.expect(newExpression, VALIDATION.BE_DISABLED);
-  }
-
-  if (isCy.validation.haveAttr(callArgs[0])) {
+  if (isCy.validation.haveLength(shouldCyValidation)) {
     return creator.expect(
       newExpression,
-      VALIDATION.TO_HAVE_ATTR,
-      callArgs.filter((_, index) => index).map((arg) => creator.string(arg))
+      VALIDATION.TO_HAVE_COUNT,
+      [creator.numeric(callArgs[1])],
+      isNegativeValidation
     );
   }
 
-  throw new Error(`Unknown "${callArgs[0]}" validation`);
+  if (isCy.validation.toHaveText(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [creator.string(callArgs[1])], isNegativeValidation);
+  }
+
+  if (isCy.validation.toHaveClass(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [creator.string(callArgs[1])], isNegativeValidation);
+  }
+
+  if (isCy.validation.beVisible(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE, [], isNegativeValidation);
+  }
+
+  if (isCy.validation.toHaveValue(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [creator.string(callArgs[1])], isNegativeValidation);
+  }
+
+  if (isCy.validation.toContain(shouldCyValidation)) {
+    return creator.expect(
+      newExpression,
+      VALIDATION.TO_CONTAIN_TEXT,
+      [creator.string(callArgs[1])],
+      isNegativeValidation
+    );
+  }
+
+  if (isCy.validation.beChecked(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.BE_CHECKED, [], isNegativeValidation);
+  }
+
+  if (isCy.validation.beDisabled(shouldCyValidation)) {
+    return creator.expect(newExpression, VALIDATION.BE_DISABLED, [], isNegativeValidation);
+  }
+
+  if (isCy.validation.haveAttr(shouldCyValidation)) {
+    return creator.expect(
+      newExpression,
+      VALIDATION.TO_HAVE_ATTR,
+      callArgs.filter((_, index) => index).map((arg) => creator.string(arg)),
+      isNegativeValidation
+    );
+  }
+
+  throw new Error(`Unknown "${shouldCyValidation}" validation`);
 }
 
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
