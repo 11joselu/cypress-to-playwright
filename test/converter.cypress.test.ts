@@ -28,40 +28,30 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('cy.fn("selector").type()'));
   });
 
-  it('Replace cy.get.type by page.type', () => {
-    const result = converter(`
-      cy.get('selector').type('message')
-  `);
+  [
+    createOption('click()', 'click()'),
+    createOption('click({force: true})', 'click({force: true})'),
+    createOption('type("a message")', 'type("a message")'),
+    createOption('type("a message", {force: true})', 'type("a message")'),
+  ].forEach((option) => {
+    it(`Replace cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
+      const result = converter(`cy.get("selector").${option.cy}`);
 
-    assert.strictEqual(
-      format(result),
-      format(`
-        await page.locator('selector').type('message')
-    `)
-    );
+      assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
+    });
+
+    it(`Replace cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
+      const result = converter('cy.get("selector").first().click()');
+
+      assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
+    });
+
+    it(`Replace cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
+      const result = converter('cy.get("selector").last().click()');
+
+      assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
+    });
   });
-
-  [createOption('click()', 'click()'), createOption('click({force: true})', 'click({force: true})')].forEach(
-    (option) => {
-      it(`Replace cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
-        const result = converter(`cy.get("selector").${option.cy}`);
-
-        assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
-      });
-
-      it(`Replace cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
-        const result = converter('cy.get("selector").first().click()');
-
-        assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
-      });
-
-      it(`Replace cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
-        const result = converter('cy.get("selector").last().click()');
-
-        assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
-      });
-    }
-  );
 });
 
 describe('Converter: Cypress validation with .should', () => {
