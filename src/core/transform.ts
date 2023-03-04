@@ -35,6 +35,19 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return createExpectValidation(call, creator);
       }
 
+      if (isCy.type(expressionName)) {
+        const propertyExpression = call.expression;
+        const { propertyTypeAccessArguments, propertyAccessArguments } =
+          getArgumentsOfPropertyAccessExpression(propertyExpression);
+        const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
+
+        return creator.awaitExpression(
+          creator.playwrightCommand(propertyExpression.expression, COMMANDS.TYPE),
+          propertyTypeAccessArguments,
+          [...propertyAccessArguments, ...items] as unknown as ts.NodeArray<ts.Expression>
+        );
+      }
+
       return node;
     }
 

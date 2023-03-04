@@ -29,6 +29,9 @@ export const isCy = {
       return 'have.text' === expressionName;
     },
   },
+  type(expressionName: string) {
+    return 'cy.get.type' === expressionName;
+  },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {
