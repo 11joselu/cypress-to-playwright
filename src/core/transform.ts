@@ -65,13 +65,13 @@ function createGoTo(creator: Creator, call: ts.CallExpression) {
 
 function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
   const expressionName = getExpressionName(propertyExpression);
-  if (isCy.isFirst(expressionName)) {
+  if (isCy.isFirst(expressionName) || isCy.isLast(expressionName)) {
     const foundExpression = findGetPropertyExpression(propertyExpression);
 
     const newExpression = creator.propertyAccessExpression(
       creator.playwrightLocatorProperty(
         propertyExpression.expression,
-        LOCATOR_PROPERTIES.FIRST,
+        isCy.isFirst(expressionName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
         foundExpression.typeArguments,
         foundExpression.arguments
       ),

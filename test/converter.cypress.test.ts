@@ -28,6 +28,12 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
   });
 
+  test('Replace cy.get("selector").last().click() by awaited page.locator("selector").last()', () => {
+    const result = converter('cy.get("selector").last().click()');
+
+    assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
+  });
+
   test('Do not replace cy.fn(selector).click() by awaited page.click(selector)', () => {
     const result = converter('cy.fn("selector").click()');
 

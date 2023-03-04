@@ -32,5 +32,5 @@ export const isCy = {
 };
 
 function isCyWithPropertyAccess(expressionName: string) {
-  return isCy.get(expressionName) || isCy.isFirst(expressionName);
+  return isCy.get(expressionName) || isCy.isFirst(expressionName) || isCy.isLast(expressionName);
 }
