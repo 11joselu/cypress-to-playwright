@@ -1,4 +1,7 @@
 export const isCy = {
+  startWithCy(expressionName: string) {
+    return expressionName.startsWith('cy.');
+  },
   visit(expressionName: string) {
     return 'cy.visit' === expressionName;
   },
@@ -11,8 +14,11 @@ export const isCy = {
   should(expressionName: string) {
     return expressionName.endsWith('.should');
   },
-  startWithCy(expressionName: string) {
-    return expressionName.startsWith('cy.');
+  isFirst(expressionName: string) {
+    return expressionName.startsWith('cy.get.first');
+  },
+  isLast(expressionName: string) {
+    return expressionName.startsWith('cy.get.last');
   },
   validation: {
     haveLength(expressionName: string) {
@@ -21,11 +27,5 @@ export const isCy = {
     toHaveText(expressionName: string) {
       return 'have.text' === expressionName;
     },
-  },
-  isFirst(expressionName: string) {
-    return expressionName.startsWith('cy.get.first');
-  },
-  isLast(expressionName: string) {
-    return expressionName.startsWith('cy.get.last');
   },
 };
