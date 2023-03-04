@@ -111,4 +111,10 @@ describe('Converter: Cypress validation (.should)', () => {
       `)
     );
   });
+
+  test('have.class by expect().toHaveClass', () => {
+    const result = converter('cy.get("selector").should("have.class", "aClass")');
+
+    assert.strictEqual(format(result), format('await expect(page.locator("selector")).toHaveClass("aClass")'));
+  });
 });

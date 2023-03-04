@@ -28,6 +28,9 @@ export const isCy = {
     toHaveText(expressionName: string) {
       return 'have.text' === expressionName;
     },
+    toHaveClass(expressionName: string) {
+      return 'have.class' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;

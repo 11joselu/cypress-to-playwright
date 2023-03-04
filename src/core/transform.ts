@@ -158,6 +158,10 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [creator.string(callArgs[1])]);
   }
 
+  if (isCy.validation.toHaveClass(callArgs[0])) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [creator.string(callArgs[1])]);
+  }
+
   return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE);
 }
 
