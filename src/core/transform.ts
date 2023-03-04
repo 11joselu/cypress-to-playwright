@@ -78,7 +78,9 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
       COMMANDS.CLICK
     );
 
-    return creator.awaitExpression(newExpression, undefined, []);
+    const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
+
+    return creator.awaitExpression(newExpression, undefined, items);
   }
 
   const { propertyTypeAccessArguments, propertyAccessArguments } =

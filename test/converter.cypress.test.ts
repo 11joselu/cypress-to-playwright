@@ -34,6 +34,12 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
   });
 
+  test('Add forced click option when access to cy.get property', () => {
+    const result = converter('cy.get("selector").first().click({force: true})');
+
+    assert.strictEqual(format(result), format('await page.locator("selector").first().click({force: true});'));
+  });
+
   test('Replace cy.get("selector").last().click() by awaited page.locator("selector").last()', () => {
     const result = converter('cy.get("selector").last().click()');
 
