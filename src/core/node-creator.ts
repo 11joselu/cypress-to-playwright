@@ -18,11 +18,12 @@ export type Creator = {
     argumentsArray: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
   destructuringParameter(parameterName: string): ts.ParameterDeclaration;
-  awaitExpression(
+  awaitCallExpression(
     expression: ts.PropertyAccessExpression | ts.CallExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
+    typeArguments?: ts.NodeArray<ts.TypeNode> | undefined,
+    args?: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
   ): ts.AwaitExpression;
+  await(expression: ts.CallExpression): ts.AwaitExpression;
   emptyBlock(): ts.Block;
   asyncToken(): ts.ModifierToken<ts.SyntaxKind.AsyncKeyword>;
   variable(name: string, value: ts.Expression, flag?: ts.NodeFlags): ts.VariableStatement;
@@ -41,8 +42,10 @@ export type Creator = {
   playwrightLocatorProperty(
     expression: ts.Expression,
     property: LOCATOR_PROPERTIES,
-    typeArgs: ts.NodeArray<ts.TypeNode> | undefined,
-    args: ts.NodeArray<ts.Expression>
+    locatorTypeArgs?: ts.NodeArray<ts.TypeNode> | undefined,
+    locatorArgs?: ts.NodeArray<ts.Expression> | ts.Expression[],
+    propertyTypeArgs?: ts.NodeArray<ts.TypeNode> | undefined,
+    propertyArgs?: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
 };
 
@@ -55,7 +58,8 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     arrowFunction: createArrowFunction(factory),
     callExpression: createCallExpression(factory),
     destructuringParameter: createDestructuringParameter(factory),
-    awaitExpression: createAwaitExpression(factory),
+    awaitCallExpression: createAwaitCallExpression(factory),
+    await: createAwait(factory),
     emptyBlock: createEmptyBlock(factory),
     asyncToken: createAsyncToken(factory),
     variable: createVariable(factory),
@@ -96,14 +100,20 @@ function createPropertyAccessExpression(factory: ts.NodeFactory) {
   };
 }
 
-function createAwaitExpression(factory: ts.NodeFactory) {
+function createAwaitCallExpression(factory: ts.NodeFactory) {
   const callExpression = createCallExpression(factory);
   return (
     expression: ts.PropertyAccessExpression | ts.CallExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-    args: Args = []
+    typeArguments?: ts.NodeArray<ts.TypeNode>,
+    args?: Args
   ) => {
-    return factory.createAwaitExpression(callExpression(expression, typeArguments, args));
+    return factory.createAwaitExpression(callExpression(expression, typeArguments, args || ([] as Args)));
+  };
+}
+
+function createAwait(factory: ts.NodeFactory) {
+  return (expression: ts.PropertyAccessExpression | ts.CallExpression) => {
+    return factory.createAwaitExpression(expression);
   };
 }
 
@@ -201,7 +211,7 @@ function createPlaywrightExpect(factory: ts.NodeFactory) {
       | ts.NumericLiteral[]
       | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
   ) => {
-    const awaitExpression = createAwaitExpression(factory);
+    const awaitExpression = createAwaitCallExpression(factory);
     const identifier = createIdentifier(factory);
     const callExpression = createCallExpression(factory);
 
@@ -231,16 +241,22 @@ function createPlaywrightLocatorProperty(factory: ts.NodeFactory) {
   return (
     expression: ts.Expression,
     property: LOCATOR_PROPERTIES,
-    typeArgs: ts.NodeArray<ts.TypeNode> | undefined = undefined,
-    args: ts.NodeArray<ts.Expression> = [] as unknown as ts.NodeArray<ts.Expression>
+    locatorTypeArgs: ts.NodeArray<ts.TypeNode> | undefined = undefined,
+    locatorArgs: ts.NodeArray<ts.Expression> | ts.Expression[] = [] as unknown as ts.NodeArray<ts.Expression>,
+    propertyTypeArgs: ts.NodeArray<ts.TypeNode> | undefined = undefined,
+    propertyArgs: ts.NodeArray<ts.Expression> | ts.Expression[] = [] as unknown as ts.NodeArray<ts.Expression>
   ) => {
     return callExpression(
       propertyAccessExpression(
-        callExpression(playwrightCommand(expression as ts.CallExpression, COMMANDS.LOCATOR), typeArgs, args),
+        callExpression(
+          playwrightCommand(expression as ts.CallExpression, COMMANDS.LOCATOR),
+          locatorTypeArgs,
+          locatorArgs
+        ),
         property
       ),
-      undefined,
-      []
+      propertyTypeArgs,
+      propertyArgs
     );
   };
 }

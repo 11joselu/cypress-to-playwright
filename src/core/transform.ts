@@ -39,12 +39,17 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         const propertyExpression = call.expression;
         const { propertyTypeAccessArguments, propertyAccessArguments } =
           getArgumentsOfPropertyAccessExpression(propertyExpression);
-        const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
+        const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
 
-        return creator.awaitExpression(
-          creator.playwrightCommand(propertyExpression.expression, COMMANDS.TYPE),
-          propertyTypeAccessArguments,
-          [...propertyAccessArguments, ...items] as unknown as ts.NodeArray<ts.Expression>
+        return creator.await(
+          creator.playwrightLocatorProperty(
+            propertyExpression.expression,
+            LOCATOR_PROPERTIES.TYPE,
+            propertyTypeAccessArguments,
+            propertyAccessArguments,
+            parent?.typeArguments,
+            parent?.arguments
+          )
         );
       }
 
@@ -73,7 +78,11 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
 }
 
 function createGoTo(creator: Creator, call: ts.CallExpression) {
-  return creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.GOTO), call.typeArguments, call.arguments);
+  return creator.awaitCallExpression(
+    creator.playwrightCommand(call, COMMANDS.GOTO),
+    call.typeArguments,
+    call.arguments
+  );
 }
 
 function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
@@ -93,14 +102,14 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
 
     const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
 
-    return creator.awaitExpression(newExpression, undefined, items);
+    return creator.awaitCallExpression(newExpression, undefined, items);
   }
 
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
   const newArguments = [...propertyAccessArguments].concat(...items) as unknown as ts.NodeArray<ts.Expression>;
-  return creator.awaitExpression(
+  return creator.awaitCallExpression(
     creator.playwrightCommand(propertyExpression.expression, COMMANDS.CLICK),
     propertyTypeAccessArguments,
     newArguments

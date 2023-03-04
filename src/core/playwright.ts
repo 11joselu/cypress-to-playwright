@@ -2,12 +2,12 @@ export const enum COMMANDS {
   CLICK = 'click',
   GOTO = 'goto',
   LOCATOR = 'locator',
-  TYPE = 'type',
 }
 
 export const enum LOCATOR_PROPERTIES {
   FIRST = 'first',
   LAST = 'last',
+  TYPE = 'type',
 }
 
 export const enum VALIDATION {

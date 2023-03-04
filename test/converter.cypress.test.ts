@@ -60,7 +60,7 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(
       format(result),
       format(`
-      await page.type('selector', 'message')
+        await page.locator('selector').type('message')
     `)
     );
   });
