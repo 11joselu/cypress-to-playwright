@@ -73,6 +73,12 @@ describe('Converter: Cypress validation (.should)', () => {
     assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
   });
 
+  it('Throws error for unknown validation', () => {
+    assert.throws(() => {
+      converter('cy.get("selector").should("be.foo")');
+    }, /^Error: Unknown "be.foo" validation$/);
+  });
+
   it('have.length by expect().toHaveCount', () => {
     const result = converter('cy.get("selector").should("have.length", 2)');
 

@@ -31,6 +31,9 @@ export const isCy = {
     toHaveClass(expressionName: string) {
       return 'have.class' === expressionName;
     },
+    beVisible(expressionName: string) {
+      return 'be.visible' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;
