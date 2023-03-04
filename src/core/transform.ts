@@ -15,7 +15,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       }
 
       const call = node.expression;
-      const expressionName = getFormattedExpressionName(call);
+      const expressionName = getExpressionName(call);
 
       if (isHook.beforeEach(expressionName) || isHook.it(expressionName)) {
         return parseTestHook(expressionName, node, creator);
@@ -42,8 +42,8 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
   };
 };
 
-function getFormattedExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
-  return getExpressionName(expressions).reverse().join('.');
+function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
+  return getListOfExpressionName(expressions).reverse().join('.');
 }
 
 function parseTestHook(expressionName: string, node: ts.ExpressionStatement, creator: Creator) {
@@ -104,8 +104,9 @@ function createExpectValidation(
   creator: Creator
 ) {
   const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(propertyExpression);
-  const cyCommandName = getFormattedExpressionName(propertyExpression.expression);
+  const cyCommandName = getExpressionName(propertyExpression.expression);
   let expression = propertyExpression.expression;
+
   if (isCy.get(cyCommandName)) {
     expression = creator.callExpression(
       creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
@@ -117,27 +118,7 @@ function createExpectValidation(
   return creator.expect(expression);
 }
 
-function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.Block {
-  const callbackArgument = callExpression.arguments.find((arg) => ts.isFunctionLike(arg));
-  const foundCallback = callbackArgument ? (callbackArgument as ts.FunctionExpression) : undefined;
-
-  if (foundCallback?.body) {
-    return foundCallback.body as ts.Block;
-  }
-
-  return creator.emptyBlock();
-}
-
-function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
-  const callExpression = expression1.expression;
-  const typeArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
-  const argumentsArr = ts.isCallExpression(callExpression)
-    ? callExpression.arguments
-    : ([] as unknown as ts.NodeArray<ts.Expression>);
-  return { typeArguments, argumentsArr };
-}
-
-function getExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
+function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   const result: string[] = [];
   if ('name' in expression) {
     result.push(expression.name.escapedText.toString());
@@ -148,8 +129,29 @@ function getExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHand
   }
 
   if ('expression' in expression) {
-    result.push(...getExpressionName(expression.expression));
+    result.push(...getListOfExpressionName(expression.expression));
   }
 
   return result;
+}
+
+function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
+  const callExpression = expression1.expression;
+  const typeArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
+  const argumentsArr = ts.isCallExpression(callExpression)
+    ? callExpression.arguments
+    : ([] as unknown as ts.NodeArray<ts.Expression>);
+
+  return { typeArguments, argumentsArr };
+}
+
+function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.Block {
+  const callbackArgument = callExpression.arguments.find((arg) => ts.isFunctionLike(arg));
+  const foundCallback = callbackArgument ? (callbackArgument as ts.FunctionExpression) : undefined;
+
+  if (foundCallback?.body) {
+    return foundCallback.body;
+  }
+
+  return creator.emptyBlock();
 }
