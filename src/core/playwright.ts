@@ -6,6 +6,8 @@ export const enum COMMANDS {
 
 export const enum VALIDATION {
   EXPECT = 'expect',
+  TO_BE = 'toBe',
+  TO_BE_VISIBLE = 'toBeVisible',
 }
 
 export const PLAYWRIGHT_PAGE_NAME = 'page';

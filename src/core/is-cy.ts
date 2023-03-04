@@ -14,4 +14,9 @@ export const isCy = {
   startWithCy(expressionName: string) {
     return expressionName.startsWith('cy.');
   },
+  validation: {
+    haveLength(expressionName: string) {
+      return 'have.length' === expressionName;
+    },
+  },
 };

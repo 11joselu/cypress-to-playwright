@@ -1,13 +1,13 @@
 import ts from 'typescript';
 import { Creator, nodeCreator } from './node-creator';
-import { COMMANDS, HOOKS } from './playwright';
+import { COMMANDS, HOOKS, VALIDATION } from './playwright';
 import { isCy } from './is-cy';
 import { isHook } from './is-hook';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
   return (rootNode) => {
-    function visit(node: ts.Node): ts.Node {
+    function visit(node: ts.Node): ts.Node | ts.NodeArray<ts.Statement> {
       node = ts.visitEachChild(node, visit, context);
 
       if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
@@ -80,7 +80,6 @@ function createExpectValidation(
   const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(propertyExpression);
   const cyCommandName = getExpressionName(propertyExpression.expression);
   let expression = propertyExpression.expression;
-
   if (isCy.get(cyCommandName)) {
     expression = creator.callExpression(
       creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
@@ -89,7 +88,21 @@ function createExpectValidation(
     );
   }
 
-  return creator.expect(expression);
+  const args = call.arguments.map((arg) => arg.getText().replace(/"/g, ''));
+  if (isCy.validation.haveLength(args[0])) {
+    const name = 'elements';
+    const variable = creator.variable(
+      name,
+      creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.LOCATOR), typeArguments, argumentsArr)
+    );
+    const expect = creator.expect(creator.propertyAccessExpression(name, 'length'), VALIDATION.TO_BE, [
+      creator.numeric(args[1]),
+    ]);
+
+    return creator.block([variable, creator.statement(expect)]).statements;
+  }
+
+  return creator.expect(expression, VALIDATION.TO_BE_VISIBLE);
 }
 
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
