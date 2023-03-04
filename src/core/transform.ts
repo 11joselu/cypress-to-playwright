@@ -49,37 +49,11 @@ function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHan
 function parseTestHook(expressionName: string, node: ts.ExpressionStatement, creator: Creator) {
   const call = node.expression as ts.CallExpression;
   if (isHook.it(expressionName)) {
-    let expression: ts.Expression;
-    if (isHook.isItSkipOrOnly(expressionName)) {
-      if (!ts.isPropertyAccessExpression(call.expression)) return node;
-      expression = creator.propertyAccessExpression(HOOKS.TEST, call.expression.name);
-    } else {
-      expression = creator.identifier(HOOKS.TEST);
-    }
-
-    const [title] = call.arguments;
-    return creator.expressionStatement(
-      expression,
-      creator.callExpression(call.expression, call.typeArguments, [
-        title,
-        creator.arrowFunction(
-          getBodyOfCall(call, creator),
-          [creator.destructuringParameter('page')],
-          [creator.asyncToken()]
-        ),
-      ])
-    );
+    return createItHook(expressionName, call, node, creator);
   }
 
   if (isHook.beforeEach(expressionName)) {
-    const expression = creator.identifier(HOOKS.BEFORE_EACH);
-    return creator.callExpression(expression, call.typeArguments, [
-      creator.arrowFunction(
-        getBodyOfCall(call, creator),
-        [creator.destructuringParameter('page')],
-        [creator.asyncToken()]
-      ),
-    ]);
+    return createBeforeEach(creator, call);
   }
 
   return node;
@@ -133,6 +107,40 @@ function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.Le
   }
 
   return result;
+}
+
+function createItHook(expressionName: string, call: ts.CallExpression, node: ts.ExpressionStatement, creator: Creator) {
+  let expression: ts.Expression;
+  if (isHook.isItSkipOrOnly(expressionName)) {
+    if (!ts.isPropertyAccessExpression(call.expression)) return node;
+    expression = creator.propertyAccessExpression(HOOKS.TEST, call.expression.name);
+  } else {
+    expression = creator.identifier(HOOKS.TEST);
+  }
+
+  const [title] = call.arguments;
+  return creator.expressionStatement(
+    expression,
+    creator.callExpression(call.expression, call.typeArguments, [
+      title,
+      creator.arrowFunction(
+        getBodyOfCall(call, creator),
+        [creator.destructuringParameter('page')],
+        [creator.asyncToken()]
+      ),
+    ])
+  );
+}
+
+function createBeforeEach(creator: Creator, call: ts.CallExpression) {
+  const expression = creator.identifier(HOOKS.BEFORE_EACH);
+  return creator.callExpression(expression, call.typeArguments, [
+    creator.arrowFunction(
+      getBodyOfCall(call, creator),
+      [creator.destructuringParameter('page')],
+      [creator.asyncToken()]
+    ),
+  ]);
 }
 
 function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
