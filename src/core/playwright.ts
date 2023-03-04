@@ -11,6 +11,7 @@ export const enum LOCATOR_PROPERTIES {
   CHECK = 'check',
   UNCHECK = 'uncheck',
   SELECT = 'selectOption',
+  SCROLL_TO = 'scroll',
 }
 
 export const enum VALIDATION {

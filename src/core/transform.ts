@@ -51,6 +51,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SELECT);
       }
 
+      if (isCy.scrollTo(expressionName)) {
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SCROLL_TO);
+      }
+
       return node;
     }
 
