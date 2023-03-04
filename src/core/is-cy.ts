@@ -37,6 +37,9 @@ export const isCy = {
     toHaveValue(expressionName: string) {
       return 'have.value' === expressionName;
     },
+    toContain(expressionName: string) {
+      return 'contain' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;
