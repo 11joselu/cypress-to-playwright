@@ -1,5 +1,4 @@
 export const enum COMMANDS {
-  CLICK = 'click',
   GOTO = 'goto',
   LOCATOR = 'locator',
 }
@@ -8,6 +7,7 @@ export const enum LOCATOR_PROPERTIES {
   FIRST = 'first',
   LAST = 'last',
   TYPE = 'type',
+  CLICK = 'click',
 }
 
 export const enum VALIDATION {

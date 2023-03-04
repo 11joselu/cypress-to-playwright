@@ -16,16 +16,16 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
 
-  test('Replace cy.get(selector).click() by awaited page.click(selector)', () => {
+  test('Replace cy.get(selector).click() by awaited page.locator(selector).click()', () => {
     const result = converter('cy.get("selector").click()');
 
-    assert.strictEqual(format(result), format('await page.click("selector")'));
+    assert.strictEqual(format(result), format('await page.locator("selector").click()'));
   });
 
-  test('Add forced click option', () => {
+  test('Add forced click option', { only: true }, () => {
     const result = converter('cy.get("selector").click({force: true})');
 
-    assert.strictEqual(format(result), format('await page.click("selector", {force: true})'));
+    assert.strictEqual(format(result), format('await page.locator("selector").click({force: true})'));
   });
 
   test('Replace cy.get("selector").first().click() by awaited page.locator("selector").first()', () => {

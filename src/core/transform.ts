@@ -86,33 +86,40 @@ function createGoTo(creator: Creator, call: ts.CallExpression) {
 }
 
 function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
+  const { propertyTypeAccessArguments, propertyAccessArguments } =
+    getArgumentsOfPropertyAccessExpression(propertyExpression);
+  const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
   const expressionName = getExpressionName(propertyExpression);
+
   if (isCy.isFirst(expressionName) || isCy.isLast(expressionName)) {
     const foundExpression = findGetPropertyExpression(propertyExpression);
 
-    const newExpression = creator.propertyAccessExpression(
-      creator.playwrightLocatorProperty(
-        propertyExpression.expression,
-        isCy.isFirst(expressionName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
-        foundExpression.typeArguments,
-        foundExpression.arguments
+    const expression = creator.callExpression(
+      creator.propertyAccessExpression(
+        creator.playwrightLocatorProperty(
+          propertyExpression.expression,
+          isCy.isFirst(expressionName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
+          foundExpression.typeArguments,
+          foundExpression.arguments
+        ),
+        LOCATOR_PROPERTIES.CLICK
       ),
-      COMMANDS.CLICK
+      parent?.typeArguments,
+      parent?.arguments || []
     );
 
-    const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
-
-    return creator.awaitCallExpression(newExpression, undefined, items);
+    return creator.await(expression);
   }
 
-  const { propertyTypeAccessArguments, propertyAccessArguments } =
-    getArgumentsOfPropertyAccessExpression(propertyExpression);
-  const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
-  const newArguments = [...propertyAccessArguments].concat(...items) as unknown as ts.NodeArray<ts.Expression>;
-  return creator.awaitCallExpression(
-    creator.playwrightCommand(propertyExpression.expression, COMMANDS.CLICK),
-    propertyTypeAccessArguments,
-    newArguments
+  return creator.await(
+    creator.playwrightLocatorProperty(
+      propertyExpression.expression,
+      LOCATOR_PROPERTIES.CLICK,
+      propertyTypeAccessArguments,
+      propertyAccessArguments,
+      parent?.typeArguments,
+      parent?.arguments
+    )
   );
 }
 
