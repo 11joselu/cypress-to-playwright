@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { converter } from '../src/converter';
 import { format } from './format';
 
-describe('Converter: Cypress', { concurrency: true }, () => {
+describe('Converter: Cypress commands', { concurrency: true }, () => {
   test('Replace cy.visit by awaited page.goto', () => {
     const result = converter('cy.visit("http://localhost")');
 
@@ -64,51 +64,51 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     `)
     );
   });
+});
 
-  describe('Replace Cypress validation cy.get(...).should', () => {
-    test('be.visible by expect().toBeVisible', () => {
-      const result = converter('cy.get("selector").should("be.visible")');
+describe('Converter: Cypress validation (.should)', () => {
+  test('be.visible by expect().toBeVisible', () => {
+    const result = converter('cy.get("selector").should("be.visible")');
 
-      assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
-    });
+    assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
+  });
 
-    test('have.length by expect().toHaveCount', () => {
-      const result = converter('cy.get("selector").should("have.length", 2)');
+  test('have.length by expect().toHaveCount', () => {
+    const result = converter('cy.get("selector").should("have.length", 2)');
 
-      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).toHaveCount(2);`));
-    });
+    assert.strictEqual(format(result), format(`await expect(page.locator("selector")).toHaveCount(2);`));
+  });
 
-    test('have.text by toHaveText', () => {
-      const result = converter('cy.get("selector").should("have.text", "Submitted")');
+  test('have.text by toHaveText', () => {
+    const result = converter('cy.get("selector").should("have.text", "Submitted")');
 
-      assert.strictEqual(
-        format(result),
-        format(`
+    assert.strictEqual(
+      format(result),
+      format(`
           await expect(page.locator("selector")).toHaveText("Submitted");
       `)
-      );
-    });
+    );
+  });
 
-    test('cy.get.first() by page.locator.first()', () => {
-      const result = converter(`cy.get("selector").first().should('have.text', 'Test')`);
+  test('cy.get.first() by page.locator.first()', () => {
+    const result = converter(`cy.get("selector").first().should('have.text', 'Test')`);
 
-      assert.strictEqual(
-        format(result),
-        format(`
+    assert.strictEqual(
+      format(result),
+      format(`
           await expect(page.locator("selector").first()).toHaveText('Test');
       `)
-      );
-    });
+    );
+  });
 
-    test('cy.get.last() by page.locator.last()', () => {
-      const result = converter(`cy.get("selector").last().should('have.text', 'Test')`);
+  test('cy.get.last() by page.locator.last()', () => {
+    const result = converter(`cy.get("selector").last().should('have.text', 'Test')`);
 
-      assert.strictEqual(
-        format(result),
-        format(`
+    assert.strictEqual(
+      format(result),
+      format(`
           await expect(page.locator("selector").last()).toHaveText('Test');
       `)
-      );
-    });
+    );
   });
 });
