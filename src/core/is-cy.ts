@@ -34,6 +34,9 @@ export const isCy = {
     beVisible(expressionName: string) {
       return 'be.visible' === expressionName;
     },
+    toHaveValue(expressionName: string) {
+      return 'have.value' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;

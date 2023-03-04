@@ -60,6 +60,7 @@ describe('Converter: Cypress validation with .should', () => {
     createOption('should("have.length", 2)', 'toHaveCount(2)'),
     createOption('should("have.text", "text")', 'toHaveText("text")'),
     createOption('should("have.class", "aClass")', 'toHaveClass("aClass")'),
+    createOption('should("have.value", "a text message")', 'toHaveValue("a text message")'),
   ].forEach((option) => {
     it(`Replace cy.get().${option.cy} by  cy.get().${option.playwright}`, () => {
       const result = converter(`cy.get("selector").${option.cy}`);

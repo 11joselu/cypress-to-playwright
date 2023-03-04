@@ -3,7 +3,6 @@ import { Creator, nodeCreator } from './node-creator';
 import { COMMANDS, HOOKS, LOCATOR_PROPERTIES, VALIDATION } from './playwright';
 import { isCy } from './is-cy';
 import { isHook } from './is-hook';
-import { throws } from 'assert';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -165,6 +164,10 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
 
   if (isCy.validation.beVisible(callArgs[0])) {
     return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE);
+  }
+
+  if (isCy.validation.toHaveValue(callArgs[0])) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [creator.string(callArgs[1])]);
   }
 
   throw new Error(`Unknown "${callArgs[0]}" validation`);
