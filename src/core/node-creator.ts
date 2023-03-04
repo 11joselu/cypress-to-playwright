@@ -1,6 +1,8 @@
 import ts from 'typescript';
 import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
 
+type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[];
+
 export type Creator = {
   playwrightCommand(
     callExpression: ts.CallExpression | ts.LeftHandSideExpression,
@@ -10,7 +12,7 @@ export type Creator = {
   expect(
     validationValues: ts.LeftHandSideExpression,
     validationType: Omit<VALIDATION, 'EXPECT'>,
-    args?: ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[]
+    args?: Args
   ): ts.AwaitExpression;
   awaitExpression(
     expression: ts.PropertyAccessExpression | ts.CallExpression,
@@ -77,7 +79,7 @@ function createAwaitExpression(factory: ts.NodeFactory) {
   return (
     expression: ts.PropertyAccessExpression | ts.CallExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] = []
+    args: Args = []
   ) => {
     return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, args));
   };
