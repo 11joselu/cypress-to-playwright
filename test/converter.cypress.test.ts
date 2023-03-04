@@ -16,43 +16,19 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
 
-  it('Replace cy.get(selector).click() by awaited page.locator(selector).click()', () => {
-    const result = converter('cy.get("selector").click()');
-
-    assert.strictEqual(format(result), format('await page.locator("selector").click()'));
-  });
-
-  it('Add forced click option', () => {
-    const result = converter('cy.get("selector").click({force: true})');
-
-    assert.strictEqual(format(result), format('await page.locator("selector").click({force: true})'));
-  });
-
-  it('Replace cy.get("selector").first().click() by awaited page.locator("selector").first()', () => {
-    const result = converter('cy.get("selector").first().click()');
-
-    assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
-  });
-
-  it('Add forced click option when access to cy.get property', () => {
-    const result = converter('cy.get("selector").first().click({force: true})');
-
-    assert.strictEqual(format(result), format('await page.locator("selector").first().click({force: true});'));
-  });
-
-  it('Replace cy.get("selector").last().click() by awaited page.locator("selector").last()', () => {
-    const result = converter('cy.get("selector").last().click()');
-
-    assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
-  });
-
   it('Do not replace cy.fn(selector).click()', () => {
     const result = converter('cy.fn("selector").click()');
 
     assert.strictEqual(format(result), format('cy.fn("selector").click()'));
   });
 
-  it('Replace cy.get.type by page.type', { only: true }, () => {
+  it('Do not replace cy.fn(selector).type()', () => {
+    const result = converter('cy.fn("selector").type()');
+
+    assert.strictEqual(format(result), format('cy.fn("selector").type()'));
+  });
+
+  it('Replace cy.get.type by page.type', () => {
     const result = converter(`
       cy.get('selector').type('message')
   `);
@@ -64,6 +40,28 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     `)
     );
   });
+
+  [createOption('click()', 'click()'), createOption('click({force: true})', 'click({force: true})')].forEach(
+    (option) => {
+      it(`Replace cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
+        const result = converter(`cy.get("selector").${option.cy}`);
+
+        assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
+      });
+
+      it(`Replace cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
+        const result = converter('cy.get("selector").first().click()');
+
+        assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
+      });
+
+      it(`Replace cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
+        const result = converter('cy.get("selector").last().click()');
+
+        assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
+      });
+    }
+  );
 });
 
 describe('Converter: Cypress validation with .should', () => {
@@ -72,23 +70,23 @@ describe('Converter: Cypress validation with .should', () => {
     createOption('should("have.length", 2)', 'toHaveCount(2)'),
     createOption('should("have.text", "text")', 'toHaveText("text")'),
     createOption('should("have.class", "aClass")', 'toHaveClass("aClass")'),
-  ].forEach((x) => {
-    it(`Replace cy.get().${x.cy} by  cy.get().${x.playwright}`, () => {
-      const result = converter(`cy.get("selector").${x.cy}`);
+  ].forEach((option) => {
+    it(`Replace cy.get().${option.cy} by  cy.get().${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").${option.cy}`);
 
-      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).${x.playwright}`));
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).${option.playwright}`));
     });
 
-    it(`Replace cy.get().first().${x.cy} by page.locator().first().${x.playwright}`, () => {
-      const result = converter(`cy.get("selector").first().${x.cy}`);
+    it(`Replace cy.get().first().${option.cy} by page.locator().first().${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").first().${option.cy}`);
 
-      assert.strictEqual(format(result), format(`await expect(page.locator("selector").first()).${x.playwright}`));
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector").first()).${option.playwright}`));
     });
 
-    it(`Replace cy.get().last().${x.cy} by page.locator().last().${x.playwright}`, () => {
-      const result = converter(`cy.get("selector").last().${x.cy}`);
+    it(`Replace cy.get().last().${option.cy} by page.locator().last().${option.playwright}`, () => {
+      const result = converter(`cy.get("selector").last().${option.cy}`);
 
-      assert.strictEqual(format(result), format(`await expect(page.locator("selector").last()).${x.playwright}`));
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector").last()).${option.playwright}`));
     });
   });
 
