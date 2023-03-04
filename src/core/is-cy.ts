@@ -18,5 +18,8 @@ export const isCy = {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;
     },
+    toHaveText(expressionName: string) {
+      return 'have.text' === expressionName;
+    },
   },
 };

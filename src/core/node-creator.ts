@@ -10,7 +10,7 @@ export type Creator = {
   expect(
     validationValues: ts.LeftHandSideExpression,
     validationType: Omit<VALIDATION, 'EXPECT'>,
-    args?: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
+    args?: ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[]
   ): ts.AwaitExpression;
   awaitExpression(
     expression: ts.PropertyAccessExpression | ts.CallExpression,
@@ -32,6 +32,7 @@ export type Creator = {
   block(statements: ts.Statement[]): ts.Block;
   statement(statement: ts.Expression): ts.Statement;
   numeric(value: string): ts.NumericLiteral;
+  string(value: string): ts.StringLiteral;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
@@ -51,6 +52,7 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     variable: createVariable(factory),
     block: createBlock(factory),
     numeric: createNumericLiteral(factory),
+    string: createStringLiteral(factory),
   };
 };
 
@@ -75,7 +77,7 @@ function createAwaitExpression(factory: ts.NodeFactory) {
   return (
     expression: ts.PropertyAccessExpression | ts.CallExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
+    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] = []
   ) => {
     return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, args));
   };
@@ -132,7 +134,10 @@ function playwrightExpect(factory: ts.NodeFactory) {
   return (
     expression: ts.LeftHandSideExpression,
     validationType: Omit<VALIDATION, 'EXPECT'>,
-    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
+    args:
+      | ts.NodeArray<ts.Expression>
+      | ts.NumericLiteral[]
+      | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
   ) => {
     const awaitExpression = createAwaitExpression(factory);
     return awaitExpression(
@@ -185,5 +190,11 @@ function createVariableStatement(factory: ts.NodeFactory) {
 function createNumericLiteral(factory: ts.NodeFactory) {
   return (value: string) => {
     return factory.createNumericLiteral(value);
+  };
+}
+
+function createStringLiteral(factory: ts.NodeFactory) {
+  return (value: string) => {
+    return factory.createStringLiteral(value);
   };
 }

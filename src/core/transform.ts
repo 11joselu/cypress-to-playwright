@@ -102,6 +102,10 @@ function createExpectValidation(
     return creator.block([variable, creator.statement(expect)]).statements;
   }
 
+  if (isCy.validation.toHaveText(args[0])) {
+    return creator.expect(expression, VALIDATION.TO_HAVE_TEXT, [creator.string(args[1])]);
+  }
+
   return creator.expect(expression, VALIDATION.TO_BE_VISIBLE);
 }
 

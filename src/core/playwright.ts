@@ -8,6 +8,7 @@ export const enum VALIDATION {
   EXPECT = 'expect',
   TO_BE = 'toBe',
   TO_BE_VISIBLE = 'toBeVisible',
+  TO_HAVE_TEXT = 'toHaveText',
 }
 
 export const PLAYWRIGHT_PAGE_NAME = 'page';

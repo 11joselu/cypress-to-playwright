@@ -52,5 +52,16 @@ describe('Converter: Cypress', { concurrency: true }, () => {
       `)
       );
     });
+
+    test('have.text by toHaveText', { only: true }, () => {
+      const result = converter('cy.get("selector").should("have.text", "Submitted")');
+
+      assert.strictEqual(
+        format(result),
+        format(`
+          await expect(page.locator("selector")).toHaveText("Submitted");
+      `)
+      );
+    });
   });
 });
