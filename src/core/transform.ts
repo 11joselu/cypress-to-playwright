@@ -43,6 +43,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CHECK);
       }
 
+      if (isCy.uncheck(expressionName)) {
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.UNCHECK);
+      }
+
       return node;
     }
 

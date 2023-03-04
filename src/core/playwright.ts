@@ -9,6 +9,7 @@ export const enum LOCATOR_PROPERTIES {
   TYPE = 'type',
   CLICK = 'click',
   CHECK = 'check',
+  UNCHECK = 'uncheck',
 }
 
 export const enum VALIDATION {
