@@ -184,6 +184,10 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     return creator.expect(newExpression, VALIDATION.BE_CHECKED);
   }
 
+  if (isCy.validation.beDisabled(callArgs[0])) {
+    return creator.expect(newExpression, VALIDATION.BE_DISABLED);
+  }
+
   throw new Error(`Unknown "${callArgs[0]}" validation`);
 }
 

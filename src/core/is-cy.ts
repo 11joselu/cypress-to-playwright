@@ -43,6 +43,9 @@ export const isCy = {
     beChecked(expressionName: string) {
       return 'be.checked' === expressionName;
     },
+    beDisabled(expressionName: string) {
+      return 'be.disabled' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;
