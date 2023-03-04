@@ -8,6 +8,7 @@ export const enum LOCATOR_PROPERTIES {
   LAST = 'last',
   TYPE = 'type',
   CLICK = 'click',
+  CHECK = 'check',
 }
 
 export const enum VALIDATION {

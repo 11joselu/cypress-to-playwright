@@ -44,6 +44,9 @@ export const isCy = {
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;
   },
+  check(expressionName: string) {
+    return 'cy.get.check' === expressionName;
+  },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {

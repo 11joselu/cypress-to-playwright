@@ -53,6 +53,24 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         );
       }
 
+      if (isCy.check(expressionName)) {
+        const propertyExpression = call.expression;
+        const { propertyTypeAccessArguments, propertyAccessArguments } =
+          getArgumentsOfPropertyAccessExpression(propertyExpression);
+        const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
+
+        return creator.await(
+          creator.playwrightLocatorProperty(
+            propertyExpression.expression,
+            LOCATOR_PROPERTIES.CHECK,
+            propertyTypeAccessArguments,
+            propertyAccessArguments,
+            parent?.typeArguments,
+            parent?.arguments
+          )
+        );
+      }
+
       return node;
     }
 
