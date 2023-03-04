@@ -11,4 +11,7 @@ export const isCy = {
   should(expressionName: string) {
     return 'cy.get.should' === expressionName;
   },
+  startWithCy(expressionName: string) {
+    return expressionName.startsWith('cy.');
+  },
 };

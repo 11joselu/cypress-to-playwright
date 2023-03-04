@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { Creator, nodeCreator } from './node-creator';
 import { COMMANDS, HOOKS } from './playwright';
 import { isCy } from './is-cy';
+import { isHook } from './is-hook';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -13,42 +14,22 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         const call = node.expression;
         const expressionName = getFormattedExpressionName(call);
 
-        if (isTestHook(expressionName)) {
+        if (isHook.beforeEach(expressionName) || isHook.it(expressionName)) {
           return parseTestHook(expressionName, node, creator);
         }
 
-        if (!isCypressCommand(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
+        if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
 
         if (isCy.visit(expressionName)) {
-          return creator.awaitExpression(
-            creator.playwrightCommand(call, COMMANDS.GOTO),
-            call.typeArguments,
-            call.arguments
-          );
+          return createGoTo(creator, call);
         }
 
         if (isCy.click(expressionName)) {
-          const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(call.expression);
-          return creator.awaitExpression(
-            creator.playwrightCommand(call.expression.expression, COMMANDS.CLICK),
-            typeArguments,
-            argumentsArr
-          );
+          return createClickCommand(call.expression, creator);
         }
 
         if (isCy.should(expressionName)) {
-          const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(call.expression);
-          const cyCommandName = getFormattedExpressionName(call.expression.expression);
-          let expression = call.expression.expression;
-          if (isCy.get(cyCommandName)) {
-            expression = creator.callExpression(
-              creator.playwrightCommand(call.expression.expression, COMMANDS.LOCATOR),
-              typeArguments,
-              argumentsArr
-            );
-          }
-
-          return creator.expect(expression);
+          return createExpectValidation(call.expression, call, creator);
         }
       }
 
@@ -63,17 +44,12 @@ function getFormattedExpressionName(expressions: ts.PropertyAccessExpression | t
   return getExpressionName(expressions).reverse().join('.');
 }
 
-function isTestHook(expressionName: string) {
-  return isBeforeEach(expressionName) || isItBlock(expressionName);
-}
-
 function parseTestHook(expressionName: string, node: ts.ExpressionStatement, creator: Creator) {
   const call = node.expression as ts.CallExpression;
-  if (isItBlock(expressionName)) {
+  if (isHook.it(expressionName)) {
     let expression: ts.Expression;
-    if (isItSkipOrOnly(expressionName)) {
+    if (isHook.isItSkipOrOnly(expressionName)) {
       if (!ts.isPropertyAccessExpression(call.expression)) return node;
-
       expression = creator.propertyAccessExpression(HOOKS.TEST, call.expression.name);
     } else {
       expression = creator.identifier(HOOKS.TEST);
@@ -93,7 +69,7 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
     );
   }
 
-  if (isBeforeEach(expressionName)) {
+  if (isHook.beforeEach(expressionName)) {
     const expression = creator.identifier(HOOKS.BEFORE_EACH);
     return creator.callExpression(expression, call.typeArguments, [
       creator.arrowFunction(
@@ -107,20 +83,36 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
   return node;
 }
 
-function isBeforeEach(expressionName: string) {
-  return 'beforeEach' === expressionName;
+function createGoTo(creator: Creator, call: ts.CallExpression) {
+  return creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.GOTO), call.typeArguments, call.arguments);
 }
 
-function isItBlock(expressionName: string) {
-  return 'it' === expressionName || isItSkipOrOnly(expressionName);
+function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
+  const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(propertyExpression);
+  return creator.awaitExpression(
+    creator.playwrightCommand(propertyExpression.expression, COMMANDS.CLICK),
+    typeArguments,
+    argumentsArr
+  );
 }
 
-function isItSkipOrOnly(expressionName: string) {
-  return ['it.only', 'it.skip'].includes(expressionName);
-}
+function createExpectValidation(
+  propertyExpression: ts.PropertyAccessExpression,
+  call: ts.CallExpression,
+  creator: Creator
+) {
+  const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(propertyExpression);
+  const cyCommandName = getFormattedExpressionName(propertyExpression.expression);
+  let expression = propertyExpression.expression;
+  if (isCy.get(cyCommandName)) {
+    expression = creator.callExpression(
+      creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
+      typeArguments,
+      argumentsArr
+    );
+  }
 
-function isCypressCommand(expressionName: string) {
-  return expressionName.startsWith('cy');
+  return creator.expect(expression);
 }
 
 function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.Block {
