@@ -4,96 +4,96 @@ import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[];
 
 export type Creator = {
-  playwrightCommand(
-    callExpression: ts.CallExpression | ts.LeftHandSideExpression,
-    commandName: COMMANDS
-  ): ts.PropertyAccessExpression;
+  callExpressionStatement(newExpression: ts.Expression, callExpression: ts.CallExpression): ts.Statement;
+  statement(statement: ts.Expression): ts.Statement;
+  propertyAccessExpression(identifierName: string, name: string | ts.MemberName): ts.PropertyAccessExpression;
   identifier(name: string): ts.Identifier;
-  expect(
-    validationValues: ts.LeftHandSideExpression,
-    validationType: Omit<VALIDATION, 'EXPECT'>,
-    args?: Args
-  ): ts.AwaitExpression;
-  awaitExpression(
-    expression: ts.PropertyAccessExpression | ts.CallExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
-  ): ts.AwaitExpression;
+  arrowFunction(body: ts.Block, parameters: ts.ParameterDeclaration[], modifiers?: ts.Modifier[]): ts.ArrowFunction;
   callExpression(
     expression: ts.Expression,
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
     argumentsArray: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
-  expressionStatement(newExpression: ts.Expression, callExpression: ts.CallExpression): ts.ExpressionStatement;
   destructuringParameter(parameterName: string): ts.ParameterDeclaration;
-  propertyAccessExpression(identifierName: string, name: string | ts.MemberName): ts.PropertyAccessExpression;
-  arrowFunction(body: ts.Block, parameters: ts.ParameterDeclaration[], modifiers?: ts.Modifier[]): ts.ArrowFunction;
+  awaitExpression(
+    expression: ts.PropertyAccessExpression | ts.CallExpression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+    args: ts.NodeArray<ts.Expression> | ts.NumericLiteral[]
+  ): ts.AwaitExpression;
   emptyBlock(): ts.Block;
   asyncToken(): ts.ModifierToken<ts.SyntaxKind.AsyncKeyword>;
   variable(name: string, value: ts.Expression, flag?: ts.NodeFlags): ts.VariableStatement;
   block(statements: ts.Statement[]): ts.Block;
-  statement(statement: ts.Expression): ts.Statement;
   numeric(value: string): ts.NumericLiteral;
   string(value: string): ts.StringLiteral;
+  expect(
+    validationValues: ts.LeftHandSideExpression,
+    validationType: Omit<VALIDATION, 'EXPECT'>,
+    args?: Args
+  ): ts.AwaitExpression;
+  playwrightCommand(
+    callExpression: ts.CallExpression | ts.LeftHandSideExpression,
+    commandName: COMMANDS
+  ): ts.PropertyAccessExpression;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
   return {
-    expressionStatement: createExpressionStatement(factory),
-    statement: createVariableStatement(factory),
-    playwrightCommand: createPlaywrightCommand(factory),
-    identifier: createIdentifier(factory),
+    callExpressionStatement: createWrappedCallExpressionInStatement(factory),
+    statement: createStatement(factory),
     propertyAccessExpression: createPropertyAccessExpression(factory),
+    identifier: createIdentifier(factory),
     arrowFunction: createArrowFunction(factory),
     callExpression: createCallExpression(factory),
     destructuringParameter: createDestructuringParameter(factory),
     awaitExpression: createAwaitExpression(factory),
-    expect: playwrightExpect(factory),
     emptyBlock: createEmptyBlock(factory),
     asyncToken: createAsyncToken(factory),
     variable: createVariable(factory),
     block: createBlock(factory),
     numeric: createNumericLiteral(factory),
     string: createStringLiteral(factory),
+    expect: createPlaywrightExpect(factory),
+    playwrightCommand: createPlaywrightCommand(factory),
   };
 };
 
-function createExpressionStatement(factory: ts.NodeFactory) {
+function createWrappedCallExpressionInStatement(factory: ts.NodeFactory) {
+  const statement = createStatement(factory);
   return (newExpression: ts.Expression, callExpression: ts.CallExpression) => {
-    return factory.createExpressionStatement(
+    return statement(
       factory.createCallExpression(newExpression, callExpression.typeArguments, callExpression.arguments)
     );
   };
 }
 
-function createPlaywrightCommand(factory: ts.NodeFactory) {
-  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: COMMANDS) => {
-    return factory.createPropertyAccessExpression(
-      factory.createIdentifier(PLAYWRIGHT_PAGE_NAME),
-      factory.createIdentifier(commandName)
-    );
+function createStatement(factory: ts.NodeFactory) {
+  return (statement: ts.Expression): ts.Statement => {
+    return factory.createExpressionStatement(statement);
+  };
+}
+
+function createPropertyAccessExpression(factory: ts.NodeFactory) {
+  const identifier = createIdentifier(factory);
+  return (identifierName: string, name: string | ts.MemberName) => {
+    return factory.createPropertyAccessExpression(identifier(identifierName), name);
   };
 }
 
 function createAwaitExpression(factory: ts.NodeFactory) {
+  const callExpression = createCallExpression(factory);
   return (
     expression: ts.PropertyAccessExpression | ts.CallExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
     args: Args = []
   ) => {
-    return factory.createAwaitExpression(factory.createCallExpression(expression, typeArguments, args));
+    return factory.createAwaitExpression(callExpression(expression, typeArguments, args));
   };
 }
 
 function createIdentifier(factory: ts.NodeFactory) {
   return (name: string) => {
     return factory.createIdentifier(name);
-  };
-}
-
-function createPropertyAccessExpression(factory: ts.NodeFactory) {
-  return (identifierName: string, name: string | ts.MemberName) => {
-    return factory.createPropertyAccessExpression(createIdentifier(factory)(identifierName), name);
   };
 }
 
@@ -121,34 +121,14 @@ function createCallExpression(factory: ts.NodeFactory) {
 }
 
 function createDestructuringParameter(factory: ts.NodeFactory) {
+  const identifier = createIdentifier(factory);
   return (parameterName: string) => {
     return factory.createParameterDeclaration(
       [],
       undefined,
       factory.createObjectBindingPattern([
-        factory.createBindingElement(undefined, undefined, factory.createIdentifier(parameterName)),
+        factory.createBindingElement(undefined, undefined, identifier(parameterName)),
       ])
-    );
-  };
-}
-
-function playwrightExpect(factory: ts.NodeFactory) {
-  return (
-    expression: ts.LeftHandSideExpression,
-    validationType: Omit<VALIDATION, 'EXPECT'>,
-    args:
-      | ts.NodeArray<ts.Expression>
-      | ts.NumericLiteral[]
-      | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
-  ) => {
-    const awaitExpression = createAwaitExpression(factory);
-    return awaitExpression(
-      factory.createPropertyAccessExpression(
-        factory.createCallExpression(factory.createIdentifier(VALIDATION.EXPECT), undefined, [expression]),
-        factory.createIdentifier(validationType as string)
-      ),
-      undefined,
-      args
     );
   };
 }
@@ -166,11 +146,12 @@ function createAsyncToken(factory: ts.NodeFactory) {
 }
 
 function createVariable(factory: ts.NodeFactory) {
+  const identifier = createIdentifier(factory);
   return function (name: string, value: ts.Expression, flag: ts.NodeFlags = ts.NodeFlags.Const) {
     return factory.createVariableStatement(
       undefined,
       factory.createVariableDeclarationList(
-        [factory.createVariableDeclaration(factory.createIdentifier(name), undefined, undefined, value)],
+        [factory.createVariableDeclaration(identifier(name), undefined, undefined, value)],
         flag
       )
     );
@@ -183,12 +164,6 @@ function createBlock(factory: ts.NodeFactory) {
   };
 }
 
-function createVariableStatement(factory: ts.NodeFactory) {
-  return (statement: ts.Expression): ts.Statement => {
-    return factory.createExpressionStatement(statement);
-  };
-}
-
 function createNumericLiteral(factory: ts.NodeFactory) {
   return (value: string) => {
     return factory.createNumericLiteral(value);
@@ -198,5 +173,37 @@ function createNumericLiteral(factory: ts.NodeFactory) {
 function createStringLiteral(factory: ts.NodeFactory) {
   return (value: string) => {
     return factory.createStringLiteral(value);
+  };
+}
+
+function createPlaywrightExpect(factory: ts.NodeFactory) {
+  return (
+    expression: ts.LeftHandSideExpression,
+    validationType: Omit<VALIDATION, 'EXPECT'>,
+    args:
+      | ts.NodeArray<ts.Expression>
+      | ts.NumericLiteral[]
+      | ts.StringLiteral[] = [] as unknown as ts.NodeArray<ts.Expression>
+  ) => {
+    const awaitExpression = createAwaitExpression(factory);
+    const identifier = createIdentifier(factory);
+    const callExpression = createCallExpression(factory);
+
+    return awaitExpression(
+      factory.createPropertyAccessExpression(
+        callExpression(identifier(VALIDATION.EXPECT), undefined, [expression]),
+        identifier(validationType as string)
+      ),
+      undefined,
+      args
+    );
+  };
+}
+
+function createPlaywrightCommand(factory: ts.NodeFactory) {
+  const propertyAccessExpression = createPropertyAccessExpression(factory);
+  const identifier = createIdentifier(factory);
+  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: COMMANDS) => {
+    return propertyAccessExpression(PLAYWRIGHT_PAGE_NAME, identifier(commandName));
   };
 }

@@ -136,7 +136,7 @@ function createItHook(expressionName: string, call: ts.CallExpression, node: ts.
   }
 
   const [title] = call.arguments;
-  return creator.expressionStatement(
+  return creator.callExpressionStatement(
     expression,
     creator.callExpression(call.expression, call.typeArguments, [
       title,
