@@ -180,6 +180,10 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     return creator.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [creator.string(callArgs[1])]);
   }
 
+  if (isCy.validation.beChecked(callArgs[0])) {
+    return creator.expect(newExpression, VALIDATION.BE_CHECKED);
+  }
+
   throw new Error(`Unknown "${callArgs[0]}" validation`);
 }
 

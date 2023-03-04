@@ -24,6 +24,7 @@ export const enum VALIDATION {
   TO_HAVE_CLASS = 'toHaveClass',
   TO_HAVE_VALUE = 'toHaveValue',
   TO_CONTAIN_TEXT = 'toContainText',
+  BE_CHECKED = 'toBeChecked',
 }
 
 export const PLAYWRIGHT_PAGE_NAME = 'page';
