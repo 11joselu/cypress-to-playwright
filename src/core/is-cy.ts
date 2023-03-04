@@ -50,6 +50,9 @@ export const isCy = {
   uncheck(expressionName: string) {
     return 'cy.get.uncheck' === expressionName;
   },
+  select(expressionName: string) {
+    return 'cy.get.select' === expressionName;
+  },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {

@@ -10,6 +10,7 @@ export const enum LOCATOR_PROPERTIES {
   CLICK = 'click',
   CHECK = 'check',
   UNCHECK = 'uncheck',
+  SELECT = 'selectOption',
 }
 
 export const enum VALIDATION {

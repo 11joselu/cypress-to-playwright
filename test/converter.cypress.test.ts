@@ -37,6 +37,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('check({force: true})', 'check({force: true})'),
     createOption('uncheck()', 'uncheck()'),
     createOption('uncheck({force: true})', 'uncheck({force: true})'),
+    createOption('select("item")', 'selectOption("item")'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = converter(`cy.get("selector").${option.cy}`);
