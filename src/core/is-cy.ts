@@ -9,7 +9,7 @@ export const isCy = {
     return 'cy.get.click' === expressionName;
   },
   should(expressionName: string) {
-    return 'cy.get.should' === expressionName;
+    return 'cy.get.should' === expressionName || 'cy.get.first.should' === expressionName;
   },
   startWithCy(expressionName: string) {
     return expressionName.startsWith('cy.');
@@ -21,5 +21,8 @@ export const isCy = {
     toHaveText(expressionName: string) {
       return 'have.text' === expressionName;
     },
+  },
+  isFirst(expressionName: string) {
+    return expressionName.startsWith('cy.get.first');
   },
 };

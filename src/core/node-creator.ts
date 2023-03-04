@@ -6,7 +6,10 @@ type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral
 export type Creator = {
   callExpressionStatement(newExpression: ts.Expression, callExpression: ts.CallExpression): ts.Statement;
   statement(statement: ts.Expression): ts.Statement;
-  propertyAccessExpression(identifierName: string, name: string | ts.MemberName): ts.PropertyAccessExpression;
+  propertyAccessExpression(
+    expression: string | ts.Expression,
+    name: string | ts.MemberName
+  ): ts.PropertyAccessExpression;
   identifier(name: string): ts.Identifier;
   arrowFunction(body: ts.Block, parameters: ts.ParameterDeclaration[], modifiers?: ts.Modifier[]): ts.ArrowFunction;
   callExpression(
@@ -75,8 +78,14 @@ function createStatement(factory: ts.NodeFactory) {
 
 function createPropertyAccessExpression(factory: ts.NodeFactory) {
   const identifier = createIdentifier(factory);
-  return (identifierName: string, name: string | ts.MemberName) => {
-    return factory.createPropertyAccessExpression(identifier(identifierName), name);
+  return (expression: string | ts.Expression, name: string | ts.MemberName) => {
+    let newExpression: ts.Identifier | ts.Expression;
+    if (typeof expression === 'string') {
+      newExpression = identifier(expression);
+    } else {
+      newExpression = expression;
+    }
+    return factory.createPropertyAccessExpression(newExpression, name);
   };
 }
 

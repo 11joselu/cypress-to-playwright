@@ -2,6 +2,8 @@ export const enum COMMANDS {
   CLICK = 'click',
   GOTO = 'goto',
   LOCATOR = 'locator',
+
+  FIRST = 'first',
 }
 
 export const enum VALIDATION {

@@ -75,18 +75,35 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
 
 function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   const propertyExpression = call.expression as ts.PropertyAccessExpression;
-  const callArgs = call.arguments.map((arg) => arg.getText().replace(/"/g, ''));
+  const callArgs = call.arguments.map((arg) => arg.getText().replace(/"|'/g, ''));
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   const cyCommandName = getExpressionName(propertyExpression.expression);
   let newExpression = propertyExpression.expression;
 
-  if (isCy.get(cyCommandName)) {
-    newExpression = creator.callExpression(
-      creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
-      propertyTypeAccessArguments,
-      propertyAccessArguments
-    );
+  if (isCy.get(cyCommandName) || isCy.isFirst(cyCommandName)) {
+    if (isCy.isFirst(cyCommandName)) {
+      const foundExpression = findGetPropertyExpression(propertyExpression);
+
+      newExpression = creator.callExpression(
+        creator.propertyAccessExpression(
+          creator.callExpression(
+            creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
+            foundExpression.typeArguments,
+            foundExpression.arguments
+          ),
+          COMMANDS.FIRST
+        ),
+        undefined,
+        []
+      );
+    } else {
+      newExpression = creator.callExpression(
+        creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
+        propertyTypeAccessArguments,
+        propertyAccessArguments
+      );
+    }
   }
 
   if (isCy.validation.haveLength(callArgs[0])) {
@@ -151,8 +168,8 @@ function createBeforeEach(creator: Creator, call: ts.CallExpression) {
   ]);
 }
 
-function getArgumentsOfPropertyAccessExpression(expression1: ts.PropertyAccessExpression) {
-  const callExpression = expression1.expression;
+function getArgumentsOfPropertyAccessExpression(propertyAccessExpression: ts.PropertyAccessExpression) {
+  const callExpression = propertyAccessExpression.expression;
   const propertyTypeAccessArguments = ts.isCallExpression(callExpression) ? callExpression.typeArguments : undefined;
   const propertyAccessArguments = ts.isCallExpression(callExpression)
     ? callExpression.arguments
@@ -170,4 +187,17 @@ function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.
   }
 
   return creator.emptyBlock();
+}
+
+function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpression): ts.CallExpression {
+  const expressionName = getExpressionName(propertyExpression);
+  if ('cy.get' === expressionName) {
+    return propertyExpression.parent as ts.CallExpression;
+  }
+
+  if (ts.isCallExpression(propertyExpression.expression)) {
+    return findGetPropertyExpression(propertyExpression.expression.expression as ts.PropertyAccessExpression);
+  }
+
+  return propertyExpression.parent as ts.CallExpression;
 }

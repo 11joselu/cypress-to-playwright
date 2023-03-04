@@ -47,13 +47,24 @@ describe('Converter: Cypress', { concurrency: true }, () => {
       assert.strictEqual(format(result), format(`await expect(page.locator("selector")).toHaveCount(2);`));
     });
 
-    test('have.text by toHaveText', { only: true }, () => {
+    test('have.text by toHaveText', () => {
       const result = converter('cy.get("selector").should("have.text", "Submitted")');
 
       assert.strictEqual(
         format(result),
         format(`
           await expect(page.locator("selector")).toHaveText("Submitted");
+      `)
+      );
+    });
+
+    test('cy.get.first() by page.locator.first()', () => {
+      const result = converter(`cy.get("selector").first().should('have.text', 'Test')`);
+
+      assert.strictEqual(
+        format(result),
+        format(`
+          await expect(page.locator("selector").first()).toHaveText('Test');
       `)
       );
     });
