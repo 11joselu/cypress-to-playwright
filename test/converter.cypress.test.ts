@@ -66,11 +66,30 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
   });
 });
 
-describe('Converter: Cypress validation (.should)', () => {
-  it('be.visible by expect().toBeVisible', () => {
-    const result = converter('cy.get("selector").should("be.visible")');
+describe('Converter: Cypress validation with .should', () => {
+  [
+    createOption('should("be.visible")', 'toBeVisible()'),
+    createOption('should("have.length", 2)', 'toHaveCount(2)'),
+    createOption('should("have.text", "text")', 'toHaveText("text")'),
+    createOption('should("have.class", "aClass")', 'toHaveClass("aClass")'),
+  ].forEach((x) => {
+    it(`Replace cy.get().${x.cy} by  cy.get().${x.playwright}`, () => {
+      const result = converter(`cy.get("selector").${x.cy}`);
 
-    assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).${x.playwright}`));
+    });
+
+    it(`Replace cy.get().first().${x.cy} by page.locator().first().${x.playwright}`, () => {
+      const result = converter(`cy.get("selector").first().${x.cy}`);
+
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector").first()).${x.playwright}`));
+    });
+
+    it(`Replace cy.get().last().${x.cy} by page.locator().last().${x.playwright}`, () => {
+      const result = converter(`cy.get("selector").last().${x.cy}`);
+
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector").last()).${x.playwright}`));
+    });
   });
 
   it('Throws error for unknown validation', () => {
@@ -78,49 +97,8 @@ describe('Converter: Cypress validation (.should)', () => {
       converter('cy.get("selector").should("be.foo")');
     }, /^Error: Unknown "be.foo" validation$/);
   });
-
-  it('have.length by expect().toHaveCount', () => {
-    const result = converter('cy.get("selector").should("have.length", 2)');
-
-    assert.strictEqual(format(result), format(`await expect(page.locator("selector")).toHaveCount(2);`));
-  });
-
-  it('have.text by toHaveText', () => {
-    const result = converter('cy.get("selector").should("have.text", "Submitted")');
-
-    assert.strictEqual(
-      format(result),
-      format(`
-          await expect(page.locator("selector")).toHaveText("Submitted");
-      `)
-    );
-  });
-
-  it('cy.get.first() by page.locator.first()', () => {
-    const result = converter(`cy.get("selector").first().should('have.text', 'Test')`);
-
-    assert.strictEqual(
-      format(result),
-      format(`
-          await expect(page.locator("selector").first()).toHaveText('Test');
-      `)
-    );
-  });
-
-  it('cy.get.last() by page.locator.last()', () => {
-    const result = converter(`cy.get("selector").last().should('have.text', 'Test')`);
-
-    assert.strictEqual(
-      format(result),
-      format(`
-          await expect(page.locator("selector").last()).toHaveText('Test');
-      `)
-    );
-  });
-
-  it('have.class by expect().toHaveClass', () => {
-    const result = converter('cy.get("selector").should("have.class", "aClass")');
-
-    assert.strictEqual(format(result), format('await expect(page.locator("selector")).toHaveClass("aClass")'));
-  });
 });
+
+function createOption(cy: string, playwright: string) {
+  return { cy, playwright };
+}
