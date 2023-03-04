@@ -9,11 +9,7 @@ export const isCy = {
     return 'cy.get.click' === expressionName;
   },
   should(expressionName: string) {
-    return (
-      'cy.get.should' === expressionName ||
-      'cy.get.first.should' === expressionName ||
-      'cy.get.last.should' === expressionName
-    );
+    return expressionName.endsWith('.should');
   },
   startWithCy(expressionName: string) {
     return expressionName.startsWith('cy.');
