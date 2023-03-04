@@ -134,7 +134,7 @@ describe('Converter: Cypress validation with .should', () => {
     }, /^Error: Unknown "be.foo" validation$/);
   });
 
-  it('When there are a variable in a validation should keep it', { only: true }, () => {
+  it('When there are a variable in a validation should keep it', () => {
     const result = converter(`
         const newItem = 'Feed the cat';
         cy.get('selector').should('have.text', newItem);
