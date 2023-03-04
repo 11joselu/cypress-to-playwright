@@ -56,6 +56,9 @@ export const isCy = {
   scrollTo(expressionName: string) {
     return 'cy.get.scrollTo' === expressionName;
   },
+  scrollIntoView(expressionName: string) {
+    return 'cy.get.scrollIntoView' === expressionName;
+  },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {

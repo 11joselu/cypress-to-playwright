@@ -39,6 +39,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('uncheck({force: true})', 'uncheck({force: true})'),
     createOption('select("item")', 'selectOption("item")'),
     createOption('scrollTo(250, 250)', 'scroll(250, 250)'),
+    createOption('scrollIntoView()', 'scrollIntoViewIfNeeded()'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = converter(`cy.get("selector").${option.cy}`);

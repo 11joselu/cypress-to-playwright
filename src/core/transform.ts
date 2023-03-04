@@ -55,6 +55,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SCROLL_TO);
       }
 
+      if (isCy.scrollIntoView(expressionName)) {
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SCROLL_INTO_VIEW);
+      }
+
       return node;
     }
 

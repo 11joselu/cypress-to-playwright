@@ -12,6 +12,7 @@ export const enum LOCATOR_PROPERTIES {
   UNCHECK = 'uncheck',
   SELECT = 'selectOption',
   SCROLL_TO = 'scroll',
+  SCROLL_INTO_VIEW = 'scrollIntoViewIfNeeded',
 }
 
 export const enum VALIDATION {
