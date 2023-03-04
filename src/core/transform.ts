@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { Creator, nodeCreator } from './node-creator';
-import { COMMANDS, HOOKS, VALIDATION } from './playwright';
+import { COMMANDS, HOOKS, LOCATOR_PROPERTIES, VALIDATION } from './playwright';
 import { isCy } from './is-cy';
 import { isHook } from './is-hook';
 
@@ -85,17 +85,11 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     if (isCy.isFirst(cyCommandName)) {
       const foundExpression = findGetPropertyExpression(propertyExpression);
 
-      newExpression = creator.callExpression(
-        creator.propertyAccessExpression(
-          creator.callExpression(
-            creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
-            foundExpression.typeArguments,
-            foundExpression.arguments
-          ),
-          COMMANDS.FIRST
-        ),
-        undefined,
-        []
+      newExpression = creator.playwrightLocatorProperty(
+        propertyExpression.expression,
+        LOCATOR_PROPERTIES.FIRST,
+        foundExpression.typeArguments,
+        foundExpression.arguments
       );
     } else {
       newExpression = creator.callExpression(

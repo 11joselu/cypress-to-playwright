@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION } from './playwright';
+import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES } from './playwright';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[];
 
@@ -38,6 +38,12 @@ export type Creator = {
     callExpression: ts.CallExpression | ts.LeftHandSideExpression,
     commandName: COMMANDS
   ): ts.PropertyAccessExpression;
+  playwrightLocatorProperty(
+    expression: ts.Expression,
+    property: LOCATOR_PROPERTIES,
+    typeArgs: ts.NodeArray<ts.TypeNode> | undefined,
+    args: ts.NodeArray<ts.Expression>
+  ): ts.CallExpression;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
@@ -58,6 +64,7 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     string: createStringLiteral(factory),
     expect: createPlaywrightExpect(factory),
     playwrightCommand: createPlaywrightCommand(factory),
+    playwrightLocatorProperty: createPlaywrightLocatorProperty(factory),
   };
 };
 
@@ -214,5 +221,26 @@ function createPlaywrightCommand(factory: ts.NodeFactory) {
   const identifier = createIdentifier(factory);
   return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: COMMANDS) => {
     return propertyAccessExpression(PLAYWRIGHT_PAGE_NAME, identifier(commandName));
+  };
+}
+
+function createPlaywrightLocatorProperty(factory: ts.NodeFactory) {
+  const callExpression = createCallExpression(factory);
+  const propertyAccessExpression = createPropertyAccessExpression(factory);
+  const playwrightCommand = createPlaywrightCommand(factory);
+  return (
+    expression: ts.Expression,
+    property: LOCATOR_PROPERTIES,
+    typeArgs: ts.NodeArray<ts.TypeNode> | undefined = undefined,
+    args: ts.NodeArray<ts.Expression> = [] as unknown as ts.NodeArray<ts.Expression>
+  ) => {
+    return callExpression(
+      propertyAccessExpression(
+        callExpression(playwrightCommand(expression as ts.CallExpression, COMMANDS.LOCATOR), typeArgs, args),
+        property
+      ),
+      undefined,
+      []
+    );
   };
 }
