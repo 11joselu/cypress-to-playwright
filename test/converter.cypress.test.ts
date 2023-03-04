@@ -71,6 +71,7 @@ describe('Converter: Cypress validation with .should', () => {
     createOption('should("contain", "a text message")', 'toContainText("a text message")'),
     createOption('should("be.checked")', 'toBeChecked()'),
     createOption('should("be.disabled")', 'toBeDisabled()'),
+    createOption('should("have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
   ].forEach((option) => {
     it(`Transform cy.get().${option.cy} by  cy.get().${option.playwright}`, () => {
       const result = converter(`cy.get("selector").${option.cy}`);

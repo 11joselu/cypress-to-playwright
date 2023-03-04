@@ -188,6 +188,14 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
     return creator.expect(newExpression, VALIDATION.BE_DISABLED);
   }
 
+  if (isCy.validation.haveAttr(callArgs[0])) {
+    return creator.expect(
+      newExpression,
+      VALIDATION.TO_HAVE_ATTR,
+      callArgs.filter((_, index) => index).map((arg) => creator.string(arg))
+    );
+  }
+
   throw new Error(`Unknown "${callArgs[0]}" validation`);
 }
 

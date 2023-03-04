@@ -46,6 +46,9 @@ export const isCy = {
     beDisabled(expressionName: string) {
       return 'be.disabled' === expressionName;
     },
+    haveAttr(expressionName: string) {
+      return 'have.attr' === expressionName;
+    },
   },
   type(expressionName: string) {
     return 'cy.get.type' === expressionName;
