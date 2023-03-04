@@ -10,27 +10,29 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
 
-      if (ts.isExpressionStatement(node) && ts.isCallExpression(node.expression)) {
-        const call = node.expression;
-        const expressionName = getFormattedExpressionName(call);
+      if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
+        return node;
+      }
 
-        if (isHook.beforeEach(expressionName) || isHook.it(expressionName)) {
-          return parseTestHook(expressionName, node, creator);
-        }
+      const call = node.expression;
+      const expressionName = getFormattedExpressionName(call);
 
-        if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
+      if (isHook.beforeEach(expressionName) || isHook.it(expressionName)) {
+        return parseTestHook(expressionName, node, creator);
+      }
 
-        if (isCy.visit(expressionName)) {
-          return createGoTo(creator, call);
-        }
+      if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
 
-        if (isCy.click(expressionName)) {
-          return createClickCommand(call.expression, creator);
-        }
+      if (isCy.visit(expressionName)) {
+        return createGoTo(creator, call);
+      }
 
-        if (isCy.should(expressionName)) {
-          return createExpectValidation(call.expression, call, creator);
-        }
+      if (isCy.click(expressionName)) {
+        return createClickCommand(call.expression, creator);
+      }
+
+      if (isCy.should(expressionName)) {
+        return createExpectValidation(call.expression, call, creator);
       }
 
       return node;
