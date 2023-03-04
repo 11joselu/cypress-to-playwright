@@ -10,7 +10,7 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('await page.goto("http://localhost")'));
   });
 
-  test('Do not replace fn.visit by awaited page.goto', () => {
+  test('Do not replace fn.visit', () => {
     const result = converter('fn.visit("http://localhost")');
 
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
@@ -46,7 +46,7 @@ describe('Converter: Cypress', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
   });
 
-  test('Do not replace cy.fn(selector).click() by awaited page.click(selector)', () => {
+  test('Do not replace cy.fn(selector).click()', () => {
     const result = converter('cy.fn("selector").click()');
 
     assert.strictEqual(format(result), format('cy.fn("selector").click()'));
