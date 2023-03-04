@@ -22,7 +22,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('await page.locator("selector").click()'));
   });
 
-  it('Add forced click option', { only: true }, () => {
+  it('Add forced click option', () => {
     const result = converter('cy.get("selector").click({force: true})');
 
     assert.strictEqual(format(result), format('await page.locator("selector").click({force: true})'));
