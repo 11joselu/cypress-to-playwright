@@ -83,10 +83,12 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
 
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
+  const items = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent.arguments : [];
+  const newArguments = [...propertyAccessArguments].concat(...items) as unknown as ts.NodeArray<ts.Expression>;
   return creator.awaitExpression(
     creator.playwrightCommand(propertyExpression.expression, COMMANDS.CLICK),
     propertyTypeAccessArguments,
-    propertyAccessArguments
+    newArguments
   );
 }
 
