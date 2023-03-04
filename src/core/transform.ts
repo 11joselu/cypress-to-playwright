@@ -81,13 +81,13 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   const cyCommandName = getExpressionName(propertyExpression.expression);
   let newExpression = propertyExpression.expression;
 
-  if (isCy.get(cyCommandName) || isCy.isFirst(cyCommandName)) {
-    if (isCy.isFirst(cyCommandName)) {
+  if (isCy.get(cyCommandName) || isCy.isFirst(cyCommandName) || isCy.isLast(cyCommandName)) {
+    if (isCy.isFirst(cyCommandName) || isCy.isLast(cyCommandName)) {
       const foundExpression = findGetPropertyExpression(propertyExpression);
 
       newExpression = creator.playwrightLocatorProperty(
         propertyExpression.expression,
-        LOCATOR_PROPERTIES.FIRST,
+        isCy.isFirst(cyCommandName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
         foundExpression.typeArguments,
         foundExpression.arguments
       );

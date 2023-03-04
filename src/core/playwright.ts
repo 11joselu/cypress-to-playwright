@@ -6,6 +6,7 @@ export const enum COMMANDS {
 
 export const enum LOCATOR_PROPERTIES {
   FIRST = 'first',
+  LAST = 'last',
 }
 
 export const enum VALIDATION {

@@ -68,5 +68,16 @@ describe('Converter: Cypress', { concurrency: true }, () => {
       `)
       );
     });
+
+    test('cy.get.last() by page.locator.last()', () => {
+      const result = converter(`cy.get("selector").last().should('have.text', 'Test')`);
+
+      assert.strictEqual(
+        format(result),
+        format(`
+          await expect(page.locator("selector").last()).toHaveText('Test');
+      `)
+      );
+    });
   });
 });
