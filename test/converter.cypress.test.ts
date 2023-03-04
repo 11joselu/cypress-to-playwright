@@ -32,7 +32,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('click()', 'click()'),
     createOption('click({force: true})', 'click({force: true})'),
     createOption('type("a message")', 'type("a message")'),
-    createOption('type("a message", {force: true})', 'type("a message")'),
+    createOption('type("a message", {force: true})', 'type("a message", {force: true})'),
   ].forEach((option) => {
     it(`Replace cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = converter(`cy.get("selector").${option.cy}`);
