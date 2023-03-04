@@ -171,11 +171,11 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   }
 
   if (isCy.validation.toHaveText(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [creator.string(callArgs[1])], isNegativeValidation);
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.toHaveClass(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [creator.string(callArgs[1])], isNegativeValidation);
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.beVisible(shouldCyValidation)) {
@@ -183,16 +183,11 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   }
 
   if (isCy.validation.toHaveValue(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [creator.string(callArgs[1])], isNegativeValidation);
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.toContain(shouldCyValidation)) {
-    return creator.expect(
-      newExpression,
-      VALIDATION.TO_CONTAIN_TEXT,
-      [creator.string(callArgs[1])],
-      isNegativeValidation
-    );
+    return creator.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.beChecked(shouldCyValidation)) {

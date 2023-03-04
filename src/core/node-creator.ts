@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES } from './playwright';
 
-type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[];
+type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 
 export type Creator = {
   callExpressionStatement(newExpression: ts.Expression, callExpression: ts.CallExpression): ts.Statement;

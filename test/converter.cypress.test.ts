@@ -133,6 +133,21 @@ describe('Converter: Cypress validation with .should', () => {
       converter('cy.get("selector").should("be.foo")');
     }, /^Error: Unknown "be.foo" validation$/);
   });
+
+  it('When there are a variable in a validation should keep it', { only: true }, () => {
+    const result = converter(`
+        const newItem = 'Feed the cat';
+        cy.get('selector').should('have.text', newItem);
+      `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+          const newItem = 'Feed the cat';
+          await expect(page.locator("selector")).toHaveText(newItem)
+        `)
+    );
+  });
 });
 
 function createOption(cy: string, playwright: string) {
