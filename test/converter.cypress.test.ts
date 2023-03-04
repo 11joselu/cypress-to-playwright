@@ -41,16 +41,10 @@ describe('Converter: Cypress', { concurrency: true }, () => {
       assert.strictEqual(format(result), format('await expect(page.locator("selector")).toBeVisible()'));
     });
 
-    test('have.length by expect(elements).toBe()', () => {
+    test('have.length by expect().toHaveCount', () => {
       const result = converter('cy.get("selector").should("have.length", 2)');
 
-      assert.strictEqual(
-        format(result),
-        format(`
-          const elements = await page.locator("selector");
-          await expect(elements.length).toBe(2)
-      `)
-      );
+      assert.strictEqual(format(result), format(`await expect(page.locator("selector")).toHaveCount(2);`));
     });
 
     test('have.text by toHaveText', { only: true }, () => {

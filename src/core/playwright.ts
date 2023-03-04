@@ -9,6 +9,7 @@ export const enum VALIDATION {
   TO_BE = 'toBe',
   TO_BE_VISIBLE = 'toBeVisible',
   TO_HAVE_TEXT = 'toHaveText',
+  TO_HAVE_COUNT = 'toHaveCount',
 }
 
 export const PLAYWRIGHT_PAGE_NAME = 'page';

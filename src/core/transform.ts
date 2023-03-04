@@ -7,7 +7,7 @@ import { isHook } from './is-hook';
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
   return (rootNode) => {
-    function visit(node: ts.Node): ts.Node | ts.NodeArray<ts.Statement> {
+    function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
 
       if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
@@ -90,7 +90,7 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   }
 
   if (isCy.validation.haveLength(callArgs[0])) {
-    return createHaveLengthValidation(creator, call, propertyTypeAccessArguments, propertyAccessArguments);
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_COUNT, [creator.numeric(callArgs[1])]);
   }
 
   if (isCy.validation.toHaveText(callArgs[0])) {
@@ -170,23 +170,4 @@ function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.
   }
 
   return creator.emptyBlock();
-}
-
-function createHaveLengthValidation(
-  creator: Creator,
-  call: ts.CallExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
-  argumentsArr: ts.NodeArray<ts.Expression>
-) {
-  const callArgs = call.arguments.map((arg) => arg.getText().replace(/"/g, ''));
-  const variableName = 'elements';
-  const variable = creator.variable(
-    variableName,
-    creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.LOCATOR), typeArguments, argumentsArr)
-  );
-  const expect = creator.expect(creator.propertyAccessExpression(variableName, 'length'), VALIDATION.TO_BE, [
-    creator.numeric(callArgs[1]),
-  ]);
-
-  return creator.block([variable, creator.statement(expect)]).statements;
 }
