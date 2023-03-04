@@ -79,34 +79,26 @@ function createExpectValidation(
 ) {
   const { typeArguments, argumentsArr } = getArgumentsOfPropertyAccessExpression(propertyExpression);
   const cyCommandName = getExpressionName(propertyExpression.expression);
-  let expression = propertyExpression.expression;
+  const callArgs = call.arguments.map((arg) => arg.getText().replace(/"/g, ''));
+  let newExpression = propertyExpression.expression;
+
   if (isCy.get(cyCommandName)) {
-    expression = creator.callExpression(
+    newExpression = creator.callExpression(
       creator.playwrightCommand(propertyExpression.expression, COMMANDS.LOCATOR),
       typeArguments,
       argumentsArr
     );
   }
 
-  const args = call.arguments.map((arg) => arg.getText().replace(/"/g, ''));
-  if (isCy.validation.haveLength(args[0])) {
-    const name = 'elements';
-    const variable = creator.variable(
-      name,
-      creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.LOCATOR), typeArguments, argumentsArr)
-    );
-    const expect = creator.expect(creator.propertyAccessExpression(name, 'length'), VALIDATION.TO_BE, [
-      creator.numeric(args[1]),
-    ]);
-
-    return creator.block([variable, creator.statement(expect)]).statements;
+  if (isCy.validation.haveLength(callArgs[0])) {
+    return createHaveLengthValidation(creator, call, typeArguments, argumentsArr, callArgs);
   }
 
-  if (isCy.validation.toHaveText(args[0])) {
-    return creator.expect(expression, VALIDATION.TO_HAVE_TEXT, [creator.string(args[1])]);
+  if (isCy.validation.toHaveText(callArgs[0])) {
+    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [creator.string(callArgs[1])]);
   }
 
-  return creator.expect(expression, VALIDATION.TO_BE_VISIBLE);
+  return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE);
 }
 
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
@@ -179,4 +171,23 @@ function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.
   }
 
   return creator.emptyBlock();
+}
+
+function createHaveLengthValidation(
+  creator: Creator,
+  call: ts.CallExpression,
+  typeArguments: ts.NodeArray<ts.TypeNode> | undefined,
+  argumentsArr: ts.NodeArray<ts.Expression>,
+  callArgs: string[]
+) {
+  const variableName = 'elements';
+  const variable = creator.variable(
+    variableName,
+    creator.awaitExpression(creator.playwrightCommand(call, COMMANDS.LOCATOR), typeArguments, argumentsArr)
+  );
+  const expect = creator.expect(creator.propertyAccessExpression(variableName, 'length'), VALIDATION.TO_BE, [
+    creator.numeric(callArgs[1]),
+  ]);
+
+  return creator.block([variable, creator.statement(expect)]).statements;
 }
