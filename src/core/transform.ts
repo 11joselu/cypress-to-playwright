@@ -64,6 +64,23 @@ function createGoTo(creator: Creator, call: ts.CallExpression) {
 }
 
 function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
+  const expressionName = getExpressionName(propertyExpression);
+  if (isCy.isFirst(expressionName)) {
+    const foundExpression = findGetPropertyExpression(propertyExpression);
+
+    const newExpression = creator.propertyAccessExpression(
+      creator.playwrightLocatorProperty(
+        propertyExpression.expression,
+        LOCATOR_PROPERTIES.FIRST,
+        foundExpression.typeArguments,
+        foundExpression.arguments
+      ),
+      COMMANDS.CLICK
+    );
+
+    return creator.awaitExpression(newExpression, undefined, []);
+  }
+
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   return creator.awaitExpression(

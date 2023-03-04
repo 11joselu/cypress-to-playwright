@@ -9,7 +9,8 @@ export const isCy = {
     return 'cy.get' === expressionName;
   },
   click(expressionName: string) {
-    return 'cy.get.click' === expressionName;
+    const cleanedExpression = expressionName.replace('.click', '');
+    return isCyWithPropertyAccess(cleanedExpression) && expressionName.endsWith('.click');
   },
   should(expressionName: string) {
     return expressionName.endsWith('.should');
@@ -29,3 +30,7 @@ export const isCy = {
     },
   },
 };
+
+function isCyWithPropertyAccess(expressionName: string) {
+  return isCy.get(expressionName) || isCy.isFirst(expressionName);
+}
