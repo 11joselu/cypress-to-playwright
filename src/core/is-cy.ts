@@ -9,8 +9,7 @@ export const isCy = {
     return 'cy.get' === expressionName;
   },
   click(expressionName: string) {
-    const cleanedExpression = expressionName.replace('.click', '');
-    return isCyWithPropertyAccess(cleanedExpression) && expressionName.endsWith('.click');
+    return isFirstOfLastWithCommand(expressionName, '.click');
   },
   should(expressionName: string) {
     return expressionName.endsWith('.should');
@@ -54,25 +53,30 @@ export const isCy = {
     },
   },
   type(expressionName: string) {
-    return 'cy.get.type' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.type');
   },
   check(expressionName: string) {
-    return 'cy.get.check' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.check');
   },
   uncheck(expressionName: string) {
-    return 'cy.get.uncheck' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.uncheck');
   },
   select(expressionName: string) {
-    return 'cy.get.select' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.select');
   },
   scrollTo(expressionName: string) {
-    return 'cy.get.scrollTo' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.scrollTo');
   },
   scrollIntoView(expressionName: string) {
-    return 'cy.get.scrollIntoView' === expressionName;
+    return isFirstOfLastWithCommand(expressionName, '.scrollIntoView');
   },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {
   return isCy.get(expressionName) || isCy.isFirst(expressionName) || isCy.isLast(expressionName);
+}
+
+function isFirstOfLastWithCommand(expressionName: string, searchValue: string) {
+  const cleanedExpression = expressionName.replace(searchValue, '');
+  return isCyWithPropertyAccess(cleanedExpression) && expressionName.endsWith(searchValue);
 }

@@ -28,7 +28,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       }
 
       if (isCy.click(expressionName)) {
-        return createClickCommand(call.expression, creator);
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CLICK);
       }
 
       if (isCy.should(expressionName)) {
@@ -87,7 +87,11 @@ function createGoTo(creator: Creator, call: ts.CallExpression) {
   return creator.awaitCallExpression(creator.playwrightCommand(COMMANDS.GOTO), call.typeArguments, call.arguments);
 }
 
-function createClickCommand(propertyExpression: ts.PropertyAccessExpression, creator: Creator) {
+function createPlaywrightCommand(
+  propertyExpression: ts.PropertyAccessExpression,
+  creator: Creator,
+  command: LOCATOR_PROPERTIES
+) {
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
@@ -103,7 +107,7 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
           foundExpression.typeArguments,
           foundExpression.arguments
         ),
-        LOCATOR_PROPERTIES.CLICK
+        command
       ),
       parent?.typeArguments,
       parent?.arguments || []
@@ -114,7 +118,7 @@ function createClickCommand(propertyExpression: ts.PropertyAccessExpression, cre
 
   return creator.await(
     creator.playwrightLocatorProperty(
-      LOCATOR_PROPERTIES.CLICK,
+      command,
       propertyTypeAccessArguments,
       propertyAccessArguments,
       parent?.typeArguments,
@@ -286,24 +290,4 @@ function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpressi
   }
 
   return propertyExpression.parent as ts.CallExpression;
-}
-
-function createPlaywrightCommand(
-  propertyExpression: ts.PropertyAccessExpression,
-  creator: Creator,
-  property: LOCATOR_PROPERTIES
-) {
-  const { propertyTypeAccessArguments, propertyAccessArguments } =
-    getArgumentsOfPropertyAccessExpression(propertyExpression);
-
-  const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
-  return creator.await(
-    creator.playwrightLocatorProperty(
-      property,
-      propertyTypeAccessArguments,
-      propertyAccessArguments,
-      parent?.typeArguments,
-      parent?.arguments
-    )
-  );
 }

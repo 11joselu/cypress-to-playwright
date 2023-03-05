@@ -16,18 +16,6 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
 
-  it('Do not transform cy.fn(selector).click()', () => {
-    const result = index('cy.fn("selector").click()');
-
-    assert.strictEqual(format(result), format('cy.fn("selector").click()'));
-  });
-
-  it('Do not transform cy.fn(selector).type()', () => {
-    const result = index('cy.fn("selector").type()');
-
-    assert.strictEqual(format(result), format('cy.fn("selector").type()'));
-  });
-
   [
     createOption('click()', 'click()'),
     createOption('click({force: true})', 'click({force: true})'),
@@ -48,15 +36,21 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     });
 
     it(`Transform cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
-      const result = index('cy.get("selector").first().click()');
+      const result = index(`cy.get("selector").first().${option.cy}`);
 
-      assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
+      assert.strictEqual(format(result), format(`await page.locator("selector").first().${option.playwright}`));
     });
 
     it(`Transform cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
-      const result = index('cy.get("selector").last().click()');
+      const result = index(`cy.get("selector").last().${option.cy}`);
 
-      assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
+      assert.strictEqual(format(result), format(`await page.locator("selector").last().${option.playwright}`));
+    });
+
+    it(`Do not transform cy.fn(selector).${option.cy}`, () => {
+      const result = index(`cy.fn("selector").${option.cy}`);
+
+      assert.strictEqual(format(result), format(`cy.fn("selector").${option.cy}`));
     });
   });
 });
