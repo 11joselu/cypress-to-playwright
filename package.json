@@ -3,12 +3,16 @@
   "version": "0.0.1",
   "description": "Automatic migration from cypress to playwright",
   "main": "index.js",
+  "bin": {
+    "cypress-to-playwright": "src/bin/index.js"
+  },
   "scripts": {
     "postinstall": "git config --local core.hooksPath .githooks/",
     "build": "tsc",
     "lint": "eslint **/*.ts --fix",
     "lint-staged": "lint-staged",
-    "test": "tsc --noEmit && node --loader tsx --no-warnings --test-reporter=spec --test test/*.test.ts "
+    "test": "tsc --noEmit && node --loader tsx --no-warnings --test-reporter=spec --test test/*.test.ts",
+    "binary": "tsc --noEmit && node --loader tsx src/bin/index.ts"
   },
   "repository": {
     "type": "git",
