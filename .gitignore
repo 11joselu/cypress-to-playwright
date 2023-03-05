@@ -1,6 +1,8 @@
 node_modules/
 .idea/
 .vscode/
+#Output of script validation
+examples/playwright
 
 dist/
 lib/
