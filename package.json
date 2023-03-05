@@ -29,7 +29,7 @@
     "lint": "eslint **/*.ts --fix",
     "lint-staged": "lint-staged",
     "test": "tsc --noEmit && node --loader tsx --no-warnings --test-reporter=spec --test test/*.test.ts",
-    "binary": "tsc --noEmit && node --loader tsx src/bin/index.ts",
+    "binary": "tsc --noEmit && node --loader tsx --no-warnings src/bin/index.ts",
     "build": "tsc -p ./tsconfig.json && tsc -p ./tsconfig.cjs.json && tsconfig-to-dual-package",
     "postbuild": "find dist/esm -type f -name \"*.js\" -exec sh -c 'mv \"$0\" \"${0%.js}.mjs\"' {} \\;\n",
     "prepack": "npm run build"
@@ -64,6 +64,8 @@
     "tsx": "3.12.3"
   },
   "dependencies": {
+    "glob": "9.2.1",
+    "picocolors": "1.0.0",
     "typescript": "4.9.5"
   }
 }
