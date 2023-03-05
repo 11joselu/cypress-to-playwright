@@ -13,6 +13,7 @@ const spinner = ora({
   text: '',
   spinner: 'squareCorners',
 });
+spinner.start('Starting cypress-to-playwright');
 
 const notMigrated: string[] = [];
 let migrated = 0;
@@ -45,7 +46,7 @@ function migrateFiles(files: string[]) {
       spinner.succeed(`File ${basename(file)} migrated`);
       writeFileSync(file.replace('.js', '.migrated.js'), result, 'utf-8');
     } catch (e) {
-      spinner.fail(pc.red(`There was an error migrating: ${basename(file)}`));
+      spinner.fail(pc.red(`There was an error migrating ${basename(file)}:\n\tError: ${(e as Error).message}`));
       notMigrated.push(file);
     }
   });
