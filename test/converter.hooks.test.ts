@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
-import { index } from '../src';
-import { format } from './format';
+import { index } from '../src/index.js';
+import { format } from './format.js';
 
 describe('Converter: Test Hooks', { concurrency: true }, () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {

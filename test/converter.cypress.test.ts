@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
-import { index } from '../src';
-import { format } from './format';
+import { index } from '../src/index.js';
+import { format } from './format.js';
 
 describe('Converter: Cypress commands', { concurrency: true }, () => {
   it('Transform cy.visit by awaited page.goto', () => {
