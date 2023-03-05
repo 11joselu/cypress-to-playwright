@@ -8,7 +8,7 @@
     "node": ">=16.0.0"
   },
   "type": "module",
-  "bin": "./bin/lint-staged.js",
+  "bin": "./bin/cypress-to-playwright.js",
   "exports": {
     ".": "./lib/index.js",
     "./bin": "./bin/cypress-to-playwright.js",
