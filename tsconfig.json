@@ -1,21 +1,30 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
-    "module": "CommonJS",
-    "target": "es2022",
-    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "outDir": "dist"
+    "newLine": "LF",
+    "outDir": "dist/esm/",
+    "target": "ES2018",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "preserve",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src"
+    "src/**/*"
   ],
   "exclude": [
+    ".git",
     "node_modules"
   ]
 }

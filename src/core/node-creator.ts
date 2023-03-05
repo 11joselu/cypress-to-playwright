@@ -36,12 +36,8 @@ export type Creator = {
     validationArgs?: Args,
     isNegative?: boolean
   ): ts.AwaitExpression;
-  playwrightCommand(
-    callExpression: ts.CallExpression | ts.LeftHandSideExpression,
-    commandName: COMMANDS
-  ): ts.PropertyAccessExpression;
+  playwrightCommand(commandName: COMMANDS): ts.PropertyAccessExpression;
   playwrightLocatorProperty(
-    expression: ts.Expression,
     property: LOCATOR_PROPERTIES,
     locatorTypeArgs?: ts.NodeArray<ts.TypeNode> | undefined,
     locatorArgs?: ts.NodeArray<ts.Expression> | ts.Expression[],
@@ -245,7 +241,7 @@ function createPlaywrightExpect(factory: ts.NodeFactory) {
 function createPlaywrightCommand(factory: ts.NodeFactory) {
   const propertyAccessExpression = createPropertyAccessExpression(factory);
   const identifier = createIdentifier(factory);
-  return (callExpression: ts.CallExpression | ts.LeftHandSideExpression, commandName: COMMANDS) => {
+  return (commandName: COMMANDS) => {
     return propertyAccessExpression(PLAYWRIGHT_PAGE_NAME, identifier(commandName));
   };
 }
@@ -255,7 +251,6 @@ function createPlaywrightLocatorProperty(factory: ts.NodeFactory) {
   const propertyAccessExpression = createPropertyAccessExpression(factory);
   const playwrightCommand = createPlaywrightCommand(factory);
   return (
-    expression: ts.Expression,
     property: LOCATOR_PROPERTIES,
     locatorTypeArgs: ts.NodeArray<ts.TypeNode> | undefined = undefined,
     locatorArgs: ts.NodeArray<ts.Expression> | ts.Expression[] = [] as unknown as ts.NodeArray<ts.Expression>,
@@ -264,11 +259,7 @@ function createPlaywrightLocatorProperty(factory: ts.NodeFactory) {
   ) => {
     return callExpression(
       propertyAccessExpression(
-        callExpression(
-          playwrightCommand(expression as ts.CallExpression, COMMANDS.LOCATOR),
-          locatorTypeArgs,
-          locatorArgs
-        ),
+        callExpression(playwrightCommand(COMMANDS.LOCATOR), locatorTypeArgs, locatorArgs),
         property
       ),
       propertyTypeArgs,

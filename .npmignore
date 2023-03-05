@@ -1,0 +1,6 @@
+test
+coverage
+.editorconfig
+.eslintrc.json
+.prettierrc.json
+tsconfig*.json
