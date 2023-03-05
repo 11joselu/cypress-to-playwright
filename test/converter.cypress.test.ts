@@ -1,29 +1,29 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
-import { converter } from '../src/converter';
+import { index } from '../src';
 import { format } from './format';
 
 describe('Converter: Cypress commands', { concurrency: true }, () => {
   it('Transform cy.visit by awaited page.goto', () => {
-    const result = converter('cy.visit("http://localhost")');
+    const result = index('cy.visit("http://localhost")');
 
     assert.strictEqual(format(result), format('await page.goto("http://localhost")'));
   });
 
   it('Do not transform fn.visit', () => {
-    const result = converter('fn.visit("http://localhost")');
+    const result = index('fn.visit("http://localhost")');
 
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
 
   it('Do not transform cy.fn(selector).click()', () => {
-    const result = converter('cy.fn("selector").click()');
+    const result = index('cy.fn("selector").click()');
 
     assert.strictEqual(format(result), format('cy.fn("selector").click()'));
   });
 
   it('Do not transform cy.fn(selector).type()', () => {
-    const result = converter('cy.fn("selector").type()');
+    const result = index('cy.fn("selector").type()');
 
     assert.strictEqual(format(result), format('cy.fn("selector").type()'));
   });
@@ -42,19 +42,19 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('scrollIntoView()', 'scrollIntoViewIfNeeded()'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
-      const result = converter(`cy.get("selector").${option.cy}`);
+      const result = index(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
     });
 
     it(`Transform cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
-      const result = converter('cy.get("selector").first().click()');
+      const result = index('cy.get("selector").first().click()');
 
       assert.strictEqual(format(result), format('await page.locator("selector").first().click();'));
     });
 
     it(`Transform cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
-      const result = converter('cy.get("selector").last().click()');
+      const result = index('cy.get("selector").last().click()');
 
       assert.strictEqual(format(result), format('await page.locator("selector").last().click();'));
     });
@@ -74,19 +74,19 @@ describe('Converter: Cypress validation with .should', () => {
     createOption('should("have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
   ].forEach((option) => {
     it(`Transform cy.get().${option.cy} by  cy.get().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").${option.cy}`);
+      const result = index(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector")).${option.playwright}`));
     });
 
     it(`Transform cy.get().first().${option.cy} by page.locator().first().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").first().${option.cy}`);
+      const result = index(`cy.get("selector").first().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector").first()).${option.playwright}`));
     });
 
     it(`Transform cy.get().last().${option.cy} by page.locator().last().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").last().${option.cy}`);
+      const result = index(`cy.get("selector").last().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector").last()).${option.playwright}`));
     });
@@ -104,13 +104,13 @@ describe('Converter: Cypress validation with .should', () => {
     createOption('should("not.have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
   ].forEach((option) => {
     it(`Transform negative cy.get().${option.cy} by  cy.get().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").${option.cy}`);
+      const result = index(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector")).not.${option.playwright}`));
     });
 
     it(`Transform cy.get().first().${option.cy} by page.locator().first().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").first().${option.cy}`);
+      const result = index(`cy.get("selector").first().${option.cy}`);
 
       assert.strictEqual(
         format(result),
@@ -119,7 +119,7 @@ describe('Converter: Cypress validation with .should', () => {
     });
 
     it(`Transform cy.get().last().${option.cy} by page.locator().last().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").last().${option.cy}`);
+      const result = index(`cy.get("selector").last().${option.cy}`);
 
       assert.strictEqual(
         format(result),
@@ -130,12 +130,12 @@ describe('Converter: Cypress validation with .should', () => {
 
   it('Throws error for unknown validation', () => {
     assert.throws(() => {
-      converter('cy.get("selector").should("be.foo")');
+      index('cy.get("selector").should("be.foo")');
     }, /^Error: Unknown "be.foo" validation$/);
   });
 
   it('When there are a variable in a validation should keep it', () => {
-    const result = converter(`
+    const result = index(`
         const newItem = 'Feed the cat';
         cy.get('selector').should('have.text', newItem);
       `);

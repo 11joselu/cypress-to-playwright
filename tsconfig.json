@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "newLine": "LF",
-    "outDir": "dist/esm/",
+    "outDir": "lib/",
     "target": "ES2018",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "jsx": "preserve",
     "lib": [
-      "esnext",
-      "dom"
+      "esnext"
     ],
     "strict": true,
     "noUnusedLocals": true,

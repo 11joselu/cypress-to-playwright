@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { Creator, nodeCreator } from './node-creator';
-import { COMMANDS, HOOKS, LOCATOR_PROPERTIES, VALIDATION } from './playwright';
-import { isCy } from './is-cy';
-import { isHook } from './is-hook';
+import { Creator, nodeCreator } from './node-creator.js';
+import { COMMANDS, HOOKS, LOCATOR_PROPERTIES, VALIDATION } from './playwright.js';
+import { isCy } from './is-cy.js';
+import { isHook } from './is-hook.js';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);

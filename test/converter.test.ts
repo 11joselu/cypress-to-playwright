@@ -1,29 +1,29 @@
 import { describe, it } from 'node:test';
 import * as assert from 'assert';
-import { converter } from '../src/converter';
+import { index } from '../src';
 import { format } from './format';
 
 describe('Converter', { concurrency: true }, () => {
   it('Returns empty string when there are not code', () => {
-    const result = converter('');
+    const result = index('');
 
     assert.strictEqual(result, '');
   });
 
   it('Accepts JavaScript code', () => {
-    const result = converter(`function hello() {}`);
+    const result = index(`function hello() {}`);
 
     assert.strictEqual(format(result), format('function hello() { }'));
   });
 
   it('Accepts TypeScript code', () => {
-    const result = converter(`function hello(): void {}`);
+    const result = index(`function hello(): void {}`);
 
     assert.strictEqual(format(result), format('function hello(): void { }'));
   });
 
   it('Convert large cypress code', () => {
-    const result = converter(`
+    const result = index(`
       describe('example to-do app', () => {
         beforeEach(() => {
           cy.visit('https://example.cypress.io/todo');
