@@ -70,6 +70,9 @@ export const isCy = {
   scrollIntoView(expressionName: string) {
     return isFirstOfLastWithCommand(expressionName, '.scrollIntoView');
   },
+  dblclick(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.dblclick');
+  },
 };
 
 function isCyWithPropertyAccess(expressionName: string) {

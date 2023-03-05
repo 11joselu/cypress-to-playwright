@@ -13,6 +13,7 @@ export const enum LOCATOR_PROPERTIES {
   SELECT = 'selectOption',
   SCROLL_TO = 'scroll',
   SCROLL_INTO_VIEW = 'scrollIntoViewIfNeeded',
+  DBL_CLICK = 'dblclick',
 }
 
 export const enum VALIDATION {

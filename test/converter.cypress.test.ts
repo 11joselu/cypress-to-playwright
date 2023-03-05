@@ -28,6 +28,8 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('select("item")', 'selectOption("item")'),
     createOption('scrollTo(250, 250)', 'scroll(250, 250)'),
     createOption('scrollIntoView()', 'scrollIntoViewIfNeeded()'),
+    createOption('dblclick()', 'dblclick()'),
+    createOption('dblclick({force: true})', 'dblclick({force: true})'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = index(`cy.get("selector").${option.cy}`);
