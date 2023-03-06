@@ -3,6 +3,17 @@ export const enum COMMANDS {
   LOCATOR = 'locator',
 }
 
+export const enum ROUTE {
+  NAME = 'route',
+  FULFILL = 'fulfill',
+  REQUEST = 'request',
+  STATUS = 'status',
+  BODY = 'body',
+  FALLBACK = 'fallback',
+
+  METHOD = 'method',
+}
+
 export const enum LOCATOR_PROPERTIES {
   FIRST = 'first',
   LAST = 'last',

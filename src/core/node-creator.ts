@@ -1,5 +1,5 @@
 import ts, { Expression } from 'typescript';
-import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES } from './playwright.js';
+import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES, ROUTE } from './playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 
@@ -375,7 +375,7 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
       const binaryExpression = createBinaryExpression(factory);
       const token = createToken(factory);
       const returnStatement = createReturn(factory);
-      return callExpression(propertyAccessExpression(identifier('page'), 'route'), undefined, [
+      return callExpression(propertyAccessExpression(identifier(PLAYWRIGHT_PAGE_NAME), ROUTE.NAME), undefined, [
         stringLiteral(url),
         arrowFunction(
           block([
@@ -383,8 +383,12 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
               binaryExpression(
                 callExpression(
                   propertyAccessExpression(
-                    callExpression(propertyAccessExpression(identifier('route'), identifier('request')), undefined, []),
-                    identifier('method')
+                    callExpression(
+                      propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.REQUEST)),
+                      undefined,
+                      []
+                    ),
+                    identifier(ROUTE.METHOD)
                   ),
                   undefined,
                   []
@@ -394,34 +398,44 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
               ),
               block([
                 statement(
-                  callExpression(propertyAccessExpression(identifier('route'), identifier('fallback')), undefined, [])
+                  callExpression(
+                    propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.FALLBACK)),
+                    undefined,
+                    []
+                  )
                 ),
                 returnStatement(undefined),
               ]),
               undefined
             ),
             statement(
-              callExpression(propertyAccessExpression(identifier('route'), 'fulfill'), undefined, [
-                objectLiteralExpression([propertyAssignment('status', statusCode), propertyAssignment('body', body)]),
+              callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
+                objectLiteralExpression([
+                  propertyAssignment(ROUTE.STATUS, statusCode),
+                  propertyAssignment(ROUTE.BODY, body),
+                ]),
               ])
             ),
           ]),
-          [parameterDeclaration('route')]
+          [parameterDeclaration(ROUTE.NAME)]
         ),
       ]);
     }
 
-    return callExpression(propertyAccessExpression(identifier('page'), 'route'), undefined, [
+    return callExpression(propertyAccessExpression(identifier(PLAYWRIGHT_PAGE_NAME), ROUTE.NAME), undefined, [
       stringLiteral(url),
       arrowFunction(
         block([
           statement(
-            callExpression(propertyAccessExpression(identifier('route'), 'fulfill'), undefined, [
-              objectLiteralExpression([propertyAssignment('status', statusCode), propertyAssignment('body', body)]),
+            callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
+              objectLiteralExpression([
+                propertyAssignment(ROUTE.STATUS, statusCode),
+                propertyAssignment(ROUTE.BODY, body),
+              ]),
             ])
           ),
         ]),
-        [parameterDeclaration('route')]
+        [parameterDeclaration(ROUTE.NAME)]
       ),
     ]);
   };
