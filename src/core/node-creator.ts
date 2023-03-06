@@ -354,6 +354,7 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
   const binaryExpression = createBinaryExpression(factory);
   const token = createToken(factory);
   const returnStatement = createReturn(factory);
+  const callOfProperty = createCallOfProperty(factory);
 
   return function createRouteIntercept(node: ts.CallExpression) {
     const method = node.arguments.find((arg) => isRest(arg));
@@ -375,7 +376,7 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
     const statusCode = numericLiteral(statusCodeProp.initializer.getText());
     const bodyExpressions = [
       statement(
-        callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
+        callOfProperty(ROUTE.NAME, ROUTE.FULFILL, [
           objectLiteralExpression([propertyAssignment(ROUTE.STATUS, statusCode), propertyAssignment(ROUTE.BODY, body)]),
         ])
       ),
@@ -383,10 +384,7 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
 
     if (method) {
       const requestCallExpression = callExpression(
-        propertyAccessExpression(
-          callExpression(propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.REQUEST)), undefined, []),
-          identifier(ROUTE.METHOD)
-        ),
+        propertyAccessExpression(callOfProperty(ROUTE.NAME, ROUTE.REQUEST, []), identifier(ROUTE.METHOD)),
         undefined,
         []
       );
@@ -396,19 +394,14 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
           token(ts.SyntaxKind.ExclamationEqualsEqualsToken),
           stringLiteral(fixString(method.getFullText()))
         ),
-        block([
-          statement(
-            callExpression(propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.FALLBACK)), undefined, [])
-          ),
-          returnStatement(undefined),
-        ]),
+        block([statement(callOfProperty(ROUTE.NAME, ROUTE.FALLBACK, [])), returnStatement(undefined)]),
         undefined
       );
 
       bodyExpressions.unshift(bodyIfStatement);
     }
 
-    return callExpression(propertyAccessExpression(identifier(PLAYWRIGHT_PAGE_NAME), ROUTE.NAME), undefined, [
+    return callOfProperty(PLAYWRIGHT_PAGE_NAME, ROUTE.NAME, [
       stringLiteral(url),
       arrowFunction(block(bodyExpressions), [parameterDeclaration(ROUTE.NAME)]),
     ]);
@@ -417,4 +410,22 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
 
 function fixString(str: string) {
   return str.replace(/["']/g, '');
+}
+
+function createCallOfProperty(factory: ts.NodeFactory) {
+  const identifier = createIdentifier(factory);
+  const propertyAccessExpression = createPropertyAccessExpression(factory);
+  const callExpression = createCallExpression(factory);
+
+  return (
+    objIdentifier: ROUTE | typeof PLAYWRIGHT_PAGE_NAME,
+    property: ROUTE,
+    objectLiteralExpressions: ts.Expression[]
+  ) => {
+    return callExpression(
+      propertyAccessExpression(identifier(objIdentifier), property),
+      undefined,
+      objectLiteralExpressions
+    );
+  };
 }
