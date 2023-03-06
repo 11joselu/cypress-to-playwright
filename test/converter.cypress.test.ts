@@ -31,6 +31,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
     createOption('dblclick()', 'dblclick()'),
     createOption('dblclick({force: true})', 'dblclick({force: true})'),
     createOption('clear()', 'fill("")'),
+    createOption('clear({force: true})', 'fill("", {force: true})'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = index(`cy.get("selector").${option.cy}`);

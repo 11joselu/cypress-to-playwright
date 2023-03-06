@@ -99,14 +99,14 @@ function createPlaywrightCommand(
   propertyExpression: ts.PropertyAccessExpression,
   creator: Creator,
   command: LOCATOR_PROPERTIES,
-  concatArguments: ts.Expression[] = []
+  toInjectArgs: ts.Expression[] = []
 ) {
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
   const expressionName = getExpressionName(propertyExpression);
 
-  const propertyArgs = [...(parent?.arguments ?? []), ...concatArguments];
+  const propertyArgs = [...toInjectArgs, ...(parent?.arguments ?? [])];
 
   if (isCy.isFirst(expressionName) || isCy.isLast(expressionName)) {
     const foundExpression = findGetPropertyExpression(propertyExpression);
