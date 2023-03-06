@@ -14,6 +14,7 @@ export const enum LOCATOR_PROPERTIES {
   SCROLL_TO = 'scroll',
   SCROLL_INTO_VIEW = 'scrollIntoViewIfNeeded',
   DBL_CLICK = 'dblclick',
+  CLEAR = 'fill',
 }
 
 export const enum VALIDATION {

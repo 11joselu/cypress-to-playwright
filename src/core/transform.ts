@@ -63,6 +63,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.DBL_CLICK);
       }
 
+      if (isCy.clear(expressionName)) {
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CLEAR, [creator.string('')]);
+      }
+
       return node;
     }
 
@@ -94,12 +98,15 @@ function createGoTo(creator: Creator, call: ts.CallExpression) {
 function createPlaywrightCommand(
   propertyExpression: ts.PropertyAccessExpression,
   creator: Creator,
-  command: LOCATOR_PROPERTIES
+  command: LOCATOR_PROPERTIES,
+  concatArguments: ts.Expression[] = []
 ) {
   const { propertyTypeAccessArguments, propertyAccessArguments } =
     getArgumentsOfPropertyAccessExpression(propertyExpression);
   const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
   const expressionName = getExpressionName(propertyExpression);
+
+  const propertyArgs = [...(parent?.arguments ?? []), ...concatArguments];
 
   if (isCy.isFirst(expressionName) || isCy.isLast(expressionName)) {
     const foundExpression = findGetPropertyExpression(propertyExpression);
@@ -114,7 +121,7 @@ function createPlaywrightCommand(
         command
       ),
       parent?.typeArguments,
-      parent?.arguments || []
+      propertyArgs
     );
 
     return creator.await(expression);
@@ -126,7 +133,7 @@ function createPlaywrightCommand(
       propertyTypeAccessArguments,
       propertyAccessArguments,
       parent?.typeArguments,
-      parent?.arguments
+      propertyArgs
     )
   );
 }

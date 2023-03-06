@@ -41,6 +41,9 @@ export const isCy = {
   dblclick(expressionName: string) {
     return isFirstOfLastWithCommand(expressionName, '.dblclick');
   },
+  clear(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.clear');
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;
