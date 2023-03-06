@@ -177,6 +177,72 @@ describe('Intercept', () => {
     `)
     );
   });
+
+  it('Migrate cy.intercept with METHOD POST, URL and response to page.route', { only: true }, () => {
+    const result = index(`
+      cy.intercept('POST', 'http://localhost/an-url/**', {
+        body: {
+          code: 'API_011',
+          error: true,
+          message: 'Stubbed response',
+        },
+        statusCode: 400,
+      });
+  `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      page.route('http://localhost/an-url/.*', route => {
+        if (route.request().method() !== 'POST') {
+          route.fallback();
+          return;
+        }
+        route.fulfill({
+          status: 400,
+          body: {
+            code: 'API_011',
+            error: true,
+            message: 'Stubbed response',
+          },
+        });
+      });
+    `)
+    );
+  });
+
+  it('Migrate cy.intercept with METHOD GET, URL and response to page.route', { only: true }, () => {
+    const result = index(`
+      cy.intercept('GET', 'http://localhost/an-url/**', {
+        body: {
+          code: 'API_011',
+          error: true,
+          message: 'Stubbed response',
+        },
+        statusCode: 400,
+      });
+  `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      page.route('http://localhost/an-url/.*', route => {
+        if (route.request().method() !== 'GET') {
+          route.fallback();
+          return;
+        }
+        route.fulfill({
+          status: 400,
+          body: {
+            code: 'API_011',
+            error: true,
+            message: 'Stubbed response',
+          },
+        });
+      });
+    `)
+    );
+  });
 });
 
 function createOption(cy: string, playwright: string) {

@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import ts, { Expression } from 'typescript';
 import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES } from './playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
@@ -47,6 +47,14 @@ export type Creator = {
   parameter(name: string): ts.ParameterDeclaration;
   objectLiteral(propertyAssignments: ts.PropertyAssignment[]): ts.Expression | ts.ObjectLiteralExpression;
   property(status: string, statusCode: ts.NumericLiteral | ts.Identifier): ts.PropertyAssignment;
+  ifStatement(expression: Expression, thenStatement: ts.Statement, elseStatement?: ts.Statement): ts.Statement;
+  token(kind: ts.SyntaxKind.ExclamationEqualsEqualsToken): ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>;
+  return(value?: ts.Expression): ts.ReturnStatement;
+  binaryExpression(
+    expression: ts.CallExpression,
+    token: ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>,
+    stringLiteral: ts.StringLiteral
+  ): ts.Expression;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
@@ -72,6 +80,10 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     parameter: createParameter(factory),
     objectLiteral: createObjectLiteral(factory),
     property: createProperty(factory),
+    ifStatement: createIfStatement(factory),
+    token: createToken(factory),
+    return: createReturn(factory),
+    binaryExpression: createBinaryExpression(factory),
   };
 };
 
@@ -289,5 +301,33 @@ function createObjectLiteral(factory: ts.NodeFactory) {
 function createProperty(factory: ts.NodeFactory) {
   return function (name: string, value: ts.NumericLiteral | ts.Identifier) {
     return factory.createPropertyAssignment(name, value);
+  };
+}
+
+function createIfStatement(factory: ts.NodeFactory) {
+  return function (expression: Expression, thenStatement: ts.Statement, elseStatement?: ts.Statement) {
+    return factory.createIfStatement(expression, thenStatement, elseStatement);
+  };
+}
+
+function createToken(factory: ts.NodeFactory) {
+  return function (kind: ts.SyntaxKind.ExclamationEqualsEqualsToken) {
+    return factory.createToken(kind);
+  };
+}
+
+function createReturn(factory: ts.NodeFactory) {
+  return function (value?: ts.Expression) {
+    return factory.createReturnStatement(value);
+  };
+}
+
+function createBinaryExpression(factory: ts.NodeFactory) {
+  return function (
+    expression: ts.CallExpression,
+    token: ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>,
+    stringLiteral: ts.StringLiteral
+  ) {
+    return factory.createBinaryExpression(expression, token, stringLiteral);
   };
 }
