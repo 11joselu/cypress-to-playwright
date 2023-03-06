@@ -1,5 +1,5 @@
 import ts, { Expression } from 'typescript';
-import { PLAYWRIGHT_PAGE_NAME, COMMANDS, VALIDATION, LOCATOR_PROPERTIES, ROUTE } from './playwright.js';
+import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from './playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 
@@ -350,6 +350,10 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
   const objectLiteralExpression = createObjectLiteral(factory);
   const propertyAssignment = createProperty(factory);
   const parameterDeclaration = createParameter(factory);
+  const ifStatement = createIfStatement(factory);
+  const binaryExpression = createBinaryExpression(factory);
+  const token = createToken(factory);
+  const returnStatement = createReturn(factory);
 
   return function createRouteIntercept(node: ts.CallExpression) {
     const method = node.arguments.find((arg) => isRest(arg));
@@ -369,78 +373,48 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
     }) as ts.PropertyAssignment;
     const body = identifier(bodyProp.initializer.getText());
     const statusCode = numericLiteral(statusCodeProp.initializer.getText());
+    const bodyExpressions = [
+      statement(
+        callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
+          objectLiteralExpression([propertyAssignment(ROUTE.STATUS, statusCode), propertyAssignment(ROUTE.BODY, body)]),
+        ])
+      ),
+    ];
 
     if (method) {
-      const ifStatement = createIfStatement(factory);
-      const binaryExpression = createBinaryExpression(factory);
-      const token = createToken(factory);
-      const returnStatement = createReturn(factory);
-      return callExpression(propertyAccessExpression(identifier(PLAYWRIGHT_PAGE_NAME), ROUTE.NAME), undefined, [
-        stringLiteral(url),
-        arrowFunction(
-          block([
-            ifStatement(
-              binaryExpression(
-                callExpression(
-                  propertyAccessExpression(
-                    callExpression(
-                      propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.REQUEST)),
-                      undefined,
-                      []
-                    ),
-                    identifier(ROUTE.METHOD)
-                  ),
-                  undefined,
-                  []
-                ),
-                token(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-                stringLiteral(fixString(method.getFullText()))
-              ),
-              block([
-                statement(
-                  callExpression(
-                    propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.FALLBACK)),
-                    undefined,
-                    []
-                  )
-                ),
-                returnStatement(undefined),
-              ]),
-              undefined
-            ),
-            statement(
-              callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
-                objectLiteralExpression([
-                  propertyAssignment(ROUTE.STATUS, statusCode),
-                  propertyAssignment(ROUTE.BODY, body),
-                ]),
-              ])
-            ),
-          ]),
-          [parameterDeclaration(ROUTE.NAME)]
+      const requestCallExpression = callExpression(
+        propertyAccessExpression(
+          callExpression(propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.REQUEST)), undefined, []),
+          identifier(ROUTE.METHOD)
         ),
-      ]);
+        undefined,
+        []
+      );
+      const bodyIfStatement = ifStatement(
+        binaryExpression(
+          requestCallExpression,
+          token(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+          stringLiteral(fixString(method.getFullText()))
+        ),
+        block([
+          statement(
+            callExpression(propertyAccessExpression(identifier(ROUTE.NAME), identifier(ROUTE.FALLBACK)), undefined, [])
+          ),
+          returnStatement(undefined),
+        ]),
+        undefined
+      );
+
+      bodyExpressions.unshift(bodyIfStatement);
     }
 
     return callExpression(propertyAccessExpression(identifier(PLAYWRIGHT_PAGE_NAME), ROUTE.NAME), undefined, [
       stringLiteral(url),
-      arrowFunction(
-        block([
-          statement(
-            callExpression(propertyAccessExpression(identifier(ROUTE.NAME), ROUTE.FULFILL), undefined, [
-              objectLiteralExpression([
-                propertyAssignment(ROUTE.STATUS, statusCode),
-                propertyAssignment(ROUTE.BODY, body),
-              ]),
-            ])
-          ),
-        ]),
-        [parameterDeclaration(ROUTE.NAME)]
-      ),
+      arrowFunction(block(bodyExpressions), [parameterDeclaration(ROUTE.NAME)]),
     ]);
   };
 }
 
 function fixString(str: string) {
-  return str.replace(/"|'/g, '');
+  return str.replace(/["']/g, '');
 }
