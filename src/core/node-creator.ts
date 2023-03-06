@@ -44,17 +44,6 @@ export type Creator = {
     propertyTypeArgs?: ts.NodeArray<ts.TypeNode> | undefined,
     propertyArgs?: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
-  parameter(name: string): ts.ParameterDeclaration;
-  objectLiteral(propertyAssignments: ts.PropertyAssignment[]): ts.Expression | ts.ObjectLiteralExpression;
-  property(status: string, statusCode: ts.NumericLiteral | ts.Identifier): ts.PropertyAssignment;
-  ifStatement(expression: Expression, thenStatement: ts.Statement, elseStatement?: ts.Statement): ts.Statement;
-  token(kind: ts.SyntaxKind.ExclamationEqualsEqualsToken): ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>;
-  return(value?: ts.Expression): ts.ReturnStatement;
-  binaryExpression(
-    expression: ts.CallExpression,
-    token: ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>,
-    stringLiteral: ts.StringLiteral
-  ): ts.Expression;
   playwrightIntercept(node: ts.CallExpression): ts.CallExpression;
 };
 
@@ -78,13 +67,6 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     expect: createPlaywrightExpect(factory),
     playwrightCommand: createPlaywrightCommand(factory),
     playwrightLocatorProperty: createPlaywrightLocatorProperty(factory),
-    parameter: createParameter(factory),
-    objectLiteral: createObjectLiteral(factory),
-    property: createProperty(factory),
-    ifStatement: createIfStatement(factory),
-    token: createToken(factory),
-    return: createReturn(factory),
-    binaryExpression: createBinaryExpression(factory),
     playwrightIntercept: createPlaywrightIntercept(factory),
   };
 };
