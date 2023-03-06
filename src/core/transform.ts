@@ -68,7 +68,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       }
 
       if (isCy.intercept(expressionName)) {
-        return createRouteIntercept(call, creator);
+        return creator.playwrightIntercept(call);
       }
 
       return node;
@@ -141,88 +141,6 @@ function createPlaywrightCommand(
     )
   );
 }
-
-function createRouteIntercept(node: ts.CallExpression, creator: Creator) {
-  const method = node.arguments.find((arg) => isRest(arg));
-  const urlArg = node.arguments.find((arg) => !isRest(arg) && !ts.isObjectLiteralExpression(arg)) as ts.StringLiteral;
-  // Convert Cypress-style URL pattern to RegExp
-  const url = urlArg.text.replace(/\*\*/g, '.*');
-  const optionsArg = node.arguments.find(ts.isObjectLiteralExpression) as ts.ObjectLiteralExpression;
-  const bodyProp = optionsArg.properties.find((prop) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return ts.isIdentifier(prop.name) && prop.name.text === 'body';
-  }) as ts.PropertyAssignment;
-  const statusCodeProp = optionsArg.properties.find((prop) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return ts.isIdentifier(prop.name) && prop.name.text === 'statusCode';
-  }) as ts.PropertyAssignment;
-  const body = creator.identifier(bodyProp.initializer.getText());
-  const statusCode = creator.numeric(statusCodeProp.initializer.getText());
-
-  if (method) {
-    return creator.callExpression(creator.propertyAccessExpression(creator.identifier('page'), 'route'), undefined, [
-      creator.string(url),
-      creator.arrowFunction(
-        creator.block([
-          creator.ifStatement(
-            creator.binaryExpression(
-              creator.callExpression(
-                creator.propertyAccessExpression(
-                  creator.callExpression(
-                    creator.propertyAccessExpression(creator.identifier('route'), creator.identifier('request')),
-                    undefined,
-                    []
-                  ),
-                  creator.identifier('method')
-                ),
-                undefined,
-                []
-              ),
-              creator.token(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-              creator.string(fixString(method.getFullText()))
-            ),
-            creator.block([
-              creator.statement(
-                creator.callExpression(
-                  creator.propertyAccessExpression(creator.identifier('route'), creator.identifier('fallback')),
-                  undefined,
-                  []
-                )
-              ),
-              creator.return(undefined),
-            ]),
-            undefined
-          ),
-          creator.statement(
-            creator.callExpression(
-              creator.propertyAccessExpression(creator.identifier('route'), 'fulfill'),
-              undefined,
-              [creator.objectLiteral([creator.property('status', statusCode), creator.property('body', body)])]
-            )
-          ),
-        ]),
-        [creator.parameter('route')]
-      ),
-    ]);
-  }
-
-  return creator.callExpression(creator.propertyAccessExpression(creator.identifier('page'), 'route'), undefined, [
-    creator.string(url),
-    creator.arrowFunction(
-      creator.block([
-        creator.statement(
-          creator.callExpression(creator.propertyAccessExpression(creator.identifier('route'), 'fulfill'), undefined, [
-            creator.objectLiteral([creator.property('status', statusCode), creator.property('body', body)]),
-          ])
-        ),
-      ]),
-      [creator.parameter('route')]
-    ),
-  ]);
-}
-
 function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   const propertyExpression = call.expression as ts.PropertyAccessExpression;
   const callArgs = call.arguments.map((arg) => fixString(arg.getText()));
@@ -387,11 +305,6 @@ function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpressi
 
   return propertyExpression.parent as ts.CallExpression;
 }
-
-function isRest(arg: ts.Expression) {
-  return ['POST', 'GET', 'PUT', 'PATCH', 'DELETE'].includes(fixString(arg.getText().toUpperCase()));
-}
-
 function fixString(str: string) {
   return str.replace(/"|'/g, '');
 }

@@ -55,6 +55,7 @@ export type Creator = {
     token: ts.Token<ts.SyntaxKind.ExclamationEqualsEqualsToken>,
     stringLiteral: ts.StringLiteral
   ): ts.Expression;
+  playwrightIntercept(node: ts.CallExpression): ts.CallExpression;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
@@ -84,6 +85,7 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     token: createToken(factory),
     return: createReturn(factory),
     binaryExpression: createBinaryExpression(factory),
+    playwrightIntercept: createPlaywrightIntercept(factory),
   };
 };
 
@@ -330,4 +332,121 @@ function createBinaryExpression(factory: ts.NodeFactory) {
   ) {
     return factory.createBinaryExpression(expression, token, stringLiteral);
   };
+}
+
+function createPlaywrightIntercept(factory: ts.NodeFactory) {
+  function isRest(arg: ts.Expression) {
+    return ['POST', 'GET', 'PUT', 'PATCH', 'DELETE'].includes(fixString(arg.getText().toUpperCase()));
+  }
+
+  return function createRouteIntercept(node: ts.CallExpression) {
+    const method = node.arguments.find((arg) => isRest(arg));
+    const urlArg = node.arguments.find((arg) => !isRest(arg) && !ts.isObjectLiteralExpression(arg)) as ts.StringLiteral;
+    // Convert Cypress-style URL pattern to RegExp
+    const url = urlArg.text.replace(/\*\*/g, '.*');
+    const optionsArg = node.arguments.find(ts.isObjectLiteralExpression) as ts.ObjectLiteralExpression;
+    const bodyProp = optionsArg.properties.find((prop) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return ts.isIdentifier(prop.name) && prop.name.text === 'body';
+    }) as ts.PropertyAssignment;
+    const statusCodeProp = optionsArg.properties.find((prop) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return ts.isIdentifier(prop.name) && prop.name.text === 'statusCode';
+    }) as ts.PropertyAssignment;
+    const body = createIdentifier(factory)(bodyProp.initializer.getText());
+    const statusCode = createNumericLiteral(factory)(statusCodeProp.initializer.getText());
+
+    if (method) {
+      return createCallExpression(factory)(
+        createPropertyAccessExpression(factory)(createIdentifier(factory)('page'), 'route'),
+        undefined,
+        [
+          createStringLiteral(factory)(url),
+          createArrowFunction(factory)(
+            createBlock(factory)([
+              createIfStatement(factory)(
+                createBinaryExpression(factory)(
+                  createCallExpression(factory)(
+                    createPropertyAccessExpression(factory)(
+                      createCallExpression(factory)(
+                        createPropertyAccessExpression(factory)(
+                          createIdentifier(factory)('route'),
+                          createIdentifier(factory)('request')
+                        ),
+                        undefined,
+                        []
+                      ),
+                      createIdentifier(factory)('method')
+                    ),
+                    undefined,
+                    []
+                  ),
+                  createToken(factory)(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+                  createStringLiteral(factory)(fixString(method.getFullText()))
+                ),
+                createBlock(factory)([
+                  createStatement(factory)(
+                    createCallExpression(factory)(
+                      createPropertyAccessExpression(factory)(
+                        createIdentifier(factory)('route'),
+                        createIdentifier(factory)('fallback')
+                      ),
+                      undefined,
+                      []
+                    )
+                  ),
+                  createReturn(factory)(undefined),
+                ]),
+                undefined
+              ),
+              createStatement(factory)(
+                createCallExpression(factory)(
+                  createPropertyAccessExpression(factory)(createIdentifier(factory)('route'), 'fulfill'),
+                  undefined,
+                  [
+                    createObjectLiteral(factory)([
+                      createProperty(factory)('status', statusCode),
+                      createProperty(factory)('body', body),
+                    ]),
+                  ]
+                )
+              ),
+            ]),
+            [createParameter(factory)('route')]
+          ),
+        ]
+      );
+    }
+
+    return createCallExpression(factory)(
+      createPropertyAccessExpression(factory)(createIdentifier(factory)('page'), 'route'),
+      undefined,
+      [
+        createStringLiteral(factory)(url),
+        createArrowFunction(factory)(
+          createBlock(factory)([
+            createStatement(factory)(
+              createCallExpression(factory)(
+                createPropertyAccessExpression(factory)(createIdentifier(factory)('route'), 'fulfill'),
+                undefined,
+                [
+                  createObjectLiteral(factory)([
+                    createProperty(factory)('status', statusCode),
+                    createProperty(factory)('body', body),
+                  ]),
+                ]
+              )
+            ),
+          ]),
+          [createParameter(factory)('route')]
+        ),
+      ]
+    );
+  };
+}
+
+function fixString(str: string) {
+  return str.replace(/"|'/g, '');
 }
