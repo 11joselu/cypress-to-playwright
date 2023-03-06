@@ -339,6 +339,18 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
     return ['POST', 'GET', 'PUT', 'PATCH', 'DELETE'].includes(fixString(arg.getText().toUpperCase()));
   }
 
+  const stringLiteral = createStringLiteral(factory);
+  const identifier = createIdentifier(factory);
+  const numericLiteral = createNumericLiteral(factory);
+  const propertyAccessExpression = createPropertyAccessExpression(factory);
+  const callExpression = createCallExpression(factory);
+  const arrowFunction = createArrowFunction(factory);
+  const block = createBlock(factory);
+  const statement = createStatement(factory);
+  const objectLiteralExpression = createObjectLiteral(factory);
+  const propertyAssignment = createProperty(factory);
+  const parameterDeclaration = createParameter(factory);
+
   return function createRouteIntercept(node: ts.CallExpression) {
     const method = node.arguments.find((arg) => isRest(arg));
     const urlArg = node.arguments.find((arg) => !isRest(arg) && !ts.isObjectLiteralExpression(arg)) as ts.StringLiteral;
@@ -355,95 +367,63 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
       // @ts-ignore
       return ts.isIdentifier(prop.name) && prop.name.text === 'statusCode';
     }) as ts.PropertyAssignment;
-    const body = createIdentifier(factory)(bodyProp.initializer.getText());
-    const statusCode = createNumericLiteral(factory)(statusCodeProp.initializer.getText());
+    const body = identifier(bodyProp.initializer.getText());
+    const statusCode = numericLiteral(statusCodeProp.initializer.getText());
 
     if (method) {
-      return createCallExpression(factory)(
-        createPropertyAccessExpression(factory)(createIdentifier(factory)('page'), 'route'),
-        undefined,
-        [
-          createStringLiteral(factory)(url),
-          createArrowFunction(factory)(
-            createBlock(factory)([
-              createIfStatement(factory)(
-                createBinaryExpression(factory)(
-                  createCallExpression(factory)(
-                    createPropertyAccessExpression(factory)(
-                      createCallExpression(factory)(
-                        createPropertyAccessExpression(factory)(
-                          createIdentifier(factory)('route'),
-                          createIdentifier(factory)('request')
-                        ),
-                        undefined,
-                        []
-                      ),
-                      createIdentifier(factory)('method')
-                    ),
-                    undefined,
-                    []
+      const ifStatement = createIfStatement(factory);
+      const binaryExpression = createBinaryExpression(factory);
+      const token = createToken(factory);
+      const returnStatement = createReturn(factory);
+      return callExpression(propertyAccessExpression(identifier('page'), 'route'), undefined, [
+        stringLiteral(url),
+        arrowFunction(
+          block([
+            ifStatement(
+              binaryExpression(
+                callExpression(
+                  propertyAccessExpression(
+                    callExpression(propertyAccessExpression(identifier('route'), identifier('request')), undefined, []),
+                    identifier('method')
                   ),
-                  createToken(factory)(ts.SyntaxKind.ExclamationEqualsEqualsToken),
-                  createStringLiteral(factory)(fixString(method.getFullText()))
-                ),
-                createBlock(factory)([
-                  createStatement(factory)(
-                    createCallExpression(factory)(
-                      createPropertyAccessExpression(factory)(
-                        createIdentifier(factory)('route'),
-                        createIdentifier(factory)('fallback')
-                      ),
-                      undefined,
-                      []
-                    )
-                  ),
-                  createReturn(factory)(undefined),
-                ]),
-                undefined
-              ),
-              createStatement(factory)(
-                createCallExpression(factory)(
-                  createPropertyAccessExpression(factory)(createIdentifier(factory)('route'), 'fulfill'),
                   undefined,
-                  [
-                    createObjectLiteral(factory)([
-                      createProperty(factory)('status', statusCode),
-                      createProperty(factory)('body', body),
-                    ]),
-                  ]
-                )
+                  []
+                ),
+                token(ts.SyntaxKind.ExclamationEqualsEqualsToken),
+                stringLiteral(fixString(method.getFullText()))
               ),
-            ]),
-            [createParameter(factory)('route')]
-          ),
-        ]
-      );
-    }
-
-    return createCallExpression(factory)(
-      createPropertyAccessExpression(factory)(createIdentifier(factory)('page'), 'route'),
-      undefined,
-      [
-        createStringLiteral(factory)(url),
-        createArrowFunction(factory)(
-          createBlock(factory)([
-            createStatement(factory)(
-              createCallExpression(factory)(
-                createPropertyAccessExpression(factory)(createIdentifier(factory)('route'), 'fulfill'),
-                undefined,
-                [
-                  createObjectLiteral(factory)([
-                    createProperty(factory)('status', statusCode),
-                    createProperty(factory)('body', body),
-                  ]),
-                ]
-              )
+              block([
+                statement(
+                  callExpression(propertyAccessExpression(identifier('route'), identifier('fallback')), undefined, [])
+                ),
+                returnStatement(undefined),
+              ]),
+              undefined
+            ),
+            statement(
+              callExpression(propertyAccessExpression(identifier('route'), 'fulfill'), undefined, [
+                objectLiteralExpression([propertyAssignment('status', statusCode), propertyAssignment('body', body)]),
+              ])
             ),
           ]),
-          [createParameter(factory)('route')]
+          [parameterDeclaration('route')]
         ),
-      ]
-    );
+      ]);
+    }
+
+    return callExpression(propertyAccessExpression(identifier('page'), 'route'), undefined, [
+      stringLiteral(url),
+      arrowFunction(
+        block([
+          statement(
+            callExpression(propertyAccessExpression(identifier('route'), 'fulfill'), undefined, [
+              objectLiteralExpression([propertyAssignment('status', statusCode), propertyAssignment('body', body)]),
+            ])
+          ),
+        ]),
+        [parameterDeclaration('route')]
+      ),
+    ]);
   };
 }
 
