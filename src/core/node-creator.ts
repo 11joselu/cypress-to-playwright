@@ -44,6 +44,9 @@ export type Creator = {
     propertyTypeArgs?: ts.NodeArray<ts.TypeNode> | undefined,
     propertyArgs?: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
+  parameter(name: string): ts.ParameterDeclaration;
+  objectLiteral(propertyAssignments: ts.PropertyAssignment[]): ts.Expression | ts.ObjectLiteralExpression;
+  property(status: string, statusCode: ts.NumericLiteral | ts.Identifier): ts.PropertyAssignment;
 };
 
 export const nodeCreator = (factory: ts.NodeFactory): Creator => {
@@ -66,6 +69,9 @@ export const nodeCreator = (factory: ts.NodeFactory): Creator => {
     expect: createPlaywrightExpect(factory),
     playwrightCommand: createPlaywrightCommand(factory),
     playwrightLocatorProperty: createPlaywrightLocatorProperty(factory),
+    parameter: createParameter(factory),
+    objectLiteral: createObjectLiteral(factory),
+    property: createProperty(factory),
   };
 };
 
@@ -265,5 +271,23 @@ function createPlaywrightLocatorProperty(factory: ts.NodeFactory) {
       propertyTypeArgs,
       propertyArgs
     );
+  };
+}
+
+function createParameter(factory: ts.NodeFactory) {
+  return function (name: string) {
+    return factory.createParameterDeclaration(undefined, undefined, createIdentifier(factory)(name));
+  };
+}
+
+function createObjectLiteral(factory: ts.NodeFactory) {
+  return function (properties: ts.PropertyAssignment[]) {
+    return factory.createObjectLiteralExpression(properties);
+  };
+}
+
+function createProperty(factory: ts.NodeFactory) {
+  return function (name: string, value: ts.NumericLiteral | ts.Identifier) {
+    return factory.createPropertyAssignment(name, value);
   };
 }

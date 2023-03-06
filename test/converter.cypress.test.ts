@@ -148,6 +148,37 @@ describe('Converter: Cypress validation with .should', () => {
   });
 });
 
+describe('Intercept', () => {
+  it('Migrate cy.intercept with url and response to page.route', () => {
+    const result = index(`
+    cy.intercept('http://localhost/an-url/**', {
+      body: {
+        code: 'API_011',
+        error: true,
+        message: 'Stubbed response',
+      },
+      statusCode: 400,
+    });
+  `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      page.route('http://localhost/an-url/.*', route => {
+        route.fulfill({
+          status: 400,
+          body: {
+            code: 'API_011',
+            error: true,
+            message: 'Stubbed response',
+          },
+        });
+      });
+    `)
+    );
+  });
+});
+
 function createOption(cy: string, playwright: string) {
   return { cy, playwright };
 }

@@ -44,6 +44,9 @@ export const isCy = {
   clear(expressionName: string) {
     return isFirstOfLastWithCommand(expressionName, '.clear');
   },
+  intercept(expressionName: string) {
+    return 'cy.intercept' === expressionName;
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;
