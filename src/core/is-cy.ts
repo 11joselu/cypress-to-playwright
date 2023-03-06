@@ -20,6 +20,27 @@ export const isCy = {
   isLast(expressionName: string) {
     return expressionName.startsWith('cy.get.last');
   },
+  type(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.type');
+  },
+  check(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.check');
+  },
+  uncheck(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.uncheck');
+  },
+  select(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.select');
+  },
+  scrollTo(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.scrollTo');
+  },
+  scrollIntoView(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.scrollIntoView');
+  },
+  dblclick(expressionName: string) {
+    return isFirstOfLastWithCommand(expressionName, '.dblclick');
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;
@@ -51,27 +72,6 @@ export const isCy = {
     isNegativeValidation(expressionName: string) {
       return expressionName.startsWith('not.');
     },
-  },
-  type(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.type');
-  },
-  check(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.check');
-  },
-  uncheck(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.uncheck');
-  },
-  select(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.select');
-  },
-  scrollTo(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.scrollTo');
-  },
-  scrollIntoView(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.scrollIntoView');
-  },
-  dblclick(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.dblclick');
   },
 };
 
