@@ -295,7 +295,7 @@ function getBodyOfCall(callExpression: ts.CallExpression, creator: Creator): ts.
 
 function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpression): ts.CallExpression {
   const expressionName = getExpressionName(propertyExpression);
-  if ('cy.get' === expressionName) {
+  if (isCy.get(expressionName)) {
     return propertyExpression.parent as ts.CallExpression;
   }
 

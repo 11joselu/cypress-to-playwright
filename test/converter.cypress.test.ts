@@ -59,7 +59,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
   });
 });
 
-describe('Converter: Cypress validation with .should', () => {
+describe('Converter: Cypress validation with .should', { concurrency: true }, () => {
   [
     createOption('should("be.visible")', 'toBeVisible()'),
     createOption('should("have.length", 2)', 'toHaveCount(2)'),
@@ -148,7 +148,7 @@ describe('Converter: Cypress validation with .should', () => {
   });
 });
 
-describe('Intercept', () => {
+describe('Intercept', { concurrency: true }, () => {
   it('Migrate cy.intercept with url and response to page.route', () => {
     const result = index(`
     cy.intercept('http://localhost/an-url/**', {
