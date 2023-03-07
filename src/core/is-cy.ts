@@ -9,13 +9,13 @@ export const isCy = {
     return 'cy.get' === expressionName;
   },
   contains(expressionName: string) {
-    return expressionName.startsWith('cy.contains');
+    return 'cy.contains' === expressionName;
   },
   click(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.click');
+    return ['cy.get.click', 'cy.get.first.click', 'cy.get.last.click', 'cy.contains.click'].includes(expressionName);
   },
   should(expressionName: string) {
-    return expressionName.endsWith('.should');
+    return ['cy.get.should', 'cy.get.first.should', 'cy.get.last.should'].includes(expressionName);
   },
   isFirst(expressionName: string) {
     return expressionName.startsWith('cy.get.first');
@@ -23,29 +23,89 @@ export const isCy = {
   isLast(expressionName: string) {
     return expressionName.startsWith('cy.get.last');
   },
+  startWithContains(expressionName: string) {
+    const strings = expressionName.split('.');
+    return this.contains(strings[0] + '.' + strings[1]);
+  },
   type(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.type');
+    return [
+      'cy.get.type',
+      'cy.get.first.type',
+      'cy.get.last.type',
+      'cy.contains.type',
+      'cy.contains.first.type',
+      'cy.contains.last.type',
+    ].includes(expressionName);
   },
   check(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.check');
+    return [
+      'cy.get.check',
+      'cy.get.first.check',
+      'cy.get.last.check',
+      'cy.contains.check',
+      'cy.contains.first.check',
+      'cy.contains.last.check',
+    ].includes(expressionName);
   },
   uncheck(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.uncheck');
+    return [
+      'cy.get.uncheck',
+      'cy.get.first.uncheck',
+      'cy.get.last.uncheck',
+      'cy.contains.uncheck',
+      'cy.contains.first.uncheck',
+      'cy.contains.last.uncheck',
+    ].includes(expressionName);
   },
   select(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.select');
+    return [
+      'cy.get.select',
+      'cy.get.first.select',
+      'cy.get.last.select',
+      'cy.contains.select',
+      'cy.contains.first.select',
+      'cy.contains.last.select',
+    ].includes(expressionName);
   },
   scrollTo(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.scrollTo');
+    return [
+      'cy.get.scrollTo',
+      'cy.get.first.scrollTo',
+      'cy.get.last.scrollTo',
+      'cy.contains.scrollTo',
+      'cy.contains.first.scrollTo',
+      'cy.contains.last.scrollTo',
+    ].includes(expressionName);
   },
   scrollIntoView(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.scrollIntoView');
+    return [
+      'cy.get.scrollIntoView',
+      'cy.get.first.scrollIntoView',
+      'cy.get.last.scrollIntoView',
+      'cy.contains.scrollIntoView',
+      'cy.contains.first.scrollIntoView',
+      'cy.contains.last.scrollIntoView',
+    ].includes(expressionName);
   },
   dblclick(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.dblclick');
+    return [
+      'cy.get.dblclick',
+      'cy.get.first.dblclick',
+      'cy.get.last.dblclick',
+      'cy.contains.dblclick',
+      'cy.contains.first.dblclick',
+      'cy.contains.last.dblclick',
+    ].includes(expressionName);
   },
   clear(expressionName: string) {
-    return isFirstOfLastWithCommand(expressionName, '.clear');
+    return [
+      'cy.get.clear',
+      'cy.get.first.clear',
+      'cy.get.last.clear',
+      'cy.contains.clear',
+      'cy.contains.first.clear',
+      'cy.contains.last.clear',
+    ].includes(expressionName);
   },
   intercept(expressionName: string) {
     return 'cy.intercept' === expressionName;
@@ -82,20 +142,4 @@ export const isCy = {
       return expressionName.startsWith('not.');
     },
   },
-
-  isCyWithPropertyAccess: isCyWithPropertyAccess,
 };
-
-function isCyWithPropertyAccess(expressionName: string) {
-  return (
-    isCy.get(expressionName) ||
-    isCy.isFirst(expressionName) ||
-    isCy.isLast(expressionName) ||
-    isCy.contains(expressionName)
-  );
-}
-
-function isFirstOfLastWithCommand(expressionName: string, searchValue: string) {
-  const cleanedExpression = expressionName.replace(searchValue, '');
-  return isCyWithPropertyAccess(cleanedExpression) && expressionName.endsWith(searchValue);
-}
