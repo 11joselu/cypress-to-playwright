@@ -1,9 +1,8 @@
-import { describe, it } from 'node:test';
 import * as assert from 'assert';
 import { index } from '../src/index.js';
 import { format } from './format.js';
 
-describe('Converter: Cypress commands', { concurrency: true }, () => {
+describe('Converter: Cypress commands', () => {
   it('Transform cy.visit by awaited page.goto', () => {
     const result = index('cy.visit("http://localhost")');
 
@@ -57,7 +56,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
       assert.strictEqual(format(result), format(`cy.fn("selector").${option.cy}`));
     });
 
-    it(`Transform cy.contains().${option.cy} by  cy.contains().${option.playwright}`, { only: true }, () => {
+    it(`Transform cy.contains().${option.cy} by  cy.contains().${option.playwright}`, () => {
       const result = index(`cy.contains("aText").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("text=aText").${option.playwright}`));
@@ -65,7 +64,7 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
   });
 });
 
-describe('Converter: Cypress validation with .should', { concurrency: true }, () => {
+describe('Converter: Cypress validation with .should', () => {
   [
     createOption('should("be.visible")', 'toBeVisible()'),
     createOption('should("have.length", 2)', 'toHaveCount(2)'),
@@ -154,7 +153,7 @@ describe('Converter: Cypress validation with .should', { concurrency: true }, ()
   });
 });
 
-describe('Intercept', { concurrency: true }, () => {
+describe('Intercept', () => {
   it('Migrate cy.intercept with url and response to page.route', () => {
     const result = index(`
     cy.intercept('http://localhost/an-url/**', {
@@ -184,7 +183,7 @@ describe('Intercept', { concurrency: true }, () => {
     );
   });
 
-  it('Migrate cy.intercept with METHOD POST, URL and response to page.route', { only: true }, () => {
+  it('Migrate cy.intercept with METHOD POST, URL and response to page.route', () => {
     const result = index(`
       cy.intercept('POST', 'http://localhost/an-url/**', {
         body: {
@@ -217,7 +216,7 @@ describe('Intercept', { concurrency: true }, () => {
     );
   });
 
-  it('Migrate cy.intercept with METHOD GET, URL and response to page.route', { only: true }, () => {
+  it('Migrate cy.intercept with METHOD GET, URL and response to page.route', () => {
     const result = index(`
       cy.intercept('GET', 'http://localhost/an-url/**', {
         body: {

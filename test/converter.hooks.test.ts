@@ -1,9 +1,8 @@
-import { describe, it } from 'node:test';
 import * as assert from 'assert';
 import { index } from '../src/index.js';
 import { format } from './format.js';
 
-describe('Converter: Test Hooks', { concurrency: true }, () => {
+describe('Converter: Test Hooks', () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {
     const result = index(`it('test_case', () => {});`);
 

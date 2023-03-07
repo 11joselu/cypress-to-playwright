@@ -23,7 +23,7 @@
     "postinstall": "git config --local core.hooksPath .githooks/",
     "lint": "eslint **/*.ts --fix",
     "lint-staged": "lint-staged",
-    "test": "tsc --noEmit && node --loader tsx --no-warnings --test-reporter=spec --test test/*.test.ts",
+    "test": "mocha test/**/*.test.ts",
     "test:integration": "./test/integration.sh",
     "binary": "tsc --noEmit && node --loader tsx --no-warnings src/bin/cypress-to-playwright.ts",
     "build": "tsc -p ./tsconfig.json",
@@ -46,6 +46,7 @@
   },
   "homepage": "https://github.com/11joselu/cypress-to-playwright#readme",
   "devDependencies": {
+    "@types/mocha": "10.0.1",
     "@types/node": "18.14.2",
     "@types/prettier": "2.7.2",
     "@typescript-eslint/eslint-plugin": "5.54.0",
@@ -54,7 +55,9 @@
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-prettier": "4.2.1",
     "lint-staged": "13.1.2",
+    "mocha": "10.2.0",
     "prettier": "2.8.4",
+    "ts-node": "10.9.1",
     "tsx": "3.12.3"
   },
   "dependencies": {
