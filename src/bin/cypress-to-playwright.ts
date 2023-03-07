@@ -4,7 +4,7 @@ import { basename, dirname, join, resolve, sep } from 'path';
 import pc from 'picocolors';
 import ora, { Ora } from 'ora';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { index } from '../index.js';
+import { index as converter } from '../index.js';
 
 const args = process.argv.slice(2);
 const [directory] = args;
@@ -60,7 +60,7 @@ function migrateFiles(files: string[], spinner: Ora, fromDirectory: string, outp
   files.forEach((file) => {
     const content = readFileSync(resolve(file), 'utf-8');
     try {
-      const result = index(content);
+      const result = converter(content);
       migrated += 1;
       spinner.succeed(`File ${basename(file)} migrated`);
       const writeInFile = join(outputDir, getFileWithPath(fromDirectory, file));
