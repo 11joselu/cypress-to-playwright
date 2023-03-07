@@ -23,7 +23,7 @@ export const isCy = {
   isLast(expressionName: string) {
     return expressionName.startsWith('cy.get.last');
   },
-  startWithContains(expressionName: string) {
+  selectByContains(expressionName: string) {
     const strings = expressionName.split('.');
     return this.contains(strings[0] + '.' + strings[1]);
   },

@@ -132,7 +132,7 @@ function createPlaywrightCommand(
 
   let propertyAccessArguments = argumentsOfPropertyAccessExpression.propertyAccessArguments;
 
-  if (isCy.startWithContains(expressionName)) {
+  if (isCy.selectByContains(expressionName)) {
     propertyAccessArguments = propertyAccessArguments.map((item) => {
       if (ts.isStringLiteral(item)) return creator.string(`text=${fixString(item.getText())}`);
       return item;
