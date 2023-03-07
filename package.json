@@ -62,7 +62,6 @@
   },
   "dependencies": {
     "glob": "9.2.1",
-    "ora": "6.1.2",
     "picocolors": "1.0.0",
     "typescript": "4.9.5"
   }

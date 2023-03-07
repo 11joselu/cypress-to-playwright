@@ -2,42 +2,38 @@
 import { globSync } from 'glob';
 import { basename, dirname, join, resolve, sep } from 'path';
 import pc from 'picocolors';
-import ora, { Ora } from 'ora';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { index as converter } from '../index.js';
 
-const args = process.argv.slice(2);
-const [directory] = args;
+type File = {
+  path: string;
+  code: string;
+  newCode: string | null;
+};
 
-execute(directory);
+const args = process.argv.slice(2);
+const [readFromDirectory] = args;
+
+execute(readFromDirectory);
 
 function execute(directory: string) {
-  const spinner = createSpinner();
-  validateDirectory(directory, spinner);
+  validateDirectory(directory);
   const outputDir = resolve(directory, '..', 'playwright');
   mkdir(outputDir);
 
-  spinner.info(`Reading files from: ${directory}`);
-  const files = getFiles(directory);
-  spinner.start(pc.blue('Migration start'));
-  const { migrated, notMigrated } = migrateFiles(files, spinner, directory, outputDir);
+  const result = getFiles(directory).map(readCyCode).map(migrateCodeToPlaywright);
+  result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
-  printSummary(migrated, notMigrated);
-  spinner.stop();
-  showNextStep(outputDir, spinner);
+  const migrated = result.filter((p) => p.newCode);
+  const notMigrated = result.filter((p) => !p.newCode).map((p) => p.path);
+  printSummary(migrated.length, notMigrated);
+
+  showNextStep(outputDir);
 }
 
-function createSpinner() {
-  return ora({
-    discardStdin: false,
-    text: '',
-    spinner: 'squareCorners',
-  });
-}
-
-function validateDirectory(directory: string, spinner: Ora) {
+function validateDirectory(directory: string) {
   if (!directory) {
-    spinner.fail(pc.red('Cypress directory is required'));
+    console.error(pc.red('Cypress readFromDirectory is required'));
     process.exit(1);
   }
 }
@@ -54,27 +50,36 @@ function getFiles(directory: string) {
   );
 }
 
-function migrateFiles(files: string[], spinner: Ora, fromDirectory: string, outputDir: string) {
-  let migrated = 0;
-  const notMigrated: string[] = [];
-  files.forEach((file) => {
-    const content = readFileSync(resolve(file), 'utf-8');
-    try {
-      const result = converter(content);
-      migrated += 1;
-      spinner.succeed(`File ${basename(file)} migrated`);
-      const writeInFile = join(outputDir, getFileWithPath(fromDirectory, file));
-      writeContentInFile(writeInFile, result);
-    } catch (e) {
-      spinner.fail(pc.red(`There was an error migrating ${basename(file)}:\n\tError: ${(e as Error).message}`));
-      notMigrated.push(file);
-    }
-  });
+function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
+  return (file: File) => {
+    if (!file.newCode) return;
 
-  return {
-    migrated,
-    notMigrated,
+    const writeInFile = join(outputDir, fixFilePath(readDirectory, file.path));
+    writeContentInFile(writeInFile, file.newCode);
   };
+}
+
+function readCyCode(path: string): File {
+  return {
+    path: path,
+    code: readFileSync(resolve(path), 'utf-8'),
+    newCode: null,
+  };
+}
+
+function migrateCodeToPlaywright(file: File) {
+  try {
+    const newCode = converter(file.code);
+    return {
+      ...file,
+      newCode,
+    };
+  } catch (e) {
+    return {
+      ...file,
+      newCode: null,
+    };
+  }
 }
 
 function printSummary(migrated: number, notMigrated: string[]) {
@@ -88,8 +93,8 @@ function printSummary(migrated: number, notMigrated: string[]) {
   ${pc.red('- Error:')} ${pc.red(notMigrated.length)}${strings}\n`);
 }
 
-function showNextStep(outputDir: string, spinner: Ora) {
-  spinner.warn(
+function showNextStep(outputDir: string) {
+  console.warn(
     pc.yellow(`Next Step:
       1. Run 'npm init playwright@latest'.
       2. Change 'testDir' option inside the playwright configuration file to '/${basename(outputDir)}'.
@@ -98,7 +103,7 @@ function showNextStep(outputDir: string, spinner: Ora) {
   );
 }
 
-function getFileWithPath(fromDir: string, file: string) {
+function fixFilePath(fromDir: string, file: string) {
   return file
     .replace(fromDir, '')
     .split(sep)
