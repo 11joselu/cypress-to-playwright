@@ -56,6 +56,12 @@ describe('Converter: Cypress commands', { concurrency: true }, () => {
 
       assert.strictEqual(format(result), format(`cy.fn("selector").${option.cy}`));
     });
+
+    it(`Transform cy.contains().${option.cy} by  cy.contains().${option.playwright}`, { only: true }, () => {
+      const result = index(`cy.contains("aText").${option.cy}`);
+
+      assert.strictEqual(format(result), format(`await page.locator("text=aText").${option.playwright}`));
+    });
   });
 });
 

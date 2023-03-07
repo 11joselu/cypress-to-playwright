@@ -8,6 +8,9 @@ export const isCy = {
   get(expressionName: string) {
     return 'cy.get' === expressionName;
   },
+  contains(expressionName: string) {
+    return expressionName.startsWith('cy.contains');
+  },
   click(expressionName: string) {
     return isFirstOfLastWithCommand(expressionName, '.click');
   },
@@ -79,10 +82,17 @@ export const isCy = {
       return expressionName.startsWith('not.');
     },
   },
+
+  isCyWithPropertyAccess: isCyWithPropertyAccess,
 };
 
 function isCyWithPropertyAccess(expressionName: string) {
-  return isCy.get(expressionName) || isCy.isFirst(expressionName) || isCy.isLast(expressionName);
+  return (
+    isCy.get(expressionName) ||
+    isCy.isFirst(expressionName) ||
+    isCy.isLast(expressionName) ||
+    isCy.contains(expressionName)
+  );
 }
 
 function isFirstOfLastWithCommand(expressionName: string, searchValue: string) {

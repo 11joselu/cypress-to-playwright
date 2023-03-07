@@ -105,8 +105,7 @@ function createPlaywrightCommand(
   command: LOCATOR_PROPERTIES,
   toInjectArgs: ts.Expression[] = []
 ) {
-  const { propertyTypeAccessArguments, propertyAccessArguments } =
-    getArgumentsOfPropertyAccessExpression(propertyExpression);
+  const argumentsOfPropertyAccessExpression = getArgumentsOfPropertyAccessExpression(propertyExpression);
   const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
   const expressionName = getExpressionName(propertyExpression);
 
@@ -131,10 +130,19 @@ function createPlaywrightCommand(
     return creator.await(expression);
   }
 
+  let propertyAccessArguments = argumentsOfPropertyAccessExpression.propertyAccessArguments;
+
+  if (isCy.contains(expressionName)) {
+    propertyAccessArguments = propertyAccessArguments.map((item) => {
+      if (ts.isStringLiteral(item)) return creator.string(`text=${fixString(item.getText())}`);
+      return item;
+    }) as unknown as ts.NodeArray<ts.Expression>;
+  }
+
   return creator.await(
     creator.playwrightLocatorProperty(
       command,
-      propertyTypeAccessArguments,
+      argumentsOfPropertyAccessExpression.propertyTypeAccessArguments,
       propertyAccessArguments,
       parent?.typeArguments,
       propertyArgs
@@ -306,5 +314,5 @@ function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpressi
   return propertyExpression.parent as ts.CallExpression;
 }
 function fixString(str: string) {
-  return str.replace(/"|'/g, '');
+  return str.replace(/["'`]/g, '');
 }
