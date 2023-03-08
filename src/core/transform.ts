@@ -93,15 +93,15 @@ function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHan
 function parseTestHook(expressionName: string, node: ts.ExpressionStatement, creator: Creator) {
   const call = node.expression as ts.CallExpression;
   if (isHook.it(expressionName)) {
-    return createItHook(expressionName, call, node, creator);
+    return createHookWithTitle(expressionName, call, node, creator, HOOKS.TEST);
   }
 
   if (isHook.beforeEach(expressionName)) {
-    return createBeforeEach(creator, call, HOOKS.BEFORE_EACH);
+    return createHookWithoutTitle(creator, call, HOOKS.BEFORE_EACH);
   }
 
   if (isHook.afterEach(expressionName)) {
-    return createBeforeEach(creator, call, HOOKS.AFTER_EACH);
+    return createHookWithoutTitle(creator, call, HOOKS.AFTER_EACH);
   }
 
   return node;
@@ -258,13 +258,19 @@ function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.Le
   return result;
 }
 
-function createItHook(expressionName: string, call: ts.CallExpression, node: ts.ExpressionStatement, creator: Creator) {
+function createHookWithTitle(
+  expressionName: string,
+  call: ts.CallExpression,
+  node: ts.ExpressionStatement,
+  creator: Creator,
+  hook: HOOKS
+) {
   let expression: ts.Expression;
   if (isHook.isItSkipOrOnly(expressionName)) {
     if (!ts.isPropertyAccessExpression(call.expression)) return node;
-    expression = creator.propertyAccessExpression(HOOKS.TEST, call.expression.name);
+    expression = creator.propertyAccessExpression(hook, call.expression.name);
   } else {
-    expression = creator.identifier(HOOKS.TEST);
+    expression = creator.identifier(hook);
   }
 
   const [title] = call.arguments;
@@ -281,7 +287,7 @@ function createItHook(expressionName: string, call: ts.CallExpression, node: ts.
   );
 }
 
-function createBeforeEach(creator: Creator, call: ts.CallExpression, hook: HOOKS = HOOKS.BEFORE_EACH) {
+function createHookWithoutTitle(creator: Creator, call: ts.CallExpression, hook: HOOKS = HOOKS.BEFORE_EACH) {
   const testCallExpression = creator.propertyAccessExpression(HOOKS.TEST, hook);
   return creator.callExpression(testCallExpression, call.typeArguments, [
     creator.arrowFunction(
