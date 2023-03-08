@@ -30,16 +30,12 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return actions.handle(expressionName, call.expression, factory);
       }
 
-      if (isCy.visit(expressionName)) {
-        return createGoTo(factory, call);
-      }
-
-      if (isCy.should(expressionName)) {
+      if (isValidation(expressionName)) {
         return validations.handle(call, factory);
       }
 
-      if (isCy.intercept(expressionName)) {
-        return factory.playwrightIntercept(call);
+      if (isCommand(expressionName)) {
+        return commands(expressionName, factory, call) || node;
       }
 
       return node;
@@ -73,6 +69,7 @@ function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.Le
 
   return result;
 }
+
 function isRunnerHook(expressionName: string) {
   return (
     isHook.beforeEach(expressionName) ||
@@ -81,6 +78,7 @@ function isRunnerHook(expressionName: string) {
     isHook.describe(expressionName)
   );
 }
+
 function isAction(expressionName: string) {
   return (
     isCy.click(expressionName) ||
@@ -95,4 +93,20 @@ function isAction(expressionName: string) {
     isCy.focus(expressionName) ||
     isCy.blur(expressionName)
   );
+}
+
+function isValidation(expressionName: string) {
+  return isCy.should(expressionName);
+}
+function isCommand(expressionName: string) {
+  return isCy.visit(expressionName) || isCy.intercept(expressionName);
+}
+function commands(expressionName: string, factory: Factory, call: ts.CallExpression) {
+  if (isCy.visit(expressionName)) {
+    return createGoTo(factory, call);
+  } else if (isCy.intercept(expressionName)) {
+    return factory.playwrightIntercept(call);
+  }
+
+  return null;
 }
