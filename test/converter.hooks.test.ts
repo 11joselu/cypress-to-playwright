@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { index } from '../src/index.js';
-import { format } from './format.js';
+import { format } from './test-utils.js';
 
 describe('Converter: Test Hooks', () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {

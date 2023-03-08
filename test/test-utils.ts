@@ -9,3 +9,7 @@ export function format(result: string) {
     parser: 'babel',
   });
 }
+
+export function createOption(cy: string, playwright: string) {
+  return { cy, playwright };
+}
