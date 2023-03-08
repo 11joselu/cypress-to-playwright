@@ -2,8 +2,6 @@
   "name": "@11joselu/cypress-to-playwright",
   "version": "0.0.1",
   "description": "Automatic migration from cypress to playwright",
-  "main": "dist/cjs/converter.js",
-  "module": "dist/esm/converter.mjs",
   "engines": {
     "node": ">=16.0.0"
   },
