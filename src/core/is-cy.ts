@@ -28,104 +28,34 @@ export const isCy = {
     return this.contains(strings[0] + '.' + strings[1]);
   },
   type(expressionName: string) {
-    return [
-      'cy.get.type',
-      'cy.get.first.type',
-      'cy.get.last.type',
-      'cy.contains.type',
-      'cy.contains.first.type',
-      'cy.contains.last.type',
-    ].includes(expressionName);
+    return createQueryAction('type').includes(expressionName);
   },
   check(expressionName: string) {
-    return [
-      'cy.get.check',
-      'cy.get.first.check',
-      'cy.get.last.check',
-      'cy.contains.check',
-      'cy.contains.first.check',
-      'cy.contains.last.check',
-    ].includes(expressionName);
+    return createQueryAction('check').includes(expressionName);
   },
   uncheck(expressionName: string) {
-    return [
-      'cy.get.uncheck',
-      'cy.get.first.uncheck',
-      'cy.get.last.uncheck',
-      'cy.contains.uncheck',
-      'cy.contains.first.uncheck',
-      'cy.contains.last.uncheck',
-    ].includes(expressionName);
+    return createQueryAction('uncheck').includes(expressionName);
   },
   select(expressionName: string) {
-    return [
-      'cy.get.select',
-      'cy.get.first.select',
-      'cy.get.last.select',
-      'cy.contains.select',
-      'cy.contains.first.select',
-      'cy.contains.last.select',
-    ].includes(expressionName);
+    return createQueryAction('select').includes(expressionName);
   },
   scrollTo(expressionName: string) {
-    return [
-      'cy.get.scrollTo',
-      'cy.get.first.scrollTo',
-      'cy.get.last.scrollTo',
-      'cy.contains.scrollTo',
-      'cy.contains.first.scrollTo',
-      'cy.contains.last.scrollTo',
-    ].includes(expressionName);
+    return createQueryAction('scrollTo').includes(expressionName);
   },
   scrollIntoView(expressionName: string) {
-    return [
-      'cy.get.scrollIntoView',
-      'cy.get.first.scrollIntoView',
-      'cy.get.last.scrollIntoView',
-      'cy.contains.scrollIntoView',
-      'cy.contains.first.scrollIntoView',
-      'cy.contains.last.scrollIntoView',
-    ].includes(expressionName);
+    return createQueryAction('scrollIntoView').includes(expressionName);
   },
   dblclick(expressionName: string) {
-    return [
-      'cy.get.dblclick',
-      'cy.get.first.dblclick',
-      'cy.get.last.dblclick',
-      'cy.contains.dblclick',
-      'cy.contains.first.dblclick',
-      'cy.contains.last.dblclick',
-    ].includes(expressionName);
+    return createQueryAction('dblclick').includes(expressionName);
   },
   clear(expressionName: string) {
-    return [
-      'cy.get.clear',
-      'cy.get.first.clear',
-      'cy.get.last.clear',
-      'cy.contains.clear',
-      'cy.contains.first.clear',
-      'cy.contains.last.clear',
-    ].includes(expressionName);
+    return createQueryAction('clear').includes(expressionName);
   },
   focus(expressionName: string) {
-    return [
-      'cy.get.focus',
-      'cy.get.first.focus',
-      'cy.get.last.focus',
-      'cy.contains.focus',
-      'cy.contains.first.focus',
-      'cy.contains.last.focus',
-    ].includes(expressionName);
+    return createQueryAction('focus').includes(expressionName);
   },
   blur(expressionName: string) {
-    return [
-      'cy.get.blur',
-      'cy.get.first.blur',
-      'cy.get.last.blur',
-      'cy.contains.blur',
-      'cy.contains.first.blur',
-      'cy.contains.last.blur',
-    ].includes(expressionName);
+    return createQueryAction('blur').includes(expressionName);
   },
   intercept(expressionName: string) {
     return 'cy.intercept' === expressionName;
@@ -163,3 +93,14 @@ export const isCy = {
     },
   },
 };
+
+function createQueryAction(action: string) {
+  return [
+    `cy.get.${action}`,
+    `cy.get.first.${action}`,
+    `cy.get.last.${action}`,
+    `cy.contains.${action}`,
+    `cy.contains.first.${action}`,
+    `cy.contains.last.${action}`,
+  ];
+}
