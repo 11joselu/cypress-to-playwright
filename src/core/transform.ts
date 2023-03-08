@@ -71,6 +71,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return creator.playwrightIntercept(call);
       }
 
+      if (isCy.focus(expressionName)) {
+        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.FOCUS);
+      }
+
       return node;
     }
 

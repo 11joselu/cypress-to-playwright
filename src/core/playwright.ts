@@ -26,6 +26,7 @@ export const enum LOCATOR_PROPERTIES {
   SCROLL_INTO_VIEW = 'scrollIntoViewIfNeeded',
   DBL_CLICK = 'dblclick',
   CLEAR = 'fill',
+  FOCUS = 'focus',
 }
 
 export const enum VALIDATION {
