@@ -34,11 +34,39 @@ npm install @11joselu/cypress-to-playwright -g
 npx @11joselu/cypress-to-playwright <cypress_directory>
 ```
 
-## Run tests
+## Supported migrations
 
-```sh
-npm run test
-```
+### Hooks
+| Cypress                 | Playwright                        |
+|-------------------------|-----------------------------------|
+| `it('text', fn())`      | `test('text', fn({ page }))`      |
+| `it.only('text', fn())` | `test.only('text', fn({ page }))` |
+| `it.skip('text', fn())` | `test.skip('text', fn({ page }))` |
+| `beforeEach(fn())`      | `beforeEach(fn({ page }))`        |
+
+[View more in test file](/test/converter.hooks.test.ts)
+
+### Commands
+| Cypress                                                                                             | Playwright                                                  |
+|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `cy.visit()`                                                                                        | `page.goto()`                                               |
+| `cy.get()`                                                                                          | `page.locator()`                                            |
+| `cy.contains(aText)`                                                                                | `page.locator(text=aText)`                                  |
+| `cy.get().first()` or `cy.get().last()`. <br/><br/>Same for `cy.contains`                           | `page.locator().first()` or `page.locator().first()`        |
+| `cy.get().click()`, `cy.get().check()`. `cy.get().select()` etc... <br/><br/>Same for `cy.contains` | `page.locator().click()` or `page.locator().check()` etc... |
+
+[View more in test file](/test/converter.cypress.test.ts)
+
+
+### Intercept
+| Cypress                                              | Playwright                       |
+|------------------------------------------------------|----------------------------------|
+| `cy.intercept('<method>', '<url>', <responseObject>` | `page.route(<url>, (route) => {} | 
+
+❌ Alias is not supported. That's means no `wait` support 
+
+[View more in test file](/test/converter.cyoress.test.ts)
+
 
 ## Author
 
@@ -49,6 +77,12 @@ npm run test
 * Github: [@11joselu](https://github.com/11joselu)
 
 ## Contributing
+
+### Run tests
+
+```sh
+npm run test
+```
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/11joselu/cypress-to-playwright/issues).
 
