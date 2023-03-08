@@ -297,7 +297,16 @@ function createHookWithTitle(
     );
   }
 
-  const expression = creator.propertyAccessExpression(HOOKS.TEST, HOOKS.DESCRIBE);
+  let expression = creator.propertyAccessExpression(HOOKS.TEST, HOOKS.DESCRIBE);
+
+  if (isHook.isDescribeSkipOrOnly(expressionName)) {
+    if (!ts.isPropertyAccessExpression(call.expression)) return node;
+    expression = creator.propertyAccessExpression(
+      creator.propertyAccessExpression(HOOKS.TEST, HOOKS.DESCRIBE),
+      call.expression.name
+    );
+  }
+
   const [title] = call.arguments;
 
   return creator.callExpressionStatement(

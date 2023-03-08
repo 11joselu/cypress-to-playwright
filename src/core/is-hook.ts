@@ -6,7 +6,10 @@ export const isHook = {
     return 'afterEach' === expressionName;
   },
   describe(expressionName: string) {
-    return 'describe' === expressionName;
+    return 'describe' === expressionName || this.isDescribeSkipOrOnly(expressionName);
+  },
+  isDescribeSkipOrOnly(expressionName: string) {
+    return 'describe.only' === expressionName || 'describe.skip' === expressionName;
   },
   it(expressionName: string) {
     return 'it' === expressionName || this.isItSkipOrOnly(expressionName);

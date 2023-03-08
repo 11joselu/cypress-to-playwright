@@ -185,4 +185,30 @@ describe('describe:,  Test Hooks', () => {
       `)
     );
   });
+
+  it('Convert describe.only with visit into test.describe.only', () => {
+    const result = index(`
+      describe.only('text', () => {})
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.describe.only('text', () => {})
+      `)
+    );
+  });
+
+  it('Convert describe.skip with visit into test.describe.skip', () => {
+    const result = index(`
+      describe.skip('text', () => {})
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.describe.skip('text', () => {})
+      `)
+    );
+  });
 });
