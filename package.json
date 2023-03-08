@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "rm -rf ./lib",
     "postinstall": "git config --local core.hooksPath .githooks/",
-    "lint": "eslint **/*.ts --fix",
+    "lint": "eslint {src,test}/**/*.ts --fix",
     "lint-staged": "lint-staged",
     "test": "mocha test/**/*.test.ts",
     "test:integration": "./test/integration.sh",

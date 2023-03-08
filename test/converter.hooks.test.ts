@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { index } from '../src/index.js';
 import { format } from './test-utils.js';
 
-describe('Converter: Test Hooks', () => {
+describe('it Test Hooks', () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {
     const result = index(`it('test_case', () => {});`);
 
@@ -123,23 +123,19 @@ describe('Converter: Test Hooks', () => {
 
     assert.strictEqual(format(result), format(`fn.skip('test_case', () => {});`));
   });
+});
 
-  describe('beforeEach', () => {
-    it('Convert beforeEach with visit into beforeEach with page.goto', () => {
-      const result = index(`
-        beforeEach(() => {
-          cy.visit('http://localhost')
-        })
-      `);
+describe('beforeEach: Test Hooks', () => {
+  it('Convert beforeEach with visit into test.beforeEach', () => {
+    const result = index(`
+      beforeEach(() => {})
+    `);
 
-      assert.strictEqual(
-        format(result),
-        format(`
-            beforeEach(async({page}) => {
-              await page.goto('http://localhost')
-            })
-        `)
-      );
-    });
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.beforeEach(async({page}) => {})
+      `)
+    );
   });
 });

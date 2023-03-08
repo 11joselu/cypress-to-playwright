@@ -45,7 +45,7 @@ describe('Converter', () => {
       format(result),
       format(`
         describe('example to-do app', () => {
-          beforeEach(async ({page}) => {
+          test.beforeEach(async ({page}) => {
             await page.goto('https://example.cypress.io/todo');
           });
           test('displays two todo items by default', async ({page}) => {

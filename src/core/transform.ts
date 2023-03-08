@@ -278,8 +278,9 @@ function createItHook(expressionName: string, call: ts.CallExpression, node: ts.
 }
 
 function createBeforeEach(creator: Creator, call: ts.CallExpression) {
-  const expression = creator.identifier(HOOKS.BEFORE_EACH);
-  return creator.callExpression(expression, call.typeArguments, [
+  creator.identifier(HOOKS.BEFORE_EACH);
+  const testCallExpression = creator.propertyAccessExpression(HOOKS.TEST, HOOKS.BEFORE_EACH);
+  return creator.callExpression(testCallExpression, call.typeArguments, [
     creator.arrowFunction(
       getBodyOfCall(call, creator),
       [creator.destructuringParameter('page')],
