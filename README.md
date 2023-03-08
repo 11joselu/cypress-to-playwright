@@ -55,7 +55,7 @@ npx @11joselu/cypress-to-playwright <cypress_directory>
 | `cy.get().first()` or `cy.get().last()`. <br/><br/>Same for `cy.contains`                           | `page.locator().first()` or `page.locator().first()`        |
 | `cy.get().click()`, `cy.get().check()`. `cy.get().select()` etc... <br/><br/>Same for `cy.contains` | `page.locator().click()` or `page.locator().check()` etc... |
 
-[View more in test file](/test/converter.cypress.test.ts)
+[in actions test file](/test/converter.cy-validations.test.ts) or [View more in validations test file](/test/converter.cy-actions.test.ts)
 
 
 ### Intercept
@@ -65,7 +65,7 @@ npx @11joselu/cypress-to-playwright <cypress_directory>
 
 ❌ Alias is not supported. That's means no `wait` support 
 
-[View more in test file](/test/converter.cyoress.test.ts)
+[View more in test file](/test/converter.cy-commands.test.ts)
 
 
 ## Author
