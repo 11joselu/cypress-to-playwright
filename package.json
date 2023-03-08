@@ -6,14 +6,8 @@
     "node": ">=16.0.0"
   },
   "type": "module",
-  "bin": "./bin/cypress-to-playwright.js",
-  "exports": {
-    ".": "./lib/index.js",
-    "./bin": "./bin/cypress-to-playwright.js",
-    "./package.json": "./package.json"
-  },
+  "bin": "./lib/bin/cypress-to-playwright.js",
   "files": [
-    "bin",
     "lib"
   ],
   "scripts": {
