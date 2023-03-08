@@ -17,7 +17,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       const call = node.expression;
       const expressionName = getExpressionName(call);
 
-      if (isHook.beforeEach(expressionName) || isHook.it(expressionName)) {
+      if (isHook.beforeEach(expressionName) || isHook.it(expressionName) || isHook.afterEach(expressionName)) {
         return parseTestHook(expressionName, node, creator);
       }
 
@@ -97,7 +97,11 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
   }
 
   if (isHook.beforeEach(expressionName)) {
-    return createBeforeEach(creator, call);
+    return createBeforeEach(creator, call, HOOKS.BEFORE_EACH);
+  }
+
+  if (isHook.afterEach(expressionName)) {
+    return createBeforeEach(creator, call, HOOKS.AFTER_EACH);
   }
 
   return node;
@@ -277,9 +281,8 @@ function createItHook(expressionName: string, call: ts.CallExpression, node: ts.
   );
 }
 
-function createBeforeEach(creator: Creator, call: ts.CallExpression) {
-  creator.identifier(HOOKS.BEFORE_EACH);
-  const testCallExpression = creator.propertyAccessExpression(HOOKS.TEST, HOOKS.BEFORE_EACH);
+function createBeforeEach(creator: Creator, call: ts.CallExpression, hook: HOOKS = HOOKS.BEFORE_EACH) {
+  const testCallExpression = creator.propertyAccessExpression(HOOKS.TEST, hook);
   return creator.callExpression(testCallExpression, call.typeArguments, [
     creator.arrowFunction(
       getBodyOfCall(call, creator),

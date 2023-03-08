@@ -156,3 +156,18 @@ describe('beforeEach: Test Hooks', () => {
     );
   });
 });
+
+describe('afterEach: Test Hooks', () => {
+  it('Convert afterEach with visit into test.afterEach', () => {
+    const result = index(`
+      afterEach(() => {})
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.afterEach(async({page}) => {})
+      `)
+    );
+  });
+});

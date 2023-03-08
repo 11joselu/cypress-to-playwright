@@ -49,4 +49,5 @@ export const PLAYWRIGHT_PAGE_NAME = 'page';
 export const enum HOOKS {
   BEFORE_EACH = 'beforeEach',
   TEST = 'test',
+  AFTER_EACH = 'afterEach',
 }
