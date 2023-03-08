@@ -8,7 +8,7 @@ echo "Building and migrating $cypress_files"
 rm -rf ./examples/playwright
 
 tput setaf 4; echo -e "[Test INFO]: Building code"; tput sgr0
-npm run build &> /dev/null && node lib/bin/cypress-to-playwright.js $cypress_files &> /dev/null
+npm run build --silent && node lib/bin/cypress-to-playwright.js $cypress_files
 
 function validateDirectories {
   if [ ! -d "$base" ]; then
