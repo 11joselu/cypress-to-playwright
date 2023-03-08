@@ -50,4 +50,5 @@ export const enum HOOKS {
   BEFORE_EACH = 'beforeEach',
   TEST = 'test',
   AFTER_EACH = 'afterEach',
+  DESCRIBE = 'describe',
 }

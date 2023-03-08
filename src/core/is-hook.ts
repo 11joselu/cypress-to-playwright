@@ -5,6 +5,9 @@ export const isHook = {
   afterEach(expressionName: string) {
     return 'afterEach' === expressionName;
   },
+  describe(expressionName: string) {
+    return 'describe' === expressionName;
+  },
   it(expressionName: string) {
     return 'it' === expressionName || this.isItSkipOrOnly(expressionName);
   },

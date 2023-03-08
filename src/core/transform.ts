@@ -17,7 +17,12 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       const call = node.expression;
       const expressionName = getExpressionName(call);
 
-      if (isHook.beforeEach(expressionName) || isHook.it(expressionName) || isHook.afterEach(expressionName)) {
+      if (
+        isHook.beforeEach(expressionName) ||
+        isHook.it(expressionName) ||
+        isHook.afterEach(expressionName) ||
+        isHook.describe(expressionName)
+      ) {
         return parseTestHook(expressionName, node, creator);
       }
 
@@ -94,6 +99,10 @@ function parseTestHook(expressionName: string, node: ts.ExpressionStatement, cre
   const call = node.expression as ts.CallExpression;
   if (isHook.it(expressionName)) {
     return createHookWithTitle(expressionName, call, node, creator, HOOKS.TEST);
+  }
+
+  if (isHook.describe(expressionName)) {
+    return createHookWithTitle(expressionName, call, node, creator, HOOKS.DESCRIBE);
   }
 
   if (isHook.beforeEach(expressionName)) {
@@ -265,24 +274,37 @@ function createHookWithTitle(
   creator: Creator,
   hook: HOOKS
 ) {
-  let expression: ts.Expression;
-  if (isHook.isItSkipOrOnly(expressionName)) {
-    if (!ts.isPropertyAccessExpression(call.expression)) return node;
-    expression = creator.propertyAccessExpression(hook, call.expression.name);
-  } else {
-    expression = creator.identifier(hook);
+  if (isHook.it(expressionName)) {
+    let expression: ts.Expression;
+    if (isHook.isItSkipOrOnly(expressionName)) {
+      if (!ts.isPropertyAccessExpression(call.expression)) return node;
+      expression = creator.propertyAccessExpression(hook, call.expression.name);
+    } else {
+      expression = creator.identifier(hook);
+    }
+
+    const [title] = call.arguments;
+    return creator.callExpressionStatement(
+      expression,
+      creator.callExpression(call.expression, call.typeArguments, [
+        title,
+        creator.arrowFunction(
+          getBodyOfCall(call, creator),
+          [creator.destructuringParameter('page')],
+          [creator.asyncToken()]
+        ),
+      ])
+    );
   }
 
+  const expression = creator.propertyAccessExpression(HOOKS.TEST, HOOKS.DESCRIBE);
   const [title] = call.arguments;
+
   return creator.callExpressionStatement(
     expression,
     creator.callExpression(call.expression, call.typeArguments, [
       title,
-      creator.arrowFunction(
-        getBodyOfCall(call, creator),
-        [creator.destructuringParameter('page')],
-        [creator.asyncToken()]
-      ),
+      creator.arrowFunction(getBodyOfCall(call, creator), [], []),
     ])
   );
 }

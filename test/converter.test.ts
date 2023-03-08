@@ -44,7 +44,7 @@ describe('Converter', () => {
     assert.strictEqual(
       format(result),
       format(`
-        describe('example to-do app', () => {
+        test.describe('example to-do app', () => {
           test.beforeEach(async ({page}) => {
             await page.goto('https://example.cypress.io/todo');
           });

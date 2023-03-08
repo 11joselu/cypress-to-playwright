@@ -59,7 +59,7 @@ describe('it Test Hooks', () => {
     assert.strictEqual(
       format(result),
       format(`
-      describe('test_suite', () => {
+      test.describe('test_suite', () => {
         test('test_case', async({page}) => {});
       });
     `)
@@ -167,6 +167,21 @@ describe('afterEach: Test Hooks', () => {
       format(result),
       format(`
         test.afterEach(async({page}) => {})
+      `)
+    );
+  });
+});
+
+describe('describe:,  Test Hooks', () => {
+  it('Convert describe with visit into test.describe', () => {
+    const result = index(`
+      describe('text', () => {})
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        test.describe('text', () => {})
       `)
     );
   });
