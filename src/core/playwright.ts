@@ -27,6 +27,7 @@ export const enum LOCATOR_PROPERTIES {
   DBL_CLICK = 'dblclick',
   CLEAR = 'fill',
   FOCUS = 'focus',
+  BLUR = 'blur',
 }
 
 export const enum VALIDATION {

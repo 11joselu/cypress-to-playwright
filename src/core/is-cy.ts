@@ -117,6 +117,16 @@ export const isCy = {
       'cy.contains.last.focus',
     ].includes(expressionName);
   },
+  blur(expressionName: string) {
+    return [
+      'cy.get.blur',
+      'cy.get.first.blur',
+      'cy.get.last.blur',
+      'cy.contains.blur',
+      'cy.contains.first.blur',
+      'cy.contains.last.blur',
+    ].includes(expressionName);
+  },
   intercept(expressionName: string) {
     return 'cy.intercept' === expressionName;
   },

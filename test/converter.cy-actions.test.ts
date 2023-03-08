@@ -20,6 +20,7 @@ describe('Converter: Cypress actions', () => {
     createOption('clear()', 'fill("")'),
     createOption('clear({force: true})', 'fill("", {force: true})'),
     createOption('focus()', 'focus()'),
+    createOption('blur()', 'blur()'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
       const result = index(`cy.get("selector").${option.cy}`);
