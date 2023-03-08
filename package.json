@@ -24,7 +24,7 @@
     "test": "mocha test/**/*.test.ts",
     "test:integration": "./test/integration.sh",
     "binary": "tsc --noEmit && node --loader tsx --no-warnings src/bin/cypress-to-playwright.ts",
-    "build": "tsc -p ./tsconfig.json",
+    "build": "npm run clean && tsc -p ./tsconfig.json",
     "prepack": "npm run build"
   },
   "repository": {
