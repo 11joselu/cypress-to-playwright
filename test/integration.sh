@@ -5,7 +5,7 @@ actual="examples/playwright"
 cypress_files="examples/base-cypress-12.7.0"
 
 echo "Building and migrating $cypress_files"
-rm -rf ../examples/playwright
+rm -rf ./examples/playwright
 npm run build &> /dev/null && node lib/bin/cypress-to-playwright.js $cypress_files &> /dev/null
 
 function validateDirectories {

@@ -52,7 +52,7 @@ function getFiles(directory: string) {
 
 function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
   return (file: File) => {
-    if (!file.newCode) return;
+    if (file.newCode === null) return;
 
     const writeInFile = join(outputDir, fixFilePath(readDirectory, file.path));
     writeContentInFile(writeInFile, file.newCode);
