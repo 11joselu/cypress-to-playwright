@@ -1,14 +1,14 @@
 import ts from 'typescript';
-import { Creator, nodeCreator } from './node-creator.js';
+import { Factory, nodeFactory } from './node-factory.js';
 import { COMMANDS } from './playwright.js';
-import { isCy } from './is-cy.js';
-import { isHook } from './is-hook.js';
-import * as hook from './hook.js';
+import { isCy } from './is/is-cy.js';
+import { isHook } from './is/is-hook.js';
+import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
-  const creator = nodeCreator(context.factory);
+  const factory = nodeFactory(context.factory);
   return (rootNode) => {
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
@@ -21,25 +21,25 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       const expressionName = getExpressionName(call);
 
       if (isRunnerHook(expressionName)) {
-        return hook.handle(expressionName, node, creator);
+        return hook.handle(expressionName, node, factory);
       }
 
       if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
 
       if (isAction(expressionName)) {
-        return actions.handle(expressionName, call.expression, creator);
+        return actions.handle(expressionName, call.expression, factory);
       }
 
       if (isCy.visit(expressionName)) {
-        return createGoTo(creator, call);
+        return createGoTo(factory, call);
       }
 
       if (isCy.should(expressionName)) {
-        return validations.handle(call, creator);
+        return validations.handle(call, factory);
       }
 
       if (isCy.intercept(expressionName)) {
-        return creator.playwrightIntercept(call);
+        return factory.playwrightIntercept(call);
       }
 
       return node;
@@ -53,8 +53,8 @@ function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHan
   return getListOfExpressionName(expressions).reverse().join('.');
 }
 
-function createGoTo(creator: Creator, call: ts.CallExpression) {
-  return creator.awaitCallExpression(creator.playwrightCommand(COMMANDS.GOTO), call.typeArguments, call.arguments);
+function createGoTo(factory: Factory, call: ts.CallExpression) {
+  return factory.awaitCallExpression(factory.playwrightCommand(COMMANDS.GOTO), call.typeArguments, call.arguments);
 }
 
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {

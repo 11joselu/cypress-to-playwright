@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { Creator } from './node-creator.js';
-import { isCy } from './is-cy.js';
+import { Factory } from './node-factory.js';
+import { isCy } from './is/is-cy.js';
 import { COMMANDS, LOCATOR_PROPERTIES, VALIDATION } from './playwright.js';
 
-export function handle(call: ts.CallExpression, creator: Creator) {
+export function handle(call: ts.CallExpression, factory: Factory) {
   const propertyExpression = call.expression as ts.PropertyAccessExpression;
   const callArgs = call.arguments.map((arg) => fixString(arg.getText()));
   const { propertyTypeAccessArguments, propertyAccessArguments } =
@@ -15,14 +15,14 @@ export function handle(call: ts.CallExpression, creator: Creator) {
     if (isCy.isFirst(cyCommandName) || isCy.isLast(cyCommandName)) {
       const foundExpression = findGetPropertyExpression(propertyExpression);
 
-      newExpression = creator.playwrightLocatorProperty(
+      newExpression = factory.playwrightLocatorProperty(
         isCy.isFirst(cyCommandName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
         foundExpression.typeArguments,
         foundExpression.arguments
       );
     } else {
-      newExpression = creator.callExpression(
-        creator.playwrightCommand(COMMANDS.LOCATOR),
+      newExpression = factory.callExpression(
+        factory.playwrightCommand(COMMANDS.LOCATOR),
         propertyTypeAccessArguments,
         propertyAccessArguments
       );
@@ -35,47 +35,47 @@ export function handle(call: ts.CallExpression, creator: Creator) {
   if (isNegativeValidation) shouldCyValidation = shouldCyValidation.replace('not.', '');
 
   if (isCy.validation.haveLength(shouldCyValidation)) {
-    return creator.expect(
+    return factory.expect(
       newExpression,
       VALIDATION.TO_HAVE_COUNT,
-      [creator.numeric(callArgs[1])],
+      [factory.numeric(callArgs[1])],
       isNegativeValidation
     );
   }
 
   if (isCy.validation.toHaveText(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [call.arguments[1]], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.TO_HAVE_TEXT, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.toHaveClass(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [call.arguments[1]], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.TO_HAVE_CLASS, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.beVisible(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_BE_VISIBLE, [], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.TO_BE_VISIBLE, [], isNegativeValidation);
   }
 
   if (isCy.validation.toHaveValue(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [call.arguments[1]], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.toContain(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [call.arguments[1]], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [call.arguments[1]], isNegativeValidation);
   }
 
   if (isCy.validation.beChecked(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.BE_CHECKED, [], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.BE_CHECKED, [], isNegativeValidation);
   }
 
   if (isCy.validation.beDisabled(shouldCyValidation)) {
-    return creator.expect(newExpression, VALIDATION.BE_DISABLED, [], isNegativeValidation);
+    return factory.expect(newExpression, VALIDATION.BE_DISABLED, [], isNegativeValidation);
   }
 
   if (isCy.validation.haveAttr(shouldCyValidation)) {
-    return creator.expect(
+    return factory.expect(
       newExpression,
       VALIDATION.TO_HAVE_ATTR,
-      callArgs.filter((_, index) => index).map((arg) => creator.string(arg)),
+      callArgs.filter((_, index) => index).map((arg) => factory.string(arg)),
       isNegativeValidation
     );
   }

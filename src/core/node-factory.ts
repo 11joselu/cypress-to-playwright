@@ -3,7 +3,7 @@ import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION }
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 
-export type Creator = {
+export type Factory = {
   callExpressionStatement(newExpression: ts.Expression, callExpression: ts.CallExpression): ts.Statement;
   statement(statement: ts.Expression): ts.Statement;
   propertyAccessExpression(
@@ -47,7 +47,7 @@ export type Creator = {
   playwrightIntercept(node: ts.CallExpression): ts.CallExpression;
 };
 
-export const nodeCreator = (factory: ts.NodeFactory): Creator => {
+export const nodeFactory = (factory: ts.NodeFactory): Factory => {
   return {
     callExpressionStatement: createWrappedCallExpressionInStatement(factory),
     statement: createStatement(factory),
