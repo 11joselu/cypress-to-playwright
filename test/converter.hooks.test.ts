@@ -138,4 +138,21 @@ describe('beforeEach: Test Hooks', () => {
       `)
     );
   });
+
+  it('Convert beforeEach with visit into test.beforeEach with page.goto', () => {
+    const result = index(`
+      beforeEach(() => {
+        cy.visit('http://localhost')
+      })
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+          test.beforeEach(async({page}) => {
+            await page.goto('http://localhost')
+          })
+      `)
+    );
+  });
 });
