@@ -17,12 +17,7 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
       const call = node.expression;
       const expressionName = getExpressionName(call);
 
-      if (
-        isHook.beforeEach(expressionName) ||
-        isHook.it(expressionName) ||
-        isHook.afterEach(expressionName) ||
-        isHook.describe(expressionName)
-      ) {
+      if (isRunnerHook(expressionName)) {
         return parseTestHook(expressionName, node, creator);
       }
 
@@ -170,6 +165,7 @@ function createPlaywrightCommand(
     )
   );
 }
+
 function createExpectValidation(call: ts.CallExpression, creator: Creator) {
   const propertyExpression = call.expression as ts.PropertyAccessExpression;
   const callArgs = call.arguments.map((arg) => fixString(arg.getText()));
@@ -249,7 +245,6 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
 
   throw new Error(`Unknown "${shouldCyValidation}" validation`);
 }
-
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   const result: string[] = [];
   if ('name' in expression) {
@@ -362,6 +357,15 @@ function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpressi
 
   return propertyExpression.parent as ts.CallExpression;
 }
+
 function fixString(str: string) {
   return str.replace(/["'`]/g, '');
+}
+function isRunnerHook(expressionName: string) {
+  return (
+    isHook.beforeEach(expressionName) ||
+    isHook.it(expressionName) ||
+    isHook.afterEach(expressionName) ||
+    isHook.describe(expressionName)
+  );
 }
