@@ -4,6 +4,7 @@ import { COMMANDS, LOCATOR_PROPERTIES, VALIDATION } from './playwright.js';
 import { isCy } from './is-cy.js';
 import { isHook } from './is-hook.js';
 import * as hook from './hook.js';
+import * as actions from './actions.js';
 
 export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
   const creator = nodeCreator(context.factory);
@@ -24,60 +25,20 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
 
       if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
 
-      if (isCy.visit(expressionName)) {
-        return createGoTo(creator, call);
+      if (isAction(expressionName)) {
+        return actions.handle(expressionName, call.expression, creator);
       }
 
-      if (isCy.click(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CLICK);
+      if (isCy.visit(expressionName)) {
+        return createGoTo(creator, call);
       }
 
       if (isCy.should(expressionName)) {
         return createExpectValidation(call, creator);
       }
 
-      if (isCy.type(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.TYPE);
-      }
-
-      if (isCy.check(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CHECK);
-      }
-
-      if (isCy.uncheck(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.UNCHECK);
-      }
-
-      if (isCy.select(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SELECT);
-      }
-
-      if (isCy.scrollTo(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SCROLL_TO);
-      }
-
-      if (isCy.scrollIntoView(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.SCROLL_INTO_VIEW);
-      }
-
-      if (isCy.dblclick(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.DBL_CLICK);
-      }
-
-      if (isCy.clear(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.CLEAR, [creator.string('')]);
-      }
-
       if (isCy.intercept(expressionName)) {
         return creator.playwrightIntercept(call);
-      }
-
-      if (isCy.focus(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.FOCUS);
-      }
-
-      if (isCy.blur(expressionName)) {
-        return createPlaywrightCommand(call.expression, creator, LOCATOR_PROPERTIES.BLUR);
       }
 
       return node;
@@ -90,59 +51,9 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
 function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   return getListOfExpressionName(expressions).reverse().join('.');
 }
+
 function createGoTo(creator: Creator, call: ts.CallExpression) {
   return creator.awaitCallExpression(creator.playwrightCommand(COMMANDS.GOTO), call.typeArguments, call.arguments);
-}
-
-function createPlaywrightCommand(
-  propertyExpression: ts.PropertyAccessExpression,
-  creator: Creator,
-  command: LOCATOR_PROPERTIES,
-  toInjectArgs: ts.Expression[] = []
-) {
-  const argumentsOfPropertyAccessExpression = getArgumentsOfPropertyAccessExpression(propertyExpression);
-  const parent = ts.isCallExpression(propertyExpression.parent) ? propertyExpression.parent : null;
-  const expressionName = getExpressionName(propertyExpression);
-
-  const propertyArgs = [...toInjectArgs, ...(parent?.arguments ?? [])];
-
-  if (isCy.isFirst(expressionName) || isCy.isLast(expressionName)) {
-    const foundExpression = findGetPropertyExpression(propertyExpression);
-
-    const expression = creator.callExpression(
-      creator.propertyAccessExpression(
-        creator.playwrightLocatorProperty(
-          isCy.isFirst(expressionName) ? LOCATOR_PROPERTIES.FIRST : LOCATOR_PROPERTIES.LAST,
-          foundExpression.typeArguments,
-          foundExpression.arguments
-        ),
-        command
-      ),
-      parent?.typeArguments,
-      propertyArgs
-    );
-
-    return creator.await(expression);
-  }
-
-  let propertyAccessArguments = argumentsOfPropertyAccessExpression.propertyAccessArguments;
-
-  if (isCy.selectByContains(expressionName)) {
-    propertyAccessArguments = propertyAccessArguments.map((item) => {
-      if (ts.isStringLiteral(item)) return creator.string(`text=${fixString(item.getText())}`);
-      return item;
-    }) as unknown as ts.NodeArray<ts.Expression>;
-  }
-
-  return creator.await(
-    creator.playwrightLocatorProperty(
-      command,
-      argumentsOfPropertyAccessExpression.propertyTypeAccessArguments,
-      propertyAccessArguments,
-      parent?.typeArguments,
-      propertyArgs
-    )
-  );
 }
 
 function createExpectValidation(call: ts.CallExpression, creator: Creator) {
@@ -224,6 +135,7 @@ function createExpectValidation(call: ts.CallExpression, creator: Creator) {
 
   throw new Error(`Unknown "${shouldCyValidation}" validation`);
 }
+
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   const result: string[] = [];
   if ('name' in expression) {
@@ -261,15 +173,30 @@ function findGetPropertyExpression(propertyExpression: ts.PropertyAccessExpressi
 
   return propertyExpression.parent as ts.CallExpression;
 }
-
 function fixString(str: string) {
   return str.replace(/["'`]/g, '');
 }
+
 function isRunnerHook(expressionName: string) {
   return (
     isHook.beforeEach(expressionName) ||
     isHook.it(expressionName) ||
     isHook.afterEach(expressionName) ||
     isHook.describe(expressionName)
+  );
+}
+function isAction(expressionName: string) {
+  return (
+    isCy.click(expressionName) ||
+    isCy.type(expressionName) ||
+    isCy.check(expressionName) ||
+    isCy.uncheck(expressionName) ||
+    isCy.select(expressionName) ||
+    isCy.scrollTo(expressionName) ||
+    isCy.scrollIntoView(expressionName) ||
+    isCy.dblclick(expressionName) ||
+    isCy.clear(expressionName) ||
+    isCy.focus(expressionName) ||
+    isCy.blur(expressionName)
   );
 }
