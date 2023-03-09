@@ -16,6 +16,20 @@ describe('Converter: Cypress commands', () => {
   });
 });
 
+describe('Querys', () => {
+  it('Converts cy.get to page.locator', () => {
+    const result = index(`cy.get("selector").click()`);
+
+    assert.strictEqual(format(result), format(`await page.locator("selector").click()`));
+  });
+
+  it('Converts cy.contains to page.locator', () => {
+    const result = index(`cy.contains("test").click()`);
+
+    assert.strictEqual(format(result), format(`await page.locator("text=test").click()`));
+  });
+});
+
 describe('Intercept', () => {
   it('Migrate cy.intercept with url and response to page.route', () => {
     const result = index(`
