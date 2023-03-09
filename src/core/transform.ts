@@ -12,7 +12,6 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
   return (rootNode) => {
     function visit(node: ts.Node): ts.Node {
       node = ts.visitEachChild(node, visit, context);
-
       if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
         return node;
       }
@@ -24,10 +23,10 @@ export const transform: ts.TransformerFactory<ts.Node> = (context: ts.Transforma
         return hook.handle(expressionName, node, factory);
       }
 
-      if (!isCy.startWithCy(expressionName) || !ts.isPropertyAccessExpression(call.expression)) return node;
+      if (!isCyPropertyCall(expressionName, call)) return node;
 
       if (isAction(expressionName)) {
-        return actions.handle(expressionName, call.expression, factory);
+        return actions.handle(expressionName, call.expression as ts.PropertyAccessExpression, factory);
       }
 
       if (isValidation(expressionName)) {
@@ -77,6 +76,10 @@ function isRunnerHook(expressionName: string) {
     isHook.afterEach(expressionName) ||
     isHook.describe(expressionName)
   );
+}
+
+function isCyPropertyCall(expressionName: string, call: ts.CallExpression) {
+  return isCy.startWithCy(expressionName) && ts.isPropertyAccessExpression(call.expression);
 }
 
 function isAction(expressionName: string) {
