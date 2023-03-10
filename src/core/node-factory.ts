@@ -48,6 +48,7 @@ export type Factory = {
   functionWithPageParameter(
     node: ts.FunctionDeclaration | ts.VariableDeclaration
   ): ts.FunctionDeclaration | ts.VariableDeclaration;
+  parameter: (name: string) => ts.ParameterDeclaration;
 };
 
 export const nodeFactory = (factory: ts.NodeFactory): Factory => {
@@ -72,6 +73,7 @@ export const nodeFactory = (factory: ts.NodeFactory): Factory => {
     playwrightLocatorProperty: createPlaywrightLocatorProperty(factory),
     playwrightIntercept: createPlaywrightIntercept(factory),
     functionWithPageParameter: createFunctionWithPageParameter(factory),
+    parameter: createParameter(factory),
   };
 };
 

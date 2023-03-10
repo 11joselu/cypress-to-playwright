@@ -153,4 +153,27 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Convert a cy test case with functions injection page into a playwright code', () => {
+    const result = index(`
+      it('visit', () => {
+        goToMainPage();
+      });
+      function goToMainPage() {
+        cy.visit('http://localhost/');
+      }
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      test('visit', async ({ page }) => {
+        goToMainPage(page);
+      });
+      async function goToMainPage(page) {
+        await page.goto('http://localhost/');
+      }
+    `)
+    );
+  });
 });

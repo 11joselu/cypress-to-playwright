@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { Factory, nodeFactory } from './node-factory.js';
-import { COMMANDS } from './playwright.js';
+import { COMMANDS, PLAYWRIGHT_PAGE_NAME } from './playwright.js';
 import { isCy } from './is/is-cy.js';
 import { isHook } from './is/is-hook.js';
 import * as hook from './hooks.js';
@@ -23,6 +23,18 @@ export function transform(sourceFile: ts.SourceFile) {
         }
 
         const call = node.expression;
+        const foundFunctionDeclaration = sourceFile.statements.find((st) => {
+          return ts.isFunctionDeclaration(st) && st.name?.getText() === call.expression.getText();
+        });
+
+        if (foundFunctionDeclaration) {
+          if (isFunctionOrArrowFunctionWithCyCode(foundFunctionDeclaration)) {
+            return factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
+              factory.identifier(PLAYWRIGHT_PAGE_NAME),
+            ]);
+          }
+        }
+
         const expressionName = getExpressionName(call);
 
         if (isRunnerHook(expressionName)) {
