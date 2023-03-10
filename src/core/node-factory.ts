@@ -422,7 +422,7 @@ function createFunctionWithPageParameter(factory: ts.NodeFactory) {
       // is there are any possibility to be unknown? How?
       createIdentifier(factory)(node.name?.escapedText || 'unknown'),
       node.typeParameters,
-      [createParameter(factory)(PLAYWRIGHT_PAGE_NAME)],
+      [createParameter(factory)(PLAYWRIGHT_PAGE_NAME), ...node.parameters],
       undefined,
       node.body
     );
