@@ -3,7 +3,7 @@ import pc from 'picocolors';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { globSync } from 'glob';
 import { converter } from './converter.js';
-import { inMemoryLineTracker } from './core/in-memory-line-tracker.js';
+import { inMemoryLineTracker } from './infrastructure/in-memory-line-tracker.js';
 import { Logger } from './core/logger.js';
 import { RequiredDirectoryException } from './core/required-directory-exception.js';
 
