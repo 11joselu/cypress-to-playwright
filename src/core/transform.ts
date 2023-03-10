@@ -14,21 +14,8 @@ export function transform(sourceFile: ts.SourceFile) {
       function visit(node: ts.Node): ts.Node {
         node = ts.visitEachChild(node, visit, context);
 
-        if (ts.isFunctionDeclaration(node)) {
-          const fnBodyContent = node.getFullText(sourceFile);
-          if (includesCyCodeInFnCode(fnBodyContent)) {
-            return factory.functionWithPageParameter(node);
-          }
-        }
-
-        if (
-          ts.isVariableDeclaration(node) &&
-          ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression)
-        ) {
-          const arrowBodyContent = node.getFullText(sourceFile);
-          if (includesCyCodeInFnCode(arrowBodyContent)) {
-            return factory.functionWithPageParameter(node);
-          }
+        if (isFunctionOrArrowFunctionWithCyCode(node)) {
+          return convertFunctionNode(node, sourceFile, factory);
         }
 
         if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
@@ -125,6 +112,7 @@ function isValidation(expressionName: string) {
 function isCommand(expressionName: string) {
   return isCy.visit(expressionName) || isCy.intercept(expressionName);
 }
+
 function commands(expressionName: string, factory: Factory, call: ts.CallExpression) {
   if (isCy.visit(expressionName)) {
     return createGoTo(factory, call);
@@ -134,6 +122,39 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
 
   return null;
 }
+
 function includesCyCodeInFnCode(fnBodyContent: string) {
   return fnBodyContent.includes('cy.');
+}
+function isFunctionOrArrowFunctionWithCyCode(node: ts.Node | ts.VariableDeclaration) {
+  return (
+    ts.isFunctionDeclaration(node) ||
+    (ts.isVariableDeclaration(node) &&
+      ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression))
+  );
+}
+
+function convertFunctionNode(
+  node: ts.Node | ts.FunctionDeclaration | ts.VariableDeclaration,
+  sourceFile: ts.SourceFile,
+  factory: Factory
+) {
+  if (ts.isFunctionDeclaration(node)) {
+    const fnBodyContent = node.getFullText(sourceFile);
+    if (includesCyCodeInFnCode(fnBodyContent)) {
+      return factory.functionWithPageParameter(node);
+    }
+  }
+
+  if (
+    ts.isVariableDeclaration(node) &&
+    ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression)
+  ) {
+    const arrowBodyContent = node.getFullText(sourceFile);
+    if (includesCyCodeInFnCode(arrowBodyContent)) {
+      return factory.functionWithPageParameter(node);
+    }
+  }
+
+  return node;
 }
