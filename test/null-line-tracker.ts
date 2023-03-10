@@ -1,4 +1,4 @@
-import { LineTracker, Line } from '../src/core/lineTracker';
+import { LineTracker, Line } from '../src/core/lineTracker.js';
 
 export const nullLineTracker: LineTracker = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
