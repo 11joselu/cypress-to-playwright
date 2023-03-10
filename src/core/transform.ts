@@ -14,7 +14,7 @@ export function transform(sourceFile: ts.SourceFile) {
       function visit(node: ts.Node): ts.Node {
         node = ts.visitEachChild(node, visit, context);
 
-        if (isFunctionOrArrowFunctionWithCyCode(node)) {
+        if (isFunction(node)) {
           return convertFunctionNode(node, sourceFile, factory);
         }
 
@@ -28,11 +28,16 @@ export function transform(sourceFile: ts.SourceFile) {
         });
 
         if (foundFunctionDeclaration) {
-          if (isFunctionOrArrowFunctionWithCyCode(foundFunctionDeclaration)) {
-            return factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
-              factory.identifier(PLAYWRIGHT_PAGE_NAME),
-            ]);
+          if (isFunction(foundFunctionDeclaration)) {
+            const fnBodyContent = foundFunctionDeclaration.getFullText(sourceFile);
+            if (includesCyCodeInFnCode(fnBodyContent)) {
+              return factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
+                factory.identifier(PLAYWRIGHT_PAGE_NAME),
+              ]);
+            }
           }
+
+          return node;
         }
 
         const expressionName = getExpressionName(call);
@@ -138,7 +143,7 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
 function includesCyCodeInFnCode(fnBodyContent: string) {
   return fnBodyContent.includes('cy.');
 }
-function isFunctionOrArrowFunctionWithCyCode(node: ts.Node | ts.VariableDeclaration) {
+function isFunction(node: ts.Node | ts.VariableDeclaration) {
   return (
     ts.isFunctionDeclaration(node) ||
     (ts.isVariableDeclaration(node) &&

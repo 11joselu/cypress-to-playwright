@@ -154,7 +154,7 @@ describe('Converter', () => {
     );
   });
 
-  it('Convert a cy test case with functions injection page into a playwright code', () => {
+  it('Convert a cy test case injecting page in a functions call into a playwright code', () => {
     const result = index(`
       it('visit', () => {
         goToMainPage();
@@ -172,6 +172,29 @@ describe('Converter', () => {
       });
       async function goToMainPage(page) {
         await page.goto('http://localhost/');
+      }
+    `)
+    );
+  });
+
+  it.only('Do not convert a cy test case with functions without cy references in function declaration', () => {
+    const result = index(`
+      it('visit', () => {
+        goToMainPage();
+      });
+      function goToMainPage() {
+        console.log('hey');
+      }
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      test('visit', async ({ page }) => {
+        goToMainPage();
+      });
+      function goToMainPage() {
+        console.log('hey');
       }
     `)
     );
