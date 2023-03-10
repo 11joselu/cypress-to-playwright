@@ -21,6 +21,16 @@ export function transform(sourceFile: ts.SourceFile) {
           }
         }
 
+        if (
+          ts.isVariableDeclaration(node) &&
+          ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression)
+        ) {
+          const arrowBodyContent = node.getFullText(sourceFile);
+          if (includesCyCodeInFnCode(arrowBodyContent)) {
+            return factory.functionWithPageParameter(node);
+          }
+        }
+
         if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
           return node;
         }

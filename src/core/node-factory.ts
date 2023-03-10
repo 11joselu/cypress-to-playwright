@@ -45,7 +45,9 @@ export type Factory = {
     propertyArgs?: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
   playwrightIntercept(node: ts.CallExpression): ts.CallExpression;
-  functionWithPageParameter(node: ts.FunctionDeclaration): ts.FunctionDeclaration;
+  functionWithPageParameter(
+    node: ts.FunctionDeclaration | ts.VariableDeclaration
+  ): ts.FunctionDeclaration | ts.VariableDeclaration;
 };
 
 export const nodeFactory = (factory: ts.NodeFactory): Factory => {
@@ -415,16 +417,36 @@ function createCallOfProperty(factory: ts.NodeFactory) {
 }
 
 function createFunctionWithPageParameter(factory: ts.NodeFactory) {
-  return function (node: ts.FunctionDeclaration) {
+  return function (node: ts.FunctionDeclaration | ts.VariableDeclaration) {
+    const isVariableDeclaration = ts.isVariableDeclaration(node);
+    // is there are any possibility to be unknown? How?
+    const name = isVariableDeclaration ? node.name.getText() : node.name?.escapedText || 'unknown';
+    const typeParameters = isVariableDeclaration
+      ? (node.initializer as ts.ArrowFunction).typeParameters
+      : node.typeParameters;
+    const parameters = isVariableDeclaration ? (node.initializer as ts.ArrowFunction).parameters : node.parameters;
+
+    if (isVariableDeclaration) {
+      return factory.createVariableDeclaration(
+        name,
+        undefined,
+        undefined,
+        createArrowFunction(factory)(
+          (node.initializer as ts.ArrowFunction).body as ts.Block,
+          [createParameter(factory)(PLAYWRIGHT_PAGE_NAME), ...(parameters as unknown as ts.ParameterDeclaration[])],
+          [createAsyncToken(factory)()]
+        )
+      );
+    }
+
     return factory.createFunctionDeclaration(
       [createAsyncToken(factory)()],
       undefined,
-      // is there are any possibility to be unknown? How?
-      createIdentifier(factory)(node.name?.escapedText || 'unknown'),
-      node.typeParameters,
-      [createParameter(factory)(PLAYWRIGHT_PAGE_NAME), ...node.parameters],
+      createIdentifier(factory)(name),
+      typeParameters,
+      [createParameter(factory)(PLAYWRIGHT_PAGE_NAME), ...parameters],
       undefined,
-      node.body
+      ts.isFunctionDeclaration(node) ? node.body : createEmptyBlock(factory)()
     );
   };
 }

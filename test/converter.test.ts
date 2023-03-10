@@ -93,4 +93,34 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Convert cy code inside a arrow function and inject "page" parameter', () => {
+    const result = index(`const visit = () => {
+      cy.visit('http://localhost')
+    }`);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      const visit = async (page) => {
+        await page.goto('http://localhost');
+      }
+    `)
+    );
+  });
+
+  it('Convert cy code inside a arrow function with parameters and inject "page" parameter keeping the rest of parameters', () => {
+    const result = index(`const visit = (id) => {
+      cy.visit('http://localhost/' + id)
+    }`);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      const visit = async (page, id) => {
+        await page.goto('http://localhost/' + id);
+      }
+    `)
+    );
+  });
 });
