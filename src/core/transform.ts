@@ -16,7 +16,7 @@ export function transform(sourceFile: ts.SourceFile) {
 
         if (ts.isFunctionDeclaration(node)) {
           const fnBodyContent = node.getFullText(sourceFile);
-          if (fnBodyContent.includes('cy.')) {
+          if (includesCyCodeInFnCode(fnBodyContent)) {
             return factory.functionWithPageParameter(node);
           }
         }
@@ -111,6 +111,7 @@ function isAction(expressionName: string) {
 function isValidation(expressionName: string) {
   return isCy.should(expressionName);
 }
+
 function isCommand(expressionName: string) {
   return isCy.visit(expressionName) || isCy.intercept(expressionName);
 }
@@ -122,4 +123,7 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
   }
 
   return null;
+}
+function includesCyCodeInFnCode(fnBodyContent: string) {
+  return fnBodyContent.includes('cy.');
 }

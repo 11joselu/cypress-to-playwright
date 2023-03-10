@@ -64,7 +64,7 @@ describe('Converter', () => {
     );
   });
 
-  it('Convert cy code inside a function and inject "page" parameter', () => {
+  it('Convert cy code inside a function declaration and inject "page" parameter', () => {
     const result = index(`function visit() {
       cy.visit('http://localhost')
     }`);
@@ -79,7 +79,7 @@ describe('Converter', () => {
     );
   });
 
-  it('Convert cy code inside a function with parameters and inject "page" parameter keeping the rest of parameters', () => {
+  it('Convert cy code inside a function declaration with parameters and inject "page" parameter keeping the rest of parameters', () => {
     const result = index(`function visit(id) {
       cy.visit('http://localhost/' + id)
     }`);
