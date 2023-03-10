@@ -125,6 +125,29 @@ describe('Command', () => {
         '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)'
     );
   });
+
+  it('Writes only migrated code', () => {
+    createFileWithContent(
+      resolve(ROOT_DIR, 'error.cy.js'),
+      format(`
+      it('Test case', () => {
+        cy.get('selector').should('non-existing-validation')
+      })
+    `)
+    );
+    createFileWithContent(
+      resolve(ROOT_DIR, 'success.cy.js'),
+      format(`
+      it('Test case', () => {
+      });
+    `)
+    );
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.ok(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'success.cy.js')));
+    assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'error.cy.js')), false);
+  });
 });
 
 function createFileWithContent(file: string, content: string) {
