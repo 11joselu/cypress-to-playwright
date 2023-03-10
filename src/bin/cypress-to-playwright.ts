@@ -15,7 +15,7 @@ try {
   command.execute(readFromDirectory, consoleLogger);
 } catch (e) {
   if (e instanceof EmptyDirectoryException) {
-    console.error(pc.red('Cypress readFromDirectory is required'));
+    console.error(pc.red('Cypress directory is required'));
     process.exit(1);
   }
 
