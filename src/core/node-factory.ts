@@ -45,6 +45,7 @@ export type Factory = {
     propertyArgs?: ts.NodeArray<ts.Expression> | ts.Expression[]
   ): ts.CallExpression;
   playwrightIntercept(node: ts.CallExpression): ts.CallExpression;
+  functionWithPageParameter(node: ts.FunctionDeclaration): ts.FunctionDeclaration;
 };
 
 export const nodeFactory = (factory: ts.NodeFactory): Factory => {
@@ -68,6 +69,7 @@ export const nodeFactory = (factory: ts.NodeFactory): Factory => {
     playwrightCommand: createPlaywrightCommand(factory),
     playwrightLocatorProperty: createPlaywrightLocatorProperty(factory),
     playwrightIntercept: createPlaywrightIntercept(factory),
+    functionWithPageParameter: createFunctionWithPageParameter(factory),
   };
 };
 
@@ -408,6 +410,21 @@ function createCallOfProperty(factory: ts.NodeFactory) {
       propertyAccessExpression(identifier(objIdentifier), property),
       undefined,
       objectLiteralExpressions
+    );
+  };
+}
+
+function createFunctionWithPageParameter(factory: ts.NodeFactory) {
+  return function (node: ts.FunctionDeclaration) {
+    return factory.createFunctionDeclaration(
+      [createAsyncToken(factory)()],
+      undefined,
+      // is there are any possibility to be unknown? How?
+      createIdentifier(factory)(node.name?.escapedText || 'unknown'),
+      node.typeParameters,
+      [createParameter(factory)(PLAYWRIGHT_PAGE_NAME)],
+      undefined,
+      node.body
     );
   };
 }

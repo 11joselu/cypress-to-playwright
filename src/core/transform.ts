@@ -15,28 +15,9 @@ export function transform(sourceFile: ts.SourceFile) {
         node = ts.visitEachChild(node, visit, context);
 
         if (ts.isFunctionDeclaration(node)) {
-          const fnContent = node.getFullText(sourceFile);
-          if (fnContent.includes('cy.')) {
-            return context.factory.createFunctionDeclaration(
-              [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
-              undefined,
-              // is there are any possibility to be unknown? How?
-              factory.identifier(node.name?.escapedText || 'unknown'),
-              node.typeParameters,
-              [
-                ...node.parameters,
-                context.factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  factory.identifier('page'),
-                  undefined,
-                  undefined,
-                  undefined
-                ),
-              ],
-              undefined,
-              node.body
-            );
+          const fnBodyContent = node.getFullText(sourceFile);
+          if (fnBodyContent.includes('cy.')) {
+            return factory.functionWithPageParameter(node);
           }
         }
 
