@@ -1,28 +1,28 @@
 import * as assert from 'assert';
-import { index } from '../src/index.js';
+import { converter } from '../src/converter.js';
 import { format } from './test-utils.js';
 
 describe('Converter', () => {
   it('Returns empty string when there are not code', () => {
-    const result = index('');
+    const result = converter('');
 
     assert.strictEqual(result, '');
   });
 
   it('Accepts JavaScript code', () => {
-    const result = index(`function hello() {}`);
+    const result = converter(`function hello() {}`);
 
     assert.strictEqual(format(result), format('function hello() { }'));
   });
 
   it('Accepts TypeScript code', () => {
-    const result = index(`function hello(): void {}`);
+    const result = converter(`function hello(): void {}`);
 
     assert.strictEqual(format(result), format('function hello(): void { }'));
   });
 
   it('Convert large cypress code', () => {
-    const result = index(`
+    const result = converter(`
       describe('example to-do app', () => {
         beforeEach(() => {
           cy.visit('https://example.cypress.io/todo');
@@ -65,7 +65,7 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a function declaration and inject "page" parameter', () => {
-    const result = index(`function visit() {
+    const result = converter(`function visit() {
       cy.visit('http://localhost')
     }`);
 
@@ -80,7 +80,7 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a function declaration with parameters and inject "page" parameter keeping the rest of parameters', () => {
-    const result = index(`function visit(id) {
+    const result = converter(`function visit(id) {
       cy.visit('http://localhost/' + id)
     }`);
 
@@ -95,7 +95,7 @@ describe('Converter', () => {
   });
 
   it('Do not convert a function when there are no cy code into playwright code', () => {
-    const result = index(`function visit() {
+    const result = converter(`function visit() {
       console.log('non a cypress code')
     }`);
 
@@ -110,7 +110,7 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a arrow function and inject "page" parameter', () => {
-    const result = index(`const visit = () => {
+    const result = converter(`const visit = () => {
       cy.visit('http://localhost')
     }`);
 
@@ -125,7 +125,7 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a arrow function with parameters and inject "page" parameter keeping the rest of parameters', () => {
-    const result = index(`const visit = (id) => {
+    const result = converter(`const visit = (id) => {
       cy.visit('http://localhost/' + id)
     }`);
 
@@ -140,7 +140,7 @@ describe('Converter', () => {
   });
 
   it('Do not convert a arrow function when there are no cy code into playwright code', () => {
-    const result = index(`const visit = () => {
+    const result = converter(`const visit = () => {
       console.log('non a cypress code')
     }`);
 
@@ -155,7 +155,7 @@ describe('Converter', () => {
   });
 
   it('Convert a cy test case injecting page in a functions call into a playwright code', () => {
-    const result = index(`
+    const result = converter(`
       it('visit', () => {
         goToMainPage();
       });
@@ -178,7 +178,7 @@ describe('Converter', () => {
   });
 
   it('Do not convert a cy test case with functions without cy references in function declaration', () => {
-    const result = index(`
+    const result = converter(`
       it('visit', () => {
         goToMainPage();
       });
@@ -201,7 +201,7 @@ describe('Converter', () => {
   });
 
   it('Convert a cy test case injecting page in a arrow functions call into a playwright code', () => {
-    const result = index(`
+    const result = converter(`
       it('visit', () => {
         goToMainPage();
       });

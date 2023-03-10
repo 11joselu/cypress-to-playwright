@@ -3,7 +3,7 @@ import { globSync } from 'glob';
 import { basename, dirname, join, resolve, sep } from 'path';
 import pc from 'picocolors';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { index as converter } from '../index.js';
+import { converter as converter } from '../converter.js';
 
 type File = {
   path: string;

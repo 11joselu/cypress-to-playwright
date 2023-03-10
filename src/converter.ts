@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { transform } from './core/transform.js';
 
-export function index(code: string) {
+export function converter(code: string) {
   if (code.trim() === '') return code;
 
   const sourceFile = ts.createSourceFile('migration.ts', code, ts.ScriptTarget.Latest, true);

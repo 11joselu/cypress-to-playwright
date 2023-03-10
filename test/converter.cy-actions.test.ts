@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { index } from '../src/index.js';
+import { converter } from '../src/converter.js';
 import { createOption, format } from './test-utils.js';
 
 describe('Converter: Cypress actions', () => {
@@ -23,31 +23,31 @@ describe('Converter: Cypress actions', () => {
     createOption('blur()', 'blur()'),
   ].forEach((option) => {
     it(`Transform cy.get(selector).${option.cy} by await page.locator("selector").${option.playwright})`, () => {
-      const result = index(`cy.get("selector").${option.cy}`);
+      const result = converter(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
     });
 
     it(`Transform cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
-      const result = index(`cy.get("selector").first().${option.cy}`);
+      const result = converter(`cy.get("selector").first().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").first().${option.playwright}`));
     });
 
     it(`Transform cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
-      const result = index(`cy.get("selector").last().${option.cy}`);
+      const result = converter(`cy.get("selector").last().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").last().${option.playwright}`));
     });
 
     it(`Do not transform cy.fn(selector).${option.cy}`, () => {
-      const result = index(`cy.fn("selector").${option.cy}`);
+      const result = converter(`cy.fn("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`cy.fn("selector").${option.cy}`));
     });
 
     it(`Transform cy.contains().${option.cy} by  cy.contains().${option.playwright}`, () => {
-      const result = index(`cy.contains("aText").${option.cy}`);
+      const result = converter(`cy.contains("aText").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await page.locator("text=aText").${option.playwright}`));
     });
