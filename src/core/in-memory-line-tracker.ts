@@ -1,4 +1,4 @@
-import { Line, LineTracker } from './lineTracker.js';
+import { Line, LineTracker } from './line-tracker.js';
 
 const lines: Line[] = [];
 export const inMemoryLineTracker: LineTracker = {

@@ -4,8 +4,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { globSync } from 'glob';
 import { converter } from './converter.js';
 import { inMemoryLineTracker } from './core/in-memory-line-tracker.js';
-import { EmptyDirectoryException } from './core/EmptyDirectoryException.js';
 import { Logger } from './core/logger.js';
+import { RequiredDirectoryException } from './core/required-directory-exception.js';
 
 type File = {
   path: string;
@@ -33,7 +33,7 @@ export function execute(directory: string, logger: Logger) {
 
 function validateDirectory(directory: string) {
   if (!directory) {
-    throw new EmptyDirectoryException();
+    throw new RequiredDirectoryException();
   }
 }
 

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { transform } from './core/converters/transform.js';
-import { LineTracker } from './core/lineTracker.js';
+import { LineTracker } from './core/line-tracker.js';
 
 export function converter(code: string, lineTracker: LineTracker) {
   if (code.trim() === '') return code;

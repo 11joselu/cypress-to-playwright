@@ -1,11 +1,11 @@
 import * as assert from 'assert';
 import * as command from '../src/command.js';
-import { EmptyDirectoryException } from '../src/core/EmptyDirectoryException.js';
 import { resolve } from 'path';
 import * as fs from 'fs';
 import { format } from './test-utils.js';
 import { nullLogger } from './null-logger.js';
 import { Logger } from '../src/core/logger.js';
+import { RequiredDirectoryException } from '../src/core/required-directory-exception.js';
 
 describe('Command', () => {
   const ROOT_DIR = resolve('.', 'test', 'command', 'tmp');
@@ -21,7 +21,7 @@ describe('Command', () => {
   it('Throws error when directory is empty', () => {
     assert.throws(() => {
       command.execute('', nullLogger);
-    }, EmptyDirectoryException);
+    }, RequiredDirectoryException);
   });
 
   it('Creates a playwright directory into parent given directory', () => {
