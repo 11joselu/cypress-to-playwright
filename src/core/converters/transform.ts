@@ -1,12 +1,12 @@
 import ts from 'typescript';
 import { Factory, nodeFactory } from './node-factory.js';
-import { COMMANDS, PLAYWRIGHT_PAGE_NAME } from './playwright.js';
-import { isCy } from './is/is-cy.js';
-import { isHook } from './is/is-hook.js';
+import { COMMANDS, PLAYWRIGHT_PAGE_NAME } from '../playwright.js';
+import { isCy } from '../is/is-cy.js';
+import { isHook } from '../is/is-hook.js';
 import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
-import { LineTracker } from './lineTracker.js';
+import { LineTracker } from '../lineTracker.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function transform(sourceFile: ts.SourceFile, lineTracker: LineTracker) {

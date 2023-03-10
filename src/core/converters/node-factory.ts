@@ -1,5 +1,5 @@
 import ts, { Expression } from 'typescript';
-import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from './playwright.js';
+import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from '../playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 

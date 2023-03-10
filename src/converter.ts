@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { transform } from './core/transform.js';
+import { transform } from './core/converters/transform.js';
 import { LineTracker } from './core/lineTracker.js';
 
 export function converter(code: string, lineTracker: LineTracker) {

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { Factory } from './node-factory.js';
-import { isCy } from './is/is-cy.js';
-import { LOCATOR_PROPERTIES } from './playwright.js';
+import { isCy } from '../is/is-cy.js';
+import { LOCATOR_PROPERTIES } from '../playwright.js';
 
 export function handle(expressionName: string, propertyExpression: ts.PropertyAccessExpression, factory: Factory) {
   if (isCy.click(expressionName)) {

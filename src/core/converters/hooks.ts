@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { Factory } from './node-factory.js';
-import { isHook } from './is/is-hook.js';
-import { HOOKS } from './playwright.js';
+import { isHook } from '../is/is-hook.js';
+import { HOOKS } from '../playwright.js';
 
 export const handle = (expressionName: string, node: ts.ExpressionStatement, factory: Factory) => {
   const call = node.expression as ts.CallExpression;
