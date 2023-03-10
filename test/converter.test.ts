@@ -94,6 +94,21 @@ describe('Converter', () => {
     );
   });
 
+  it('Do not convert a function when there are no cy code into playwright code', () => {
+    const result = index(`function visit() {
+      console.log('non a cypress code')
+    }`);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      function visit() {
+        console.log('non a cypress code')
+      }
+    `)
+    );
+  });
+
   it('Convert cy code inside a arrow function and inject "page" parameter', () => {
     const result = index(`const visit = () => {
       cy.visit('http://localhost')
@@ -119,6 +134,21 @@ describe('Converter', () => {
       format(`
       const visit = async (page, id) => {
         await page.goto('http://localhost/' + id);
+      }
+    `)
+    );
+  });
+
+  it('Do not convert a arrow function when there are no cy code into playwright code', () => {
+    const result = index(`const visit = () => {
+      console.log('non a cypress code')
+    }`);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      const visit = () => {
+        console.log('non a cypress code')
       }
     `)
     );
