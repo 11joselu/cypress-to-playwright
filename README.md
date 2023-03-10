@@ -34,38 +34,17 @@ npm install @11joselu/cypress-to-playwright -g
 npx @11joselu/cypress-to-playwright <cypress_directory>
 ```
 
+## How it works
+
+1. It will read all js files found in the <cypress_directory> folder.
+2. It will convert each cypress command (supported ones) to the playwright version.
+3. It will write the new files in the playwright folder at the same level as the indicated folder.
+4. Follow the steps indicated in the script.
+
 ## Supported migrations
 
-### Hooks
-| Cypress                 | Playwright                        |
-|-------------------------|-----------------------------------|
-| `it('text', fn())`      | `test('text', fn({ page }))`      |
-| `it.only('text', fn())` | `test.only('text', fn({ page }))` |
-| `it.skip('text', fn())` | `test.skip('text', fn({ page }))` |
-| `beforeEach(fn())`      | `beforeEach(fn({ page }))`        |
+[Detailed table](/docs/migration.md)
 
-[View more in test file](/test/converter.hooks.test.ts)
-
-### Commands
-| Cypress                                                                                             | Playwright                                                  |
-|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| `cy.visit()`                                                                                        | `page.goto()`                                               |
-| `cy.get()`                                                                                          | `page.locator()`                                            |
-| `cy.contains(aText)`                                                                                | `page.locator(text=aText)`                                  |
-| `cy.get().first()` or `cy.get().last()`. <br/><br/>Same for `cy.contains`                           | `page.locator().first()` or `page.locator().first()`        |
-| `cy.get().click()`, `cy.get().check()`. `cy.get().select()` etc... <br/><br/>Same for `cy.contains` | `page.locator().click()` or `page.locator().check()` etc... |
-
-[in actions test file](/test/converter.cy-validations.test.ts) or [View more in validations test file](/test/converter.cy-actions.test.ts)
-
-
-### Intercept
-| Cypress                                              | Playwright                       |
-|------------------------------------------------------|----------------------------------|
-| `cy.intercept('<method>', '<url>', <responseObject>` | `page.route(<url>, (route) => {} | 
-
-❌ Alias is not supported. That's means no `wait` support 
-
-[View more in test file](/test/converter.cy-commands.test.ts)
 
 
 ## Author
