@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import * as fs from 'fs';
 import { format } from './test-utils.js';
 import { nullLogger } from './null-logger.js';
+import { Logger } from '../src/core/logger.js';
 
 describe('Command', () => {
   const ROOT_DIR = resolve('.', 'test', 'command', 'tmp');
@@ -70,6 +71,60 @@ describe('Command', () => {
 
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'cypress.config.js')), false);
   });
+
+  it('Print success migrated summary', () => {
+    const logger = createMemoryLogger();
+    createFileWithContent(
+      resolve(ROOT_DIR, 'aTest.cy.js'),
+      format(`
+      it('Test case', () => { })
+    `)
+    );
+
+    command.execute(ROOT_DIR, logger);
+
+    assert.strictEqual(removeColor(logger.messages()[0]), '\n  - Migrated: 1\n  - Error: 0\n');
+  });
+
+  it('Print error migrated summary with files name', () => {
+    const logger = createMemoryLogger();
+    createFileWithContent(
+      resolve(ROOT_DIR, 'aTest.cy.js'),
+      format(`
+      it('Test case', () => {
+        cy.get('selector').should('non-existing-validation')
+      })
+    `)
+    );
+
+    command.execute(ROOT_DIR, logger);
+
+    assert.strictEqual(
+      removeColor(logger.messages()[0]),
+      '\n' + '  - Migrated: 0\n' + '  - Error: 1\n' + '\t- /cypress-to-playwright/test/command/tmp/aTest.cy.js\n'
+    );
+  });
+
+  it('Print next steps', () => {
+    const logger = createMemoryLogger();
+    createFileWithContent(
+      resolve(ROOT_DIR, 'aTest.cy.js'),
+      format(`
+      it('Test case', () => {
+      })
+    `)
+    );
+
+    command.execute(ROOT_DIR, logger);
+
+    assert.strictEqual(
+      removeColor(logger.messages()[1]),
+      'Next Step:\n' +
+        "      1. Run 'npm init playwright@latest'.\n" +
+        "      2. Change 'testDir' option inside the playwright configuration file to '/playwright'.\n" +
+        '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)'
+    );
+  });
 });
 
 function createFileWithContent(file: string, content: string) {
@@ -78,4 +133,21 @@ function createFileWithContent(file: string, content: string) {
 
 function readFile(file: string): string {
   return fs.readFileSync(file, 'utf-8');
+}
+
+function createMemoryLogger(): Logger & { messages: () => string[] } {
+  const messages: string[] = [];
+  return {
+    log(message: string): void {
+      messages.push(message);
+    },
+    messages() {
+      return messages;
+    },
+  };
+}
+
+function removeColor(str: string) {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\u001b\[.*?m/g, '');
 }

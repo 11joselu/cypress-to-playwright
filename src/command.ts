@@ -22,7 +22,10 @@ export function execute(directory: string, logger: Logger) {
   result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
   const migrated = result.filter((p) => p.newCode);
-  const notMigrated = result.filter((p) => !p.newCode).map((p) => p.path);
+  const notMigrated = result
+    .filter((p) => !p.newCode)
+    .map((p) => p.path)
+    .map((p) => p.replace(resolve('..'), ''));
   logger.log(getSummary(migrated.length, notMigrated));
 
   logger.log(getNextStep(outputDir));
@@ -93,8 +96,7 @@ function getNextStep(outputDir: string) {
   return pc.yellow(`Next Step:
       1. Run 'npm init playwright@latest'.
       2. Change 'testDir' option inside the playwright configuration file to '/${basename(outputDir)}'.
-      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)
-    `);
+      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)`);
 }
 
 function fixFilePath(fromDir: string, file: string) {
