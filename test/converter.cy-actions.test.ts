@@ -29,13 +29,13 @@ describe('Converter: Cypress actions', () => {
       assert.strictEqual(format(result), format(`await page.locator("selector").${option.playwright}`));
     });
 
-    it(`Transform cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.cy}`, () => {
+    it(`Transform cy.get("selector").first().${option.cy} by awaited page.locator("selector").first().${option.playwright}`, () => {
       const result = converter(`cy.get("selector").first().${option.cy}`, nullLineTracker);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").first().${option.playwright}`));
     });
 
-    it(`Transform cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.cy}`, () => {
+    it(`Transform cy.get("selector").last().${option.cy} by awaited page.locator("selector").last().${option.playwright}`, () => {
       const result = converter(`cy.get("selector").last().${option.cy}`, nullLineTracker);
 
       assert.strictEqual(format(result), format(`await page.locator("selector").last().${option.playwright}`));

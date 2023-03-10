@@ -3,7 +3,7 @@ import { converter } from '../src/converter.js';
 import { format } from './test-utils.js';
 import { nullLineTracker } from './null-line-tracker.js';
 
-describe('it Test Hooks', () => {
+describe('it: Test Hooks', () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {
     const result = converter(`it('test_case', () => {});`, nullLineTracker);
 
