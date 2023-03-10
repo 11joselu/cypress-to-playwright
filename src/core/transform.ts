@@ -23,8 +23,22 @@ export function transform(sourceFile: ts.SourceFile) {
         }
 
         const call = node.expression;
+        const expressionName = getExpressionName(call);
+
+        if (isRunnerHook(expressionName)) {
+          return hook.handle(expressionName, node, factory);
+        }
+
         const foundFunctionDeclaration = sourceFile.statements.find((st) => {
-          return ts.isFunctionDeclaration(st) && st.name?.getText() === call.expression.getText();
+          if (isFunction(st)) {
+            if (ts.isVariableStatement(st) && st.declarationList.declarations[0]) {
+              return st.declarationList.declarations[0].name.getText() === call.expression.getText();
+            }
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            return st.name?.getText() === call.expression.getText();
+          }
+          return false;
         });
 
         if (foundFunctionDeclaration) {
@@ -38,12 +52,6 @@ export function transform(sourceFile: ts.SourceFile) {
           }
 
           return node;
-        }
-
-        const expressionName = getExpressionName(call);
-
-        if (isRunnerHook(expressionName)) {
-          return hook.handle(expressionName, node, factory);
         }
 
         if (!isCyPropertyCall(expressionName, call)) return node;
@@ -144,10 +152,12 @@ function includesCyCodeInFnCode(fnBodyContent: string) {
   return fnBodyContent.includes('cy.');
 }
 function isFunction(node: ts.Node | ts.VariableDeclaration) {
+  const isArrowFunctionDeclaration = (node: ts.Node) =>
+    ts.isVariableDeclaration(node) && ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression);
   return (
     ts.isFunctionDeclaration(node) ||
-    (ts.isVariableDeclaration(node) &&
-      ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression))
+    isArrowFunctionDeclaration(node) ||
+    (ts.isVariableStatement(node) && isArrowFunctionDeclaration(node.declarationList.declarations[0]))
   );
 }
 

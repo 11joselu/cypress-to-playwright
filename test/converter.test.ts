@@ -199,4 +199,27 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Convert a cy test case injecting page in a arrow functions call into a playwright code', () => {
+    const result = index(`
+      it('visit', () => {
+        goToMainPage();
+      });
+      const goToMainPage = () => {
+        cy.visit('http://localhost/');
+      }
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      test('visit', async ({ page }) => {
+        goToMainPage(page);
+      });
+      const goToMainPage = async (page) => {
+        await page.goto('http://localhost/');
+      }
+    `)
+    );
+  });
 });
