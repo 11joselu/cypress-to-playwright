@@ -4,6 +4,7 @@ import { basename, dirname, join, resolve, sep } from 'path';
 import pc from 'picocolors';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { converter as converter } from '../converter.js';
+import { inMemoryLineTracker } from '../core/in-memory-line-tracker.js';
 
 type File = {
   path: string;
@@ -69,7 +70,7 @@ function readCyCode(path: string): File {
 
 function migrateCodeToPlaywright(file: File) {
   try {
-    const newCode = converter(file.code);
+    const newCode = converter(file.code, inMemoryLineTracker);
     return {
       ...file,
       newCode,
