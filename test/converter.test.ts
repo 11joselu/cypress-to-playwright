@@ -177,7 +177,7 @@ describe('Converter', () => {
     );
   });
 
-  it.only('Do not convert a cy test case with functions without cy references in function declaration', () => {
+  it('Do not convert a cy test case with functions without cy references in function declaration', () => {
     const result = index(`
       it('visit', () => {
         goToMainPage();
