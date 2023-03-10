@@ -6,8 +6,10 @@ import { isHook } from './is/is-hook.js';
 import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
+import { LineTracker } from './lineTracker.js';
 
-export function transform(sourceFile: ts.SourceFile) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function transform(sourceFile: ts.SourceFile, lineTracker: LineTracker) {
   return (context: ts.TransformationContext) => {
     const factory = nodeFactory(context.factory);
     return (rootNode: ts.Node) => {
