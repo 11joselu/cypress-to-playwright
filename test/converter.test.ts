@@ -63,4 +63,19 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Convert cy code inside a function and inject "page" parameter', () => {
+    const result = index(`function visit() {
+      cy.visit('http://localhost')
+    }`);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      async function visit(page) {
+        await page.goto('http://localhost');
+      }
+    `)
+    );
+  });
 });

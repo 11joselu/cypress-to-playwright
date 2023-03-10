@@ -7,13 +7,38 @@ import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function transform(_sourceFile: ts.SourceFile) {
+export function transform(sourceFile: ts.SourceFile) {
   return (context: ts.TransformationContext) => {
     const factory = nodeFactory(context.factory);
     return (rootNode: ts.Node) => {
       function visit(node: ts.Node): ts.Node {
         node = ts.visitEachChild(node, visit, context);
+
+        if (ts.isFunctionDeclaration(node)) {
+          const fnContent = node.getFullText(sourceFile);
+          if (fnContent.includes('cy.')) {
+            return context.factory.createFunctionDeclaration(
+              [context.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
+              undefined,
+              // is there are any possibility to be unknown? How?
+              factory.identifier(node.name?.escapedText || 'unknown'),
+              node.typeParameters,
+              [
+                ...node.parameters,
+                context.factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  factory.identifier('page'),
+                  undefined,
+                  undefined,
+                  undefined
+                ),
+              ],
+              undefined,
+              node.body
+            );
+          }
+        }
 
         if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
           return node;
