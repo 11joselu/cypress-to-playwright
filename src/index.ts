@@ -9,7 +9,7 @@ export function index(code: string) {
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
   });
-  const transformationResult = ts.transform(sourceFile, [transform]);
+  const transformationResult = ts.transform(sourceFile, [transform(sourceFile)]);
   const transformedSourceFile = transformationResult.transformed[0];
 
   return printer.printNode(ts.EmitHint.Unspecified, transformedSourceFile, sourceFile);

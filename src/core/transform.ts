@@ -7,42 +7,46 @@ import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
 
-export const transform: ts.TransformerFactory<ts.Node> = (context: ts.TransformationContext) => {
-  const factory = nodeFactory(context.factory);
-  return (rootNode) => {
-    function visit(node: ts.Node): ts.Node {
-      node = ts.visitEachChild(node, visit, context);
-      if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function transform(_sourceFile: ts.SourceFile) {
+  return (context: ts.TransformationContext) => {
+    const factory = nodeFactory(context.factory);
+    return (rootNode: ts.Node) => {
+      function visit(node: ts.Node): ts.Node {
+        node = ts.visitEachChild(node, visit, context);
+
+        if (!(ts.isExpressionStatement(node) && ts.isCallExpression(node.expression))) {
+          return node;
+        }
+
+        const call = node.expression;
+        const expressionName = getExpressionName(call);
+
+        if (isRunnerHook(expressionName)) {
+          return hook.handle(expressionName, node, factory);
+        }
+
+        if (!isCyPropertyCall(expressionName, call)) return node;
+
+        if (isAction(expressionName)) {
+          return actions.handle(expressionName, call.expression as ts.PropertyAccessExpression, factory);
+        }
+
+        if (isValidation(expressionName)) {
+          return validations.handle(call, factory);
+        }
+
+        if (isCommand(expressionName)) {
+          return commands(expressionName, factory, call) || node;
+        }
+
         return node;
       }
 
-      const call = node.expression;
-      const expressionName = getExpressionName(call);
-
-      if (isRunnerHook(expressionName)) {
-        return hook.handle(expressionName, node, factory);
-      }
-
-      if (!isCyPropertyCall(expressionName, call)) return node;
-
-      if (isAction(expressionName)) {
-        return actions.handle(expressionName, call.expression as ts.PropertyAccessExpression, factory);
-      }
-
-      if (isValidation(expressionName)) {
-        return validations.handle(call, factory);
-      }
-
-      if (isCommand(expressionName)) {
-        return commands(expressionName, factory, call) || node;
-      }
-
-      return node;
-    }
-
-    return ts.visitNode(rootNode, visit);
+      return ts.visitNode(rootNode, visit);
+    };
   };
-};
+}
 
 function getExpressionName(expressions: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   return getListOfExpressionName(expressions).reverse().join('.');
