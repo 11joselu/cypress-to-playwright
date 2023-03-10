@@ -5,6 +5,7 @@ import { globSync } from 'glob';
 import { converter } from './converter.js';
 import { inMemoryLineTracker } from './core/in-memory-line-tracker.js';
 import { EmptyDirectoryException } from './core/EmptyDirectoryException.js';
+import { Logger } from './core/logger.js';
 
 type File = {
   path: string;
@@ -12,7 +13,7 @@ type File = {
   newCode: string | null;
 };
 
-export function execute(directory: string) {
+export function execute(directory: string, logger: Logger) {
   validateDirectory(directory);
   const outputDir = resolve(directory, '..', 'playwright');
   mkdir(outputDir);
@@ -22,9 +23,9 @@ export function execute(directory: string) {
 
   const migrated = result.filter((p) => p.newCode);
   const notMigrated = result.filter((p) => !p.newCode).map((p) => p.path);
-  printSummary(migrated.length, notMigrated);
+  logger.log(getSummary(migrated.length, notMigrated));
 
-  showNextStep(outputDir);
+  logger.log(getNextStep(outputDir));
 }
 
 function validateDirectory(directory: string) {
@@ -77,25 +78,23 @@ function migrateCodeToPlaywright(file: File) {
   }
 }
 
-function printSummary(migrated: number, notMigrated: string[]) {
+function getSummary(migrated: number, notMigrated: string[]) {
   const strings = notMigrated
     .map((file) => {
       return `\n\t${pc.gray('- ' + file)}`;
     })
     .join('');
-  console.log(`
+  return `
   ${pc.green('- Migrated:')} ${pc.green(migrated)}
-  ${pc.red('- Error:')} ${pc.red(notMigrated.length)}${strings}\n`);
+  ${pc.red('- Error:')} ${pc.red(notMigrated.length)}${strings}\n`;
 }
 
-function showNextStep(outputDir: string) {
-  console.warn(
-    pc.yellow(`Next Step:
+function getNextStep(outputDir: string) {
+  return pc.yellow(`Next Step:
       1. Run 'npm init playwright@latest'.
       2. Change 'testDir' option inside the playwright configuration file to '/${basename(outputDir)}'.
       3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)
-    `)
-  );
+    `);
 }
 
 function fixFilePath(fromDir: string, file: string) {

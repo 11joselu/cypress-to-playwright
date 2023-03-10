@@ -4,8 +4,9 @@ import { EmptyDirectoryException } from '../src/core/EmptyDirectoryException.js'
 import { resolve } from 'path';
 import * as fs from 'fs';
 import { format } from './test-utils.js';
+import { nullLogger } from './null-logger.js';
 
-describe.only('Command', () => {
+describe('Command', () => {
   const ROOT_DIR = resolve('.', 'test', 'command', 'tmp');
 
   beforeEach(() => {
@@ -18,12 +19,12 @@ describe.only('Command', () => {
 
   it('Throws error when directory is empty', () => {
     assert.throws(() => {
-      command.execute('');
+      command.execute('', nullLogger);
     }, EmptyDirectoryException);
   });
 
   it('Creates a playwright directory into parent given directory', () => {
-    command.execute(ROOT_DIR);
+    command.execute(ROOT_DIR, nullLogger);
 
     assert.ok(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright')));
   });
@@ -36,7 +37,7 @@ describe.only('Command', () => {
     `)
     );
 
-    command.execute(ROOT_DIR);
+    command.execute(ROOT_DIR, nullLogger);
 
     assert.strictEqual(
       readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.cy.js')),
@@ -47,7 +48,7 @@ describe.only('Command', () => {
   it('Do not load non js file', () => {
     createFileWithContent(resolve(ROOT_DIR, 'README.md'), '# Title');
 
-    command.execute(ROOT_DIR);
+    command.execute(ROOT_DIR, nullLogger);
 
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'README.md')), false);
   });
@@ -57,7 +58,7 @@ describe.only('Command', () => {
     fs.mkdirSync(node_modules_directory, { recursive: true });
     createFileWithContent(resolve(node_modules_directory, 'library.js'), 'const library = true;');
 
-    command.execute(ROOT_DIR);
+    command.execute(ROOT_DIR, nullLogger);
 
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'node_modules', 'library.js')), false);
   });
@@ -65,7 +66,7 @@ describe.only('Command', () => {
   it('Do not load cypress config file', () => {
     createFileWithContent(resolve(ROOT_DIR, 'cypress.config.js'), 'const library = true;');
 
-    command.execute(ROOT_DIR);
+    command.execute(ROOT_DIR, nullLogger);
 
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'cypress.config.js')), false);
   });
