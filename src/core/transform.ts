@@ -45,9 +45,11 @@ export function transform(sourceFile: ts.SourceFile) {
           if (isFunction(foundFunctionDeclaration)) {
             const fnBodyContent = foundFunctionDeclaration.getFullText(sourceFile);
             if (includesCyCodeInFnCode(fnBodyContent)) {
-              return factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
-                factory.identifier(PLAYWRIGHT_PAGE_NAME),
-              ]);
+              return factory.await(
+                factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
+                  factory.identifier(PLAYWRIGHT_PAGE_NAME),
+                ])
+              );
             }
           }
 

@@ -168,7 +168,7 @@ describe('Converter', () => {
       format(result),
       format(`
       test('visit', async ({ page }) => {
-        goToMainPage(page);
+        await goToMainPage(page);
       });
       async function goToMainPage(page) {
         await page.goto('http://localhost/');
@@ -214,7 +214,7 @@ describe('Converter', () => {
       format(result),
       format(`
       test('visit', async ({ page }) => {
-        goToMainPage(page);
+        await goToMainPage(page);
       });
       const goToMainPage = async (page) => {
         await page.goto('http://localhost/');
