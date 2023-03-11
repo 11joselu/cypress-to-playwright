@@ -66,6 +66,9 @@ export const isCy = {
   clearCookies(expressionName: string) {
     return 'cy.clearCookies' === expressionName;
   },
+  customCommand(expressionName: string) {
+    return 'Cypress.Commands.add' === expressionName;
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;

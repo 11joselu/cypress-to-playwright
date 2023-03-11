@@ -1,4 +1,4 @@
-import ts, { Expression } from 'typescript';
+import ts, { Expression, ParameterDeclaration } from 'typescript';
 import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from '../playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
@@ -49,6 +49,7 @@ export type Factory = {
     node: ts.FunctionDeclaration | ts.VariableDeclaration
   ): ts.FunctionDeclaration | ts.VariableDeclaration;
   parameter: (name: string) => ts.ParameterDeclaration;
+  function(name: string, parameters: ts.ParameterDeclaration[], body: ts.Block): ts.FunctionDeclaration;
 };
 
 export const nodeFactory = (factory: ts.NodeFactory): Factory => {
@@ -74,6 +75,7 @@ export const nodeFactory = (factory: ts.NodeFactory): Factory => {
     playwrightIntercept: createPlaywrightIntercept(factory),
     functionWithPageParameter: createFunctionWithPageParameter(factory),
     parameter: createParameter(factory),
+    function: createFunction(factory),
   };
 };
 
@@ -449,6 +451,20 @@ function createFunctionWithPageParameter(factory: ts.NodeFactory) {
       [createParameter(factory)(PLAYWRIGHT_PAGE_NAME), ...parameters],
       undefined,
       ts.isFunctionDeclaration(node) ? node.body : createEmptyBlock(factory)()
+    );
+  };
+}
+
+function createFunction(factory: ts.NodeFactory) {
+  return (name: string, parameters: ts.ParameterDeclaration[], body: ts.Block) => {
+    return factory.createFunctionDeclaration(
+      [createAsyncToken(factory)()],
+      undefined,
+      createIdentifier(factory)(name),
+      undefined,
+      parameters,
+      undefined,
+      body
     );
   };
 }

@@ -6,6 +6,7 @@ import { isHook } from '../is/is-hook.js';
 import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
+import * as customCommand from './custom-command.js';
 
 export function transform(sourceFile: ts.SourceFile) {
   return (context: ts.TransformationContext) => {
@@ -27,6 +28,10 @@ export function transform(sourceFile: ts.SourceFile) {
 
         if (isRunnerHook(expressionName)) {
           return hook.handle(expressionName, node, factory);
+        }
+
+        if (isCy.customCommand(expressionName)) {
+          return customCommand.handle(node, factory);
         }
 
         const foundFunctionDeclaration = sourceFile.statements.find((st) => {
@@ -173,6 +178,7 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
 function includesCyCodeInFnCode(fnBodyContent: string) {
   return fnBodyContent.includes('cy.');
 }
+
 function isFunction(node: ts.Node | ts.VariableDeclaration) {
   const isArrowFunctionDeclaration = (node: ts.Node) =>
     ts.isVariableDeclaration(node) &&
@@ -184,7 +190,6 @@ function isFunction(node: ts.Node | ts.VariableDeclaration) {
     (ts.isVariableStatement(node) && isArrowFunctionDeclaration(node.declarationList.declarations[0]))
   );
 }
-
 function convertFunctionNode(
   node: ts.Node | ts.FunctionDeclaration | ts.VariableDeclaration,
   sourceFile: ts.SourceFile,
