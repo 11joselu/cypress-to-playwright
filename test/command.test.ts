@@ -30,7 +30,7 @@ describe('Command', () => {
     assert.ok(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright')));
   });
 
-  it('Read and converts cypress code', () => {
+  it('Read cypress code then write converted code into playwright directory', () => {
     createFileWithContent(
       resolve(ROOT_DIR, 'aTest.cy.js'),
       format(`
@@ -44,6 +44,19 @@ describe('Command', () => {
       readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.cy.js')),
       `test('Test case', async ({ page }) => { });\n`
     );
+  });
+
+  it('Writes even untouched code', () => {
+    createFileWithContent(
+      resolve(ROOT_DIR, 'untouched.cy.js'),
+      format(`
+      const hello = 'world';
+    `)
+    );
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.strictEqual(readFile(resolve(ROOT_DIR, '..', 'playwright', 'untouched.cy.js')), `const hello = 'world';\n`);
   });
 
   it('Do not load non js file', () => {

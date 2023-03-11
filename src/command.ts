@@ -18,7 +18,7 @@ export function execute(directory: string, logger: Logger) {
   mkdir(outputDir);
 
   const result = getFiles(directory).map(readCyCode).map(migrateCodeToPlaywright);
-  result.filter((file) => file.newCode).forEach(writeMigratedCodeFrom(directory, outputDir));
+  result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
   logger.log(getNextStep(outputDir));
 }
@@ -60,7 +60,7 @@ function migrateCodeToPlaywright(file: File) {
   const newCode = converter(file.code);
   return {
     ...file,
-    newCode: file.code === newCode ? null : newCode,
+    newCode: newCode,
   };
 }
 
