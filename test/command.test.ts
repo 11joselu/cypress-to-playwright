@@ -102,7 +102,8 @@ describe('Command', () => {
       'Next Step:\n' +
         "      1. Run 'npm init playwright@latest'.\n" +
         "      2. Change 'testDir' option inside the playwright configuration file to '/playwright'.\n" +
-        '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)'
+        '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)\n' +
+        '      4. If there are partial migrated files. Fix it replacing cy code with playwright code'
     );
   });
 

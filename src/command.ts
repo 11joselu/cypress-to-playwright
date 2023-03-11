@@ -88,7 +88,8 @@ function getNextStep(outputDir: string) {
   return pc.yellow(`Next Step:
       1. Run 'npm init playwright@latest'.
       2. Change 'testDir' option inside the playwright configuration file to '/${basename(outputDir)}'.
-      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)`);
+      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)
+      4. If there are partial migrated files. Fix it replacing cy code with playwright code`);
 }
 
 function fixFilePath(fromDir: string, file: string) {
