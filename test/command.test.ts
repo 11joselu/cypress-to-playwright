@@ -165,6 +165,24 @@ describe('Command', () => {
       `)
     );
   });
+
+  it('Do not inject import in top of file if there are no references for test of expect', () => {
+    createFileWithContent(
+      resolve(ROOT_DIR, 'aTest.cy.js'),
+      format(`
+        Cypress.Commands.add('log', () => {});
+    `)
+    );
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.strictEqual(
+      format(readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.spec.js'))),
+      format(`
+        export async function log(page){};
+      `)
+    );
+  });
 });
 
 function createFileWithContent(file: string, content: string) {

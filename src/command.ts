@@ -53,7 +53,7 @@ function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
     const writeInFile = join(outputDir, fixFilePath(readDirectory, file.path));
     let content = file.newCode || '';
 
-    if (file.newCode !== file.code) {
+    if (file.newCode !== file.code && /(?:test|describe|expect)\s*?\(/g.test(content)) {
       content = "import { test, expect } from '@playwright/test';" + '\n' + content;
     }
 
