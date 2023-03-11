@@ -47,18 +47,7 @@ export function transform(sourceFile: ts.SourceFile) {
         });
 
         if (foundFunctionDeclaration) {
-          if (isFunction(foundFunctionDeclaration)) {
-            const fnBodyContent = foundFunctionDeclaration.getFullText(sourceFile);
-            if (includesCyCodeInFnCode(fnBodyContent)) {
-              return factory.await(
-                factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
-                  factory.identifier(PLAYWRIGHT_PAGE_NAME),
-                ])
-              );
-            }
-          }
-
-          return node;
+          return injectPageArgumentIntoCallFunction(foundFunctionDeclaration, sourceFile, factory, call, node);
         }
 
         if (!isCyPropertyCall(expressionName, call)) return node;
@@ -190,6 +179,7 @@ function isFunction(node: ts.Node | ts.VariableDeclaration) {
     (ts.isVariableStatement(node) && isArrowFunctionDeclaration(node.declarationList.declarations[0]))
   );
 }
+
 function convertFunctionNode(
   node: ts.Node | ts.FunctionDeclaration | ts.VariableDeclaration,
   sourceFile: ts.SourceFile,
@@ -209,6 +199,26 @@ function convertFunctionNode(
     const arrowBodyContent = node.getFullText(sourceFile);
     if (includesCyCodeInFnCode(arrowBodyContent)) {
       return factory.functionWithPageParameter(node);
+    }
+  }
+
+  return node;
+}
+function injectPageArgumentIntoCallFunction(
+  foundFunctionDeclaration: ts.Statement,
+  sourceFile: ts.SourceFile,
+  factory: Factory,
+  call: ts.CallExpression,
+  node: ts.ExpressionStatement
+) {
+  if (isFunction(foundFunctionDeclaration)) {
+    const fnBodyContent = foundFunctionDeclaration.getFullText(sourceFile);
+    if (includesCyCodeInFnCode(fnBodyContent)) {
+      return factory.await(
+        factory.callExpression(factory.identifier(call.expression.getText()), call.typeArguments, [
+          factory.identifier(PLAYWRIGHT_PAGE_NAME),
+        ])
+      );
     }
   }
 
