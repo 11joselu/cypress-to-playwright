@@ -1,4 +1,4 @@
-import ts, { Expression, ParameterDeclaration } from 'typescript';
+import ts, { Expression, ModifierLike, ParameterDeclaration } from 'typescript';
 import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from '../playwright.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
@@ -26,6 +26,7 @@ export type Factory = {
   await(expression: ts.CallExpression): ts.AwaitExpression;
   emptyBlock(): ts.Block;
   asyncToken(): ts.ModifierToken<ts.SyntaxKind.AsyncKeyword>;
+  exportToken(): ts.ModifierToken<ts.SyntaxKind.ExportKeyword>;
   variable(name: string, value: ts.Expression, flag?: ts.NodeFlags): ts.VariableStatement;
   block(statements: ts.Statement[]): ts.Block;
   numeric(value: string): ts.NumericLiteral;
@@ -52,7 +53,8 @@ export type Factory = {
   function(
     name: string,
     parameters: ts.ParameterDeclaration[] | ts.NodeArray<ts.ParameterDeclaration>,
-    body: ts.Block
+    body: ts.Block,
+    modifiers?: ts.ModifierLike[]
   ): ts.FunctionDeclaration;
 };
 
@@ -80,6 +82,7 @@ export const nodeFactory = (factory: ts.NodeFactory): Factory => {
     functionWithPageParameter: createFunctionWithPageParameter(factory),
     parameter: createParameter(factory),
     function: createFunction(factory),
+    exportToken: createExportToken(factory),
   };
 };
 
@@ -463,10 +466,11 @@ function createFunction(factory: ts.NodeFactory) {
   return (
     name: string,
     parameters: ts.ParameterDeclaration[] | ts.NodeArray<ts.ParameterDeclaration>,
-    body: ts.Block
+    body: ts.Block,
+    modifiers: ts.ModifierLike[] = []
   ) => {
     return factory.createFunctionDeclaration(
-      [createAsyncToken(factory)()],
+      modifiers,
       undefined,
       createIdentifier(factory)(name),
       undefined,
@@ -474,5 +478,11 @@ function createFunction(factory: ts.NodeFactory) {
       undefined,
       body
     );
+  };
+}
+
+function createExportToken(factory: ts.NodeFactory) {
+  return () => {
+    return factory.createToken(ts.SyntaxKind.ExportKeyword);
   };
 }

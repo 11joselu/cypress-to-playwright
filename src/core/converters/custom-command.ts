@@ -10,7 +10,8 @@ export function handle(node: ts.ExpressionStatement, factory: Factory) {
   return factory.function(
     fixString(name),
     [...callback.parameters, factory.parameter(PLAYWRIGHT_PAGE_NAME)],
-    factory.emptyBlock()
+    factory.emptyBlock(),
+    [factory.exportToken(), factory.asyncToken()]
   );
 }
 
