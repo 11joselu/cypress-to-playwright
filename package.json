@@ -1,6 +1,6 @@
 {
   "name": "@11joselu/cypress-to-playwright",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Automatic migration from cypress to playwright",
   "engines": {
     "node": ">=16.0.0"
