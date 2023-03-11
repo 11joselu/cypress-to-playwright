@@ -197,7 +197,7 @@ describe('afterEach: Test Hooks', () => {
   });
 });
 
-describe('describe:,  Test Hooks', () => {
+describe('describe: Test Hooks', () => {
   it('Convert describe with visit into test.describe', () => {
     const result = converter(
       `
