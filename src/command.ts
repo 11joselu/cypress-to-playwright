@@ -81,7 +81,7 @@ function getSummary(migrated: number, notMigrated: string[]) {
     .join('');
   return `
   ${pc.green('- Migrated:')} ${pc.green(migrated)}
-  ${pc.red('- Partial migrated:')} ${pc.yellow(notMigrated.length)}${strings}\n`;
+  ${pc.yellow('- Partial migrated:')} ${pc.yellow(notMigrated.length)}${strings}\n`;
 }
 
 function getNextStep(outputDir: string) {
