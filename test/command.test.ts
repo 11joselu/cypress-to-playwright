@@ -98,11 +98,41 @@ describe('Command', () => {
     command.execute(ROOT_DIR, logger);
 
     assert.strictEqual(
-      removeColor(logger.messages()[0]),
+      removeColor(logger.messages()[1]),
       'Next Step:\n' +
         "      1. Run 'npm init playwright@latest'.\n" +
         "      2. Change 'testDir' option inside the playwright configuration file to '/playwright'.\n" +
         '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)'
+    );
+  });
+
+  it('Print summary with success migrated and partial migrated files', () => {
+    const logger = createMemoryLogger();
+    createFileWithContent(
+      resolve(ROOT_DIR, 'successMigrated.cy.js'),
+      format(`
+      it('Test case', () => {
+        cy.visit('http://localhost');
+      })
+    `)
+    );
+    createFileWithContent(
+      resolve(ROOT_DIR, 'partialMigrated.cy.js'),
+      format(`
+      it('Test case', () => {
+        cy.get('selector').should('non-existing-validation')
+      })
+    `)
+    );
+
+    command.execute(ROOT_DIR, logger);
+
+    assert.strictEqual(
+      removeColor(logger.messages()[0]),
+      '\n' +
+        '  - Migrated: 1\n' +
+        '  - Partial migrated: 1\n' +
+        '\t- /cypress-to-playwright/test/command/tmp/partialMigrated.cy.js\n'
     );
   });
 });

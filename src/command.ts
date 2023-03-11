@@ -10,6 +10,7 @@ type File = {
   path: string;
   code: string;
   newCode: string | null;
+  hasCyReferences: boolean;
 };
 
 export function execute(directory: string, logger: Logger) {
@@ -20,6 +21,12 @@ export function execute(directory: string, logger: Logger) {
   const result = getFiles(directory).map(readCyCode).map(migrateCodeToPlaywright);
   result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
+  const migrated = result.filter((p) => !p.hasCyReferences);
+  const notMigrated = result
+    .filter((p) => p.hasCyReferences)
+    .map((p) => p.path)
+    .map((p) => p.replace(resolve('..'), ''));
+  logger.log(getSummary(migrated.length, notMigrated));
   logger.log(getNextStep(outputDir));
 }
 
@@ -53,6 +60,7 @@ function readCyCode(path: string): File {
     path: path,
     code: readFileSync(resolve(path), 'utf-8'),
     newCode: null,
+    hasCyReferences: false,
   };
 }
 
@@ -61,7 +69,19 @@ function migrateCodeToPlaywright(file: File) {
   return {
     ...file,
     newCode: newCode,
+    hasCyReferences: newCode.includes('cy.'),
   };
+}
+
+function getSummary(migrated: number, notMigrated: string[]) {
+  const strings = notMigrated
+    .map((file) => {
+      return `\n\t${pc.gray('- ' + file)}`;
+    })
+    .join('');
+  return `
+  ${pc.green('- Migrated:')} ${pc.green(migrated)}
+  ${pc.red('- Partial migrated:')} ${pc.yellow(notMigrated.length)}${strings}\n`;
 }
 
 function getNextStep(outputDir: string) {
