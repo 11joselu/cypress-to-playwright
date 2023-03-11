@@ -63,7 +63,7 @@ export function transform(sourceFile: ts.SourceFile) {
         }
 
         if (isValidation(expressionName)) {
-          return validations.handle(call, factory);
+          return validations.handle(call, factory) || node;
         }
 
         if (isCommand(expressionName)) {

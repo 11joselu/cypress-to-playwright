@@ -80,7 +80,7 @@ export function handle(call: ts.CallExpression, factory: Factory) {
     );
   }
 
-  throw new Error(`Unknown "${shouldCyValidation}" validation`);
+  return undefined;
 }
 
 function getArgumentsOfPropertyAccessExpression(propertyAccessExpression: ts.PropertyAccessExpression) {

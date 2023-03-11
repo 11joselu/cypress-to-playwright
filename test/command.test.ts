@@ -72,39 +72,6 @@ describe('Command', () => {
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'cypress.config.js')), false);
   });
 
-  it('Print success migrated summary', () => {
-    const logger = createMemoryLogger();
-    createFileWithContent(
-      resolve(ROOT_DIR, 'aTest.cy.js'),
-      format(`
-      it('Test case', () => { })
-    `)
-    );
-
-    command.execute(ROOT_DIR, logger);
-
-    assert.strictEqual(removeColor(logger.messages()[0]), '\n  - Migrated: 1\n  - Error: 0\n');
-  });
-
-  it('Print error migrated summary with files name', () => {
-    const logger = createMemoryLogger();
-    createFileWithContent(
-      resolve(ROOT_DIR, 'aTest.cy.js'),
-      format(`
-      it('Test case', () => {
-        cy.get('selector').should('non-existing-validation')
-      })
-    `)
-    );
-
-    command.execute(ROOT_DIR, logger);
-
-    assert.strictEqual(
-      removeColor(logger.messages()[0]),
-      '\n' + '  - Migrated: 0\n' + '  - Error: 1\n' + '\t- /cypress-to-playwright/test/command/tmp/aTest.cy.js\n'
-    );
-  });
-
   it('Print next steps', () => {
     const logger = createMemoryLogger();
     createFileWithContent(
@@ -118,35 +85,12 @@ describe('Command', () => {
     command.execute(ROOT_DIR, logger);
 
     assert.strictEqual(
-      removeColor(logger.messages()[1]),
+      removeColor(logger.messages()[0]),
       'Next Step:\n' +
         "      1. Run 'npm init playwright@latest'.\n" +
         "      2. Change 'testDir' option inside the playwright configuration file to '/playwright'.\n" +
         '      3. Analyze/Remove unnecessary files (like cy commands, cy plugins, clean package.json etc...)'
     );
-  });
-
-  it('Writes only migrated code', () => {
-    createFileWithContent(
-      resolve(ROOT_DIR, 'error.cy.js'),
-      format(`
-      it('Test case', () => {
-        cy.get('selector').should('non-existing-validation')
-      })
-    `)
-    );
-    createFileWithContent(
-      resolve(ROOT_DIR, 'success.cy.js'),
-      format(`
-      it('Test case', () => {
-      });
-    `)
-    );
-
-    command.execute(ROOT_DIR, nullLogger);
-
-    assert.ok(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'success.cy.js')));
-    assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'error.cy.js')), false);
   });
 });
 

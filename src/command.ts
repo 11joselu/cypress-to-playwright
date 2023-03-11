@@ -18,14 +18,7 @@ export function execute(directory: string, logger: Logger) {
   mkdir(outputDir);
 
   const result = getFiles(directory).map(readCyCode).map(migrateCodeToPlaywright);
-  result.forEach(writeMigratedCodeFrom(directory, outputDir));
-
-  const migrated = result.filter((p) => p.newCode);
-  const notMigrated = result
-    .filter((p) => !p.newCode)
-    .map((p) => p.path)
-    .map((p) => p.replace(resolve('..'), ''));
-  logger.log(getSummary(migrated.length, notMigrated));
+  result.filter((file) => file.newCode).forEach(writeMigratedCodeFrom(directory, outputDir));
 
   logger.log(getNextStep(outputDir));
 }
@@ -49,11 +42,9 @@ function getFiles(directory: string) {
 }
 
 function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
-  return (file: File) => {
-    if (file.newCode === null) return;
-
+  return (file: File): void => {
     const writeInFile = join(outputDir, fixFilePath(readDirectory, file.path));
-    writeContentInFile(writeInFile, file.newCode);
+    writeContentInFile(writeInFile, file.newCode as string);
   };
 }
 
@@ -66,29 +57,11 @@ function readCyCode(path: string): File {
 }
 
 function migrateCodeToPlaywright(file: File) {
-  try {
-    const newCode = converter(file.code);
-    return {
-      ...file,
-      newCode,
-    };
-  } catch (e) {
-    return {
-      ...file,
-      newCode: null,
-    };
-  }
-}
-
-function getSummary(migrated: number, notMigrated: string[]) {
-  const strings = notMigrated
-    .map((file) => {
-      return `\n\t${pc.gray('- ' + file)}`;
-    })
-    .join('');
-  return `
-  ${pc.green('- Migrated:')} ${pc.green(migrated)}
-  ${pc.red('- Error:')} ${pc.red(notMigrated.length)}${strings}\n`;
+  const newCode = converter(file.code);
+  return {
+    ...file,
+    newCode: file.code === newCode ? null : newCode,
+  };
 }
 
 function getNextStep(outputDir: string) {

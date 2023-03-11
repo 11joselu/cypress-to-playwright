@@ -69,12 +69,6 @@ describe('Converter: Cypress validation', () => {
     });
   });
 
-  it('Throws error for unknown validation', () => {
-    assert.throws(() => {
-      converter('cy.get("selector").should("be.foo")');
-    }, /^Error: Unknown "be.foo" validation$/);
-  });
-
   it('When there are a variable in a validation should keep it', () => {
     const result = converter(`
       const newItem = 'Feed the cat';
