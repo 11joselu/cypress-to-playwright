@@ -1,3 +1,4 @@
+import { test, expect } from '@playwright/test';
 /// <reference types="cypress" />
 context('Assertions', () => {
   test.beforeEach(async ({ page }) => {
