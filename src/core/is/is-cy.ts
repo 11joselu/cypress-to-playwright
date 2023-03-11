@@ -63,6 +63,9 @@ export const isCy = {
   wait(expressionName: string) {
     return 'cy.wait' === expressionName;
   },
+  clearCookies(expressionName: string) {
+    return 'cy.clearCookies' === expressionName;
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;

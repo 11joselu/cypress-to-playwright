@@ -27,7 +27,7 @@
 | `cy.intercept(routeMatcher)`                                 | ❌                                                       |
 | `cy.viewport()`                                              | ❌                                                       |
 | `cy.wait()`                                                  | `await page.waitForTimeout()`                           |
-| `cy.clearCookies()`                                          | Coming soon                                             |
+| `cy.clearCookies()`                                          | `await page.context().clearCookies()`                                             |
 | `cy.setCookie('key', 'value')`                               | Coming soon                                             |
 | `cy.title()`                                                 | Coming soon                                             |
 

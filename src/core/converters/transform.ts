@@ -90,6 +90,14 @@ function createWait(factory: Factory, call: ts.CallExpression) {
   return factory.awaitCallExpression(factory.playwrightCommand(COMMANDS.WAIT), call.typeArguments, call.arguments);
 }
 
+function createClearCookies(factory: Factory, call: ts.CallExpression) {
+  const expression = factory.propertyAccessExpression(
+    factory.callExpression(factory.playwrightCommand(COMMANDS.CONTEXT), call.typeArguments, call.arguments),
+    COMMANDS.CLEAR_COOKIES
+  );
+  return factory.awaitCallExpression(expression, undefined, []);
+}
+
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   const result: string[] = [];
   if ('name' in expression) {
@@ -141,7 +149,12 @@ function isValidation(expressionName: string) {
 }
 
 function isCommand(expressionName: string) {
-  return isCy.visit(expressionName) || isCy.intercept(expressionName) || isCy.wait(expressionName);
+  return (
+    isCy.visit(expressionName) ||
+    isCy.intercept(expressionName) ||
+    isCy.wait(expressionName) ||
+    isCy.clearCookies(expressionName)
+  );
 }
 
 function commands(expressionName: string, factory: Factory, call: ts.CallExpression) {
@@ -151,6 +164,8 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
     return factory.playwrightIntercept(call);
   } else if (isCy.wait(expressionName)) {
     return createWait(factory, call);
+  } else if (isCy.clearCookies(expressionName)) {
+    return createClearCookies(factory, call);
   }
   return null;
 }

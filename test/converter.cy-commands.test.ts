@@ -20,6 +20,12 @@ describe('Converter: Cypress commands', () => {
 
     assert.strictEqual(format(result), format('await page.waitForTimeout(1000)'));
   });
+
+  it('Transform cy.clearCookies() by await page.context().clearCookies()', () => {
+    const result = converter('cy.clearCookies()');
+
+    assert.strictEqual(format(result), format('await page.context().clearCookies()'));
+  });
 });
 
 describe("Query's", () => {

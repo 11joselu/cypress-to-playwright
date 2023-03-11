@@ -2,6 +2,8 @@ export const enum COMMANDS {
   GOTO = 'goto',
   LOCATOR = 'locator',
   WAIT = 'waitForTimeout',
+  CONTEXT = 'context',
+  CLEAR_COOKIES = 'clearCookies',
 }
 
 export const enum ROUTE {
