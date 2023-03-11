@@ -49,7 +49,11 @@ export type Factory = {
     node: ts.FunctionDeclaration | ts.VariableDeclaration
   ): ts.FunctionDeclaration | ts.VariableDeclaration;
   parameter: (name: string) => ts.ParameterDeclaration;
-  function(name: string, parameters: ts.ParameterDeclaration[], body: ts.Block): ts.FunctionDeclaration;
+  function(
+    name: string,
+    parameters: ts.ParameterDeclaration[] | ts.NodeArray<ts.ParameterDeclaration>,
+    body: ts.Block
+  ): ts.FunctionDeclaration;
 };
 
 export const nodeFactory = (factory: ts.NodeFactory): Factory => {
@@ -456,7 +460,11 @@ function createFunctionWithPageParameter(factory: ts.NodeFactory) {
 }
 
 function createFunction(factory: ts.NodeFactory) {
-  return (name: string, parameters: ts.ParameterDeclaration[], body: ts.Block) => {
+  return (
+    name: string,
+    parameters: ts.ParameterDeclaration[] | ts.NodeArray<ts.ParameterDeclaration>,
+    body: ts.Block
+  ) => {
     return factory.createFunctionDeclaration(
       [createAsyncToken(factory)()],
       undefined,

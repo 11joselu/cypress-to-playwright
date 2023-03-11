@@ -8,4 +8,10 @@ describe('Converter: Cypress Custom commands', () => {
 
     assert.strictEqual(format(result), format('async function login() {}'));
   });
+
+  it('Migrate custom command with parameters into a normal function with parameters', () => {
+    const result = converter("Cypress.Commands.add('login', (username, password) => {})");
+
+    assert.strictEqual(format(result), format('async function login(username, password) {}'));
+  });
 });
