@@ -12,7 +12,7 @@ describe('example to-do app', () => {
   it('can add new todo items', () => {
     const newItem = 'Feed the cat';
 
-    cy.get('[data-test=new-todo]').type(`${newItem}{enter}`);
+    cy.addTodo(newItem);
     cy.get('.todo-list li').should('have.length', 3);
     cy.get('.todo-list li').last().should('have.text', newItem);
   });

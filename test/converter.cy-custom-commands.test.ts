@@ -14,4 +14,21 @@ describe('Converter: Cypress Custom commands', () => {
 
     assert.strictEqual(format(result), format('export async function login(username, password, page) {}'));
   });
+
+  it('Migrate custom command migrating body too', () => {
+    const result = converter(`
+      Cypress.Commands.add('addTodo', (newItem) => {
+        cy.get('[data-test=new-todo]').type(\`\${newItem}{enter}\`);
+      });
+    `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+      export async function addTodo(newItem, page) {
+        await page.locator('[data-test=new-todo]').type(\`\${newItem}{enter}\`);
+      }
+    `)
+    );
+  });
 });
