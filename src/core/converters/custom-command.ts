@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { Factory } from './node-factory.js';
 import { PLAYWRIGHT_PAGE_NAME } from '../playwright.js';
+import { fixString } from './fix-string.js';
 
 export function handle(node: ts.ExpressionStatement, factory: Factory) {
   const call = node.expression as ts.CallExpression;
@@ -13,8 +14,4 @@ export function handle(node: ts.ExpressionStatement, factory: Factory) {
     factory.emptyBlock(),
     [factory.exportToken(), factory.asyncToken()]
   );
-}
-
-function fixString(str: string) {
-  return str.replace(/["'`]/g, '');
 }

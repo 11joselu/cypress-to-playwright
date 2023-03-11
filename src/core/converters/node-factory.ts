@@ -1,5 +1,6 @@
 import ts, { Expression, ModifierLike, ParameterDeclaration } from 'typescript';
 import { COMMANDS, LOCATOR_PROPERTIES, PLAYWRIGHT_PAGE_NAME, ROUTE, VALIDATION } from '../playwright.js';
+import { fixString } from './fix-string.js';
 
 type Args = ts.NodeArray<ts.Expression> | ts.NumericLiteral[] | ts.StringLiteral[] | ts.Expression[];
 
@@ -403,10 +404,6 @@ function createPlaywrightIntercept(factory: ts.NodeFactory) {
       arrowFunction(block(bodyExpressions), [parameterDeclaration(ROUTE.NAME)]),
     ]);
   };
-}
-
-function fixString(str: string) {
-  return str.replace(/["']/g, '');
 }
 
 function createCallOfProperty(factory: ts.NodeFactory) {

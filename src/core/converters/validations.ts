@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { Factory } from './node-factory.js';
 import { isCy } from '../is/is-cy.js';
 import { COMMANDS, LOCATOR_PROPERTIES, VALIDATION } from '../playwright.js';
+import { fixString } from './fix-string.js';
 
 export function handle(call: ts.CallExpression, factory: Factory) {
   const propertyExpression = call.expression as ts.PropertyAccessExpression;
@@ -125,8 +126,4 @@ function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.Le
   }
 
   return result;
-}
-
-function fixString(str: string) {
-  return str.replace(/["'`]/g, '');
 }
