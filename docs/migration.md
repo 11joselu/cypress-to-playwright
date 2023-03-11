@@ -31,6 +31,16 @@
 | `cy.setCookie('key', 'value')`                               | Coming soon                                             |
 | `cy.title()`                                                 | Coming soon                                             |
 
+## Custom Commands
+
+| Cypress                                           | Playwright                            |
+|---------------------------------------------------|---------------------------------------|
+| `Cypress.Commands.add(name, callbackFn)`          | `export async function name(page) {}` |
+| `Cypress.Commands.add(name, options, callbackFn)` | ❌                                     |
+| `Cypress.Commands.addAll(...)`                    | ❌                                     |
+| `Cypress.Commands.overwrite(...)`                 | ❌                                     |
+
+
 
 ## Queries
 | Cypress                                                | Playwright                                      |
