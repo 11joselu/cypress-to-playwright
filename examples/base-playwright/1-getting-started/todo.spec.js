@@ -10,7 +10,7 @@ test.describe('example to-do app', () => {
   });
   test('can add new todo items', async ({ page }) => {
     const newItem = 'Feed the cat';
-    await page.locator('[data-test=new-todo]').type(`${newItem}{enter}`);
+    cy.addTodo(newItem);
     await expect(page.locator('.todo-list li')).toHaveCount(3);
     await expect(page.locator('.todo-list li').last()).toHaveText(newItem);
   });
