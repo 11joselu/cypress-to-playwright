@@ -102,7 +102,7 @@ function fixFilePath(fromDir: string, file: string) {
 
 function writeContentInFile(writeInFile: string, result: string) {
   mkdir(dirname(writeInFile));
-  writeFileSync(writeInFile, result, {
+  writeFileSync(writeInFile.replace('.cy.', '.spec.'), result, {
     flag: 'w',
   });
 }

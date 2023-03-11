@@ -41,7 +41,7 @@ describe('Command', () => {
     command.execute(ROOT_DIR, nullLogger);
 
     assert.strictEqual(
-      readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.cy.js')),
+      readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.spec.js')),
       `test('Test case', async ({ page }) => { });\n`
     );
   });
@@ -56,7 +56,10 @@ describe('Command', () => {
 
     command.execute(ROOT_DIR, nullLogger);
 
-    assert.strictEqual(readFile(resolve(ROOT_DIR, '..', 'playwright', 'untouched.cy.js')), `const hello = 'world';\n`);
+    assert.strictEqual(
+      readFile(resolve(ROOT_DIR, '..', 'playwright', 'untouched.spec.js')),
+      `const hello = 'world';\n`
+    );
   });
 
   it('Do not load non js file', () => {
