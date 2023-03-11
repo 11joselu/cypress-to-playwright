@@ -18,6 +18,8 @@
 
 > Automatic migration from cypress to playwright
 
+![](https://github.com/11joselu/cypress-to-playwright/blob/main/docs/migration-example.gif)
+
 ## Prerequisites
 
 - node >=16.0.0
