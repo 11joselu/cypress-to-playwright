@@ -1,16 +1,17 @@
 import * as assert from 'assert';
 import { converter } from '../src/converter.js';
 import { format } from './test-utils.js';
+import { nulCustomCommandTracker } from './nul-custom-command-tracker.js';
 
 describe('it: Test Hooks', () => {
   it('Transform "it" and inject "page" parameter into "test"', () => {
-    const result = converter(`it('test_case', () => {});`, []);
+    const result = converter(`it('test_case', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`test('test_case', async({page}) => {});`));
   });
 
   it('Do not transform call expression when is not "it" block into "test" block', () => {
-    const result = converter(`callFunction('test_case', () => {});`, []);
+    const result = converter(`callFunction('test_case', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`callFunction('test_case', () => {});`));
   });
@@ -22,7 +23,7 @@ describe('it: Test Hooks', () => {
       console.log('Function body');
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -42,7 +43,7 @@ describe('it: Test Hooks', () => {
       console.log('Function body');
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -62,7 +63,7 @@ describe('it: Test Hooks', () => {
       it('test_case', () => {});
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -76,7 +77,7 @@ describe('it: Test Hooks', () => {
   });
 
   it('Transform "it.only" block into "test.only" block', () => {
-    const result = converter(`it.only('test_case', () => {});`, []);
+    const result = converter(`it.only('test_case', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`test.only('test_case', async({page}) => {});`));
   });
@@ -88,7 +89,7 @@ describe('it: Test Hooks', () => {
       console.log('Function body');
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -102,13 +103,13 @@ describe('it: Test Hooks', () => {
   });
 
   it('Do not transform "fn.only" into "test.only" block', () => {
-    const result = converter(`fn.only('a simple function', () => {});`, []);
+    const result = converter(`fn.only('a simple function', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`fn.only('a simple function', () => {});`));
   });
 
   it('Transform "it.skip" block into "test.skip" block', () => {
-    const result = converter(`it.skip('test_case', () => {});`, []);
+    const result = converter(`it.skip('test_case', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`test.skip('test_case', async({page}) => {});`));
   });
@@ -120,7 +121,7 @@ describe('it: Test Hooks', () => {
       console.log('Function body');
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -134,7 +135,7 @@ describe('it: Test Hooks', () => {
   });
 
   it('Do not transform "fn.skip" block into "test.skip" block', () => {
-    const result = converter(`fn.skip('test_case', () => {});`, []);
+    const result = converter(`fn.skip('test_case', () => {});`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format(`fn.skip('test_case', () => {});`));
   });
@@ -146,7 +147,7 @@ describe('beforeEach: Test Hooks', () => {
       `
     beforeEach(() => {})
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -164,7 +165,7 @@ describe('beforeEach: Test Hooks', () => {
       cy.visit('http://localhost')
     })
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -184,7 +185,7 @@ describe('afterEach: Test Hooks', () => {
       `
     afterEach(() => {})
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -202,7 +203,7 @@ describe('describe: Test Hooks', () => {
       `
     describe('text', () => {})
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -218,7 +219,7 @@ describe('describe: Test Hooks', () => {
       `
     describe.only('text', () => {})
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -234,7 +235,7 @@ describe('describe: Test Hooks', () => {
       `
     describe.skip('text', () => {})
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(

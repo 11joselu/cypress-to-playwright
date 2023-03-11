@@ -1,22 +1,24 @@
 import * as assert from 'assert';
 import { converter } from '../src/converter.js';
 import { format } from './test-utils.js';
+import { nulCustomCommandTracker } from './nul-custom-command-tracker.js';
+import { createInMemoryCustomCommandTracker } from '../src/core/infrastructure/in-memory-custom-command-tracker.js';
 
 describe('Converter', () => {
   it('Returns empty string when there are not code', () => {
-    const result = converter('', []);
+    const result = converter('', nulCustomCommandTracker);
 
     assert.strictEqual(result, '');
   });
 
   it('Accepts JavaScript code', () => {
-    const result = converter(`function hello() {}`, []);
+    const result = converter(`function hello() {}`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format('function hello() { }'));
   });
 
   it('Accepts TypeScript code', () => {
-    const result = converter(`function hello(): void {}`, []);
+    const result = converter(`function hello(): void {}`, nulCustomCommandTracker);
 
     assert.strictEqual(format(result), format('function hello(): void { }'));
   });
@@ -41,7 +43,7 @@ describe('Converter', () => {
       });
     });
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -72,7 +74,7 @@ describe('Converter', () => {
       `function visit() {
     cy.visit('http://localhost')
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -90,7 +92,7 @@ describe('Converter', () => {
       `function visit(id) {
     cy.visit('http://localhost/' + id)
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -108,7 +110,7 @@ describe('Converter', () => {
       `function visit() {
     console.log('non a cypress code')
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -126,7 +128,7 @@ describe('Converter', () => {
       `const visit = () => {
     cy.visit('http://localhost')
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -144,7 +146,7 @@ describe('Converter', () => {
       `const visit = (id) => {
     cy.visit('http://localhost/' + id)
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -162,7 +164,7 @@ describe('Converter', () => {
       `const visit = () => {
     console.log('non a cypress code')
   }`,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -185,7 +187,7 @@ describe('Converter', () => {
       cy.visit('http://localhost/');
     }
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -211,7 +213,7 @@ describe('Converter', () => {
       console.log('hey');
     }
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -237,7 +239,7 @@ describe('Converter', () => {
       cy.visit('http://localhost/');
     }
   `,
-      []
+      nulCustomCommandTracker
     );
 
     assert.strictEqual(
@@ -261,7 +263,7 @@ describe('Converter', () => {
           let text;
         });
       `,
-        []
+        nulCustomCommandTracker
       );
     });
   });
@@ -274,7 +276,7 @@ describe('Converter', () => {
         cy.myCommand(page);
       });
   `,
-      []
+      createInMemoryCustomCommandTracker()
     );
 
     assert.strictEqual(

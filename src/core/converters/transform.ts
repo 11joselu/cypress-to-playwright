@@ -7,8 +7,9 @@ import * as hook from './hooks.js';
 import * as actions from './actions.js';
 import * as validations from './validations.js';
 import * as customCommand from './custom-command.js';
+import { CustomCommandTracker } from '../custom-command-tracker.js';
 
-export function transform(sourceFile: ts.SourceFile, customCommands: string[]) {
+export function transform(sourceFile: ts.SourceFile, customCommandsTracker: CustomCommandTracker) {
   return (context: ts.TransformationContext) => {
     const factory = nodeFactory(context.factory);
     return (rootNode: ts.Node) => {
@@ -32,7 +33,7 @@ export function transform(sourceFile: ts.SourceFile, customCommands: string[]) {
 
         if (isCy.customCommand(expressionName)) {
           const newNode = customCommand.handle(node, factory);
-          customCommands.push(createCallableCypressCustomCommandName(newNode));
+          customCommandsTracker.track(newNode.name?.escapedText || '');
           return newNode;
         }
 
@@ -66,7 +67,7 @@ export function transform(sourceFile: ts.SourceFile, customCommands: string[]) {
           return commands(expressionName, factory, call) || node;
         }
 
-        if (customCommands.includes(expressionName)) {
+        if (customCommandsTracker.exists(expressionName)) {
           if (ts.isCallExpression(node.expression)) {
             const expression = call.expression as ts.PropertyAccessExpression;
             return factory.callExpression(expression.name, undefined, [factory.identifier(PLAYWRIGHT_PAGE_NAME)]);
@@ -233,7 +234,4 @@ function injectPageArgumentIntoCallFunction(
   }
 
   return node;
-}
-function createCallableCypressCustomCommandName(newNode: ts.FunctionDeclaration) {
-  return `cy.` + newNode.name?.escapedText;
 }

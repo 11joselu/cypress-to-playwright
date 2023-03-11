@@ -5,6 +5,8 @@ import { globSync } from 'glob';
 import { converter } from './converter.js';
 import { Logger } from './core/logger.js';
 import { RequiredDirectoryException } from './core/required-directory-exception.js';
+import { createInMemoryCustomCommandTracker } from './core/infrastructure/in-memory-custom-command-tracker.js';
+import { CustomCommandTracker } from './core/custom-command-tracker.js';
 
 type File = {
   path: string;
@@ -14,13 +16,13 @@ type File = {
 };
 
 export function execute(directory: string, logger: Logger) {
-  const customCommands: string[] = [];
+  const customCommandsTracker = createInMemoryCustomCommandTracker();
   validateDirectory(directory);
   const outputDir = resolve(directory, '..', 'playwright');
   mkdir(outputDir);
 
   const files = getFiles(directory);
-  const result = files.map(readCyCode).map((file) => migrateCodeToPlaywright(file, customCommands));
+  const result = files.map(readCyCode).map((file) => migrateCodeToPlaywright(file, customCommandsTracker));
   result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
   const migrated = result.filter((p) => !p.hasCyReferences);
@@ -74,8 +76,8 @@ function readCyCode(path: string): File {
   };
 }
 
-function migrateCodeToPlaywright(file: File, customCommands: string[]) {
-  const newCode = converter(file.code, customCommands);
+function migrateCodeToPlaywright(file: File, customCommandsTracker: CustomCommandTracker) {
+  const newCode = converter(file.code, customCommandsTracker);
   return {
     ...file,
     newCode: newCode,
