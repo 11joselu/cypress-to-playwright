@@ -14,6 +14,12 @@ describe('Converter: Cypress commands', () => {
 
     assert.strictEqual(format(result), format('fn.visit("http://localhost")'));
   });
+
+  it('Transform cy.wait by await page.waitForTimeout', () => {
+    const result = converter('cy.wait(1000)');
+
+    assert.strictEqual(format(result), format('await page.waitForTimeout(1000)'));
+  });
 });
 
 describe("Query's", () => {

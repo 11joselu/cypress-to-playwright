@@ -1,6 +1,7 @@
 export const enum COMMANDS {
   GOTO = 'goto',
   LOCATOR = 'locator',
+  WAIT = 'waitForTimeout',
 }
 
 export const enum ROUTE {

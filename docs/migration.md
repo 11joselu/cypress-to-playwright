@@ -26,7 +26,7 @@
 | `cy.intercept(<url>)`                                        | ❌                                                       |
 | `cy.intercept(routeMatcher)`                                 | ❌                                                       |
 | `cy.viewport()`                                              | ❌                                                       |
-| `cy.wait()`                                                  | Coming soon                                             |
+| `cy.wait()`                                                  | `await page.waitForTimeout()`                           |
 | `cy.clearCookies()`                                          | Coming soon                                             |
 | `cy.setCookie('key', 'value')`                               | Coming soon                                             |
 | `cy.title()`                                                 | Coming soon                                             |

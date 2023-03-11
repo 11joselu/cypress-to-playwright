@@ -86,6 +86,10 @@ function createGoTo(factory: Factory, call: ts.CallExpression) {
   return factory.awaitCallExpression(factory.playwrightCommand(COMMANDS.GOTO), call.typeArguments, call.arguments);
 }
 
+function createWait(factory: Factory, call: ts.CallExpression) {
+  return factory.awaitCallExpression(factory.playwrightCommand(COMMANDS.WAIT), call.typeArguments, call.arguments);
+}
+
 function getListOfExpressionName(expression: ts.PropertyAccessExpression | ts.LeftHandSideExpression) {
   const result: string[] = [];
   if ('name' in expression) {
@@ -137,7 +141,7 @@ function isValidation(expressionName: string) {
 }
 
 function isCommand(expressionName: string) {
-  return isCy.visit(expressionName) || isCy.intercept(expressionName);
+  return isCy.visit(expressionName) || isCy.intercept(expressionName) || isCy.wait(expressionName);
 }
 
 function commands(expressionName: string, factory: Factory, call: ts.CallExpression) {
@@ -145,8 +149,9 @@ function commands(expressionName: string, factory: Factory, call: ts.CallExpress
     return createGoTo(factory, call);
   } else if (isCy.intercept(expressionName)) {
     return factory.playwrightIntercept(call);
+  } else if (isCy.wait(expressionName)) {
+    return createWait(factory, call);
   }
-
   return null;
 }
 

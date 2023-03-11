@@ -60,6 +60,9 @@ export const isCy = {
   intercept(expressionName: string) {
     return 'cy.intercept' === expressionName;
   },
+  wait(expressionName: string) {
+    return 'cy.wait' === expressionName;
+  },
   validation: {
     haveLength(expressionName: string) {
       return 'have.length' === expressionName;
