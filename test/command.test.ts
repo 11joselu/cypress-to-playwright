@@ -41,8 +41,11 @@ describe('Command', () => {
     command.execute(ROOT_DIR, nullLogger);
 
     assert.strictEqual(
-      readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.spec.js')),
-      `test('Test case', async ({ page }) => { });\n`
+      format(readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.spec.js'))),
+      format(`
+        import { test, expect } from '@playwright/test';
+        test('Test case', async ({ page }) => { });\n
+      `)
     );
   });
 
@@ -137,6 +140,29 @@ describe('Command', () => {
         '  - Migrated: 1\n' +
         '  - Partial migrated: 1\n' +
         '\t- /cypress-to-playwright/test/command/tmp/partialMigrated.cy.js\n'
+    );
+  });
+
+  it('Should inject import in top of file', () => {
+    createFileWithContent(
+      resolve(ROOT_DIR, 'aTest.cy.js'),
+      format(`
+        it('Test case', () => {
+          cy.visit('http://localhost');
+        })
+    `)
+    );
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.strictEqual(
+      format(readFile(resolve(ROOT_DIR, '..', 'playwright', 'aTest.spec.js'))),
+      format(`
+        import { test, expect } from '@playwright/test';
+        test('Test case', async ({ page }) => {
+            await page.goto('http://localhost')
+        });
+      `)
     );
   });
 });

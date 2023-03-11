@@ -51,7 +51,13 @@ function getFiles(directory: string) {
 function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
   return (file: File): void => {
     const writeInFile = join(outputDir, fixFilePath(readDirectory, file.path));
-    writeContentInFile(writeInFile, file.newCode as string);
+    let content = file.newCode || '';
+
+    if (file.newCode !== file.code) {
+      content = "import { test, expect } from '@playwright/test';" + '\n' + content;
+    }
+
+    writeContentInFile(writeInFile, content);
   };
 }
 
