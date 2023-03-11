@@ -40,7 +40,30 @@
 | `Cypress.Commands.addAll(...)`                    | ❌                                     |
 | `Cypress.Commands.overwrite(...)`                 | ❌                                     |
 
+It will replace the call too. Example:
 
+```javascript
+Cypress.Commands.add('log', () => {});
+
+// Test case
+
+it('A text', () => {
+  cy.log();
+})
+```
+
+To
+
+```javascript
+export async function log(page) {}
+
+// Test case
+test('A test', async ({page}) => {
+  log(page); 
+})
+```
+
+**Note: need to import the function manually**
 
 ## Queries
 | Cypress                                                | Playwright                                      |
