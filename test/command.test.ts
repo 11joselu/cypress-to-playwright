@@ -183,6 +183,36 @@ describe('Command', () => {
       `)
     );
   });
+
+  it.only('Replace custom command when is in another file by normal function', () => {
+    createFileWithContent(
+      resolve(ROOT_DIR, 'commands.js'),
+      format(`
+        Cypress.Commands.add('log', (message) => {});
+    `)
+    );
+
+    createFileWithContent(
+      resolve(ROOT_DIR, 'test.cy.js'),
+      format(`
+       it('a test', () => {
+        cy.log()
+       });
+    `)
+    );
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.strictEqual(
+      format(readFile(resolve(ROOT_DIR, '..', 'playwright', 'test.spec.js'))),
+      format(`
+        import { test, expect } from '@playwright/test';
+        test('a test', async ({page}) => {
+          log(page)
+        });
+      `)
+    );
+  });
 });
 
 function createFileWithContent(file: string, content: string) {

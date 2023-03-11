@@ -8,9 +8,7 @@ import * as actions from './actions.js';
 import * as validations from './validations.js';
 import * as customCommand from './custom-command.js';
 
-export function transform(sourceFile: ts.SourceFile) {
-  const customCommands: string[] = [];
-
+export function transform(sourceFile: ts.SourceFile, customCommands: string[]) {
   return (context: ts.TransformationContext) => {
     const factory = nodeFactory(context.factory);
     return (rootNode: ts.Node) => {

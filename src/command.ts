@@ -14,11 +14,13 @@ type File = {
 };
 
 export function execute(directory: string, logger: Logger) {
+  const customCommands: string[] = [];
   validateDirectory(directory);
   const outputDir = resolve(directory, '..', 'playwright');
   mkdir(outputDir);
 
-  const result = getFiles(directory).map(readCyCode).map(migrateCodeToPlaywright);
+  const files = getFiles(directory);
+  const result = files.map(readCyCode).map((file) => migrateCodeToPlaywright(file, customCommands));
   result.forEach(writeMigratedCodeFrom(directory, outputDir));
 
   const migrated = result.filter((p) => !p.hasCyReferences);
@@ -43,9 +45,11 @@ function mkdir(dir: string) {
 }
 
 function getFiles(directory: string) {
-  return globSync(`${directory}/**/*.js`, { ignore: `**/node_modules/**` }).filter(
-    (file: string) => !file.endsWith('cypress.config.js')
-  );
+  return globSync(`${directory}/**/*.js`, { ignore: `**/node_modules/**` })
+    .filter((file: string) => !file.endsWith('cypress.config.js'))
+    .sort((a) => {
+      return a.includes('spec') || a.includes('cy') ? -1 : 1;
+    });
 }
 
 function writeMigratedCodeFrom(readDirectory: string, outputDir: string) {
@@ -70,8 +74,8 @@ function readCyCode(path: string): File {
   };
 }
 
-function migrateCodeToPlaywright(file: File) {
-  const newCode = converter(file.code);
+function migrateCodeToPlaywright(file: File, customCommands: string[]) {
+  const newCode = converter(file.code, customCommands);
   return {
     ...file,
     newCode: newCode,
