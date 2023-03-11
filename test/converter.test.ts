@@ -232,4 +232,23 @@ describe('Converter', () => {
       `);
     });
   });
+
+  it('Should replace Cypress Custom command', () => {
+    const result = converter(`
+      Cypress.Commands.add('myCommand', () => {})
+      test('visit', async ({ page }) => {
+        cy.myCommand(page);
+      });
+  `);
+
+    assert.strictEqual(
+      format(result),
+      format(`
+        export async function myCommand(page){}
+        test('visit', async ({ page }) => {
+          myCommand(page);
+        });
+    `)
+    );
+  });
 });

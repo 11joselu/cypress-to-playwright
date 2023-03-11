@@ -9,6 +9,8 @@ import * as validations from './validations.js';
 import * as customCommand from './custom-command.js';
 
 export function transform(sourceFile: ts.SourceFile) {
+  const customCommands: string[] = [];
+
   return (context: ts.TransformationContext) => {
     const factory = nodeFactory(context.factory);
     return (rootNode: ts.Node) => {
@@ -31,7 +33,9 @@ export function transform(sourceFile: ts.SourceFile) {
         }
 
         if (isCy.customCommand(expressionName)) {
-          return customCommand.handle(node, factory);
+          const newNode = customCommand.handle(node, factory);
+          customCommands.push(`cy.` + newNode.name?.escapedText);
+          return newNode;
         }
 
         const foundFunctionDeclaration = sourceFile.statements.find((st) => {
@@ -62,6 +66,13 @@ export function transform(sourceFile: ts.SourceFile) {
 
         if (isCommand(expressionName)) {
           return commands(expressionName, factory, call) || node;
+        }
+
+        if (customCommands.includes(expressionName)) {
+          if (ts.isCallExpression(node.expression)) {
+            const expression = call.expression as ts.PropertyAccessExpression;
+            return factory.callExpression(expression.name, undefined, [factory.identifier(PLAYWRIGHT_PAGE_NAME)]);
+          }
         }
 
         return node;
