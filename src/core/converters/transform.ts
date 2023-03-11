@@ -32,7 +32,7 @@ export function transform(sourceFile: ts.SourceFile, customCommands: string[]) {
 
         if (isCy.customCommand(expressionName)) {
           const newNode = customCommand.handle(node, factory);
-          customCommands.push(`cy.` + newNode.name?.escapedText);
+          customCommands.push(createCallableCypressCustomCommandName(newNode));
           return newNode;
         }
 
@@ -213,6 +213,7 @@ function convertFunctionNode(
 
   return node;
 }
+
 function injectPageArgumentIntoCallFunction(
   foundFunctionDeclaration: ts.Statement,
   sourceFile: ts.SourceFile,
@@ -232,4 +233,7 @@ function injectPageArgumentIntoCallFunction(
   }
 
   return node;
+}
+function createCallableCypressCustomCommandName(newNode: ts.FunctionDeclaration) {
+  return `cy.` + newNode.name?.escapedText;
 }

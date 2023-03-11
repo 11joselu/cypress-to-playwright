@@ -184,7 +184,7 @@ describe('Command', () => {
     );
   });
 
-  it.only('Replace custom command when is in another file by normal function', () => {
+  it('Replace custom command when is in another file by normal function', () => {
     createFileWithContent(
       resolve(ROOT_DIR, 'commands.js'),
       format(`
