@@ -43,6 +43,10 @@ npx @11joselu/cypress-to-playwright <cypress_directory>
 3. It will write the new files in the playwright folder at the same level as the indicated folder.
 4. Follow the steps indicated in the script.
 
+> **Warning**
+> 
+> Migration is not perfect, therefore you will have to make modifications in the new code
+
 ## Supported migrations
 
 [Detailed table](/docs/migration.md)
