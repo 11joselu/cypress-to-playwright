@@ -3,7 +3,6 @@
   "tabWidth": 2,
   "semi": true,
   "singleQuote": true,
-  "preserveWhitespaces": true,
   "endOfLine": "lf",
   "printWidth": 120
 }

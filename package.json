@@ -19,7 +19,8 @@
     "test:integration": "./test/integration.sh",
     "binary": "tsc --noEmit && node --loader tsx --no-warnings src/bin/cypress-to-playwright.ts",
     "build": "npm run clean && tsc -p ./tsconfig.json",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "prettier:integration": "prettier examples/ --write"
   },
   "repository": {
     "type": "git",

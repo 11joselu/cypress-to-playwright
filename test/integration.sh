@@ -25,6 +25,7 @@ function validateDirectories {
 validateDirectories
 # Check that both directories exist
 
+npm run prettier:integration&>/dev/null
 tput setaf 4; echo -e "[Test INFO]: Executing test: Comparing $base and $actual"; tput sgr0
 # Compare the contents of the two directories
 diff_out=$(diff -r "$base" "$actual")

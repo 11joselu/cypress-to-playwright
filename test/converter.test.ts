@@ -222,4 +222,14 @@ describe('Converter', () => {
     `)
     );
   });
+
+  it('Do not throw error when there are variable without a value defined', () => {
+    assert.doesNotThrow(() => {
+      converter(`
+        it('matches unknown text between two elements', () => {
+          let text;
+        });
+      `);
+    });
+  });
 });

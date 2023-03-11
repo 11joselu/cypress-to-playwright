@@ -160,7 +160,9 @@ function includesCyCodeInFnCode(fnBodyContent: string) {
 }
 function isFunction(node: ts.Node | ts.VariableDeclaration) {
   const isArrowFunctionDeclaration = (node: ts.Node) =>
-    ts.isVariableDeclaration(node) && ts.isArrowFunction((node as ts.VariableDeclaration).initializer as ts.Expression);
+    ts.isVariableDeclaration(node) &&
+    (node as ts.VariableDeclaration).initializer &&
+    ts.isArrowFunction(node.initializer as ts.Expression);
   return (
     ts.isFunctionDeclaration(node) ||
     isArrowFunctionDeclaration(node) ||
