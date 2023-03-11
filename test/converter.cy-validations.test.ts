@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { converter } from '../src/converter.js';
 import { createOption, format } from './test-utils.js';
-import { nullLineTracker } from './null-line-tracker.js';
 
 describe('Converter: Cypress validation', () => {
   [
@@ -16,19 +15,19 @@ describe('Converter: Cypress validation', () => {
     createOption('should("have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
   ].forEach((option) => {
     it(`Transform cy.get().${option.cy} by  cy.get().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector")).${option.playwright}`));
     });
 
     it(`Transform cy.get().first().${option.cy} by page.locator().first().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").first().${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").first().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector").first()).${option.playwright}`));
     });
 
     it(`Transform cy.get().last().${option.cy} by page.locator().last().${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").last().${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").last().${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector").last()).${option.playwright}`));
     });
@@ -46,13 +45,13 @@ describe('Converter: Cypress validation', () => {
     createOption('should("not.have.attr", "type", "text")', "toHaveAttribute('type', 'text')"),
   ].forEach((option) => {
     it(`Transform negative cy.get().${option.cy} by  cy.get().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").${option.cy}`);
 
       assert.strictEqual(format(result), format(`await expect(page.locator("selector")).not.${option.playwright}`));
     });
 
     it(`Transform cy.get().first().${option.cy} by page.locator().first().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").first().${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").first().${option.cy}`);
 
       assert.strictEqual(
         format(result),
@@ -61,7 +60,7 @@ describe('Converter: Cypress validation', () => {
     });
 
     it(`Transform cy.get().last().${option.cy} by page.locator().last().not.${option.playwright}`, () => {
-      const result = converter(`cy.get("selector").last().${option.cy}`, nullLineTracker);
+      const result = converter(`cy.get("selector").last().${option.cy}`);
 
       assert.strictEqual(
         format(result),
@@ -72,18 +71,15 @@ describe('Converter: Cypress validation', () => {
 
   it('Throws error for unknown validation', () => {
     assert.throws(() => {
-      converter('cy.get("selector").should("be.foo")', nullLineTracker);
+      converter('cy.get("selector").should("be.foo")');
     }, /^Error: Unknown "be.foo" validation$/);
   });
 
   it('When there are a variable in a validation should keep it', () => {
-    const result = converter(
-      `
-        const newItem = 'Feed the cat';
-        cy.get('selector').should('have.text', newItem);
-      `,
-      nullLineTracker
-    );
+    const result = converter(`
+      const newItem = 'Feed the cat';
+      cy.get('selector').should('have.text', newItem);
+    `);
 
     assert.strictEqual(
       format(result),

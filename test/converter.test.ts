@@ -1,49 +1,45 @@
 import * as assert from 'assert';
 import { converter } from '../src/converter.js';
 import { format } from './test-utils.js';
-import { nullLineTracker } from './null-line-tracker.js';
 
 describe('Converter', () => {
   it('Returns empty string when there are not code', () => {
-    const result = converter('', nullLineTracker);
+    const result = converter('');
 
     assert.strictEqual(result, '');
   });
 
   it('Accepts JavaScript code', () => {
-    const result = converter(`function hello() {}`, nullLineTracker);
+    const result = converter(`function hello() {}`);
 
     assert.strictEqual(format(result), format('function hello() { }'));
   });
 
   it('Accepts TypeScript code', () => {
-    const result = converter(`function hello(): void {}`, nullLineTracker);
+    const result = converter(`function hello(): void {}`);
 
     assert.strictEqual(format(result), format('function hello(): void { }'));
   });
 
   it('Convert large cypress code', () => {
-    const result = converter(
-      `
-      describe('example to-do app', () => {
-        beforeEach(() => {
-          cy.visit('https://example.cypress.io/todo');
-        });
-        it('displays two todo items by default', () => {
-          cy.get('.todo-list li').should('have.length', 2);
-          cy.get('.todo-list li').first().should('have.text', 'Pay electric bill');
-          cy.get('.todo-list li').last().should('have.text', 'Walk the dog');
-        });
-        it('can add new todo items', () => {
-          const newItem = 'Feed the cat';
-          cy.get('[data-test=new-todo]').type(newItem + "{enter}");
-          cy.get('.todo-list li').should('have.length', 3);
-          cy.get('.todo-list li').last().should('have.text', newItem);
-        });
+    const result = converter(`
+    describe('example to-do app', () => {
+      beforeEach(() => {
+        cy.visit('https://example.cypress.io/todo');
       });
-    `,
-      nullLineTracker
-    );
+      it('displays two todo items by default', () => {
+        cy.get('.todo-list li').should('have.length', 2);
+        cy.get('.todo-list li').first().should('have.text', 'Pay electric bill');
+        cy.get('.todo-list li').last().should('have.text', 'Walk the dog');
+      });
+      it('can add new todo items', () => {
+        const newItem = 'Feed the cat';
+        cy.get('[data-test=new-todo]').type(newItem + "{enter}");
+        cy.get('.todo-list li').should('have.length', 3);
+        cy.get('.todo-list li').last().should('have.text', newItem);
+      });
+    });
+  `);
 
     assert.strictEqual(
       format(result),
@@ -69,12 +65,9 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a function declaration and inject "page" parameter', () => {
-    const result = converter(
-      `function visit() {
-      cy.visit('http://localhost')
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`function visit() {
+    cy.visit('http://localhost')
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -87,12 +80,9 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a function declaration with parameters and inject "page" parameter keeping the rest of parameters', () => {
-    const result = converter(
-      `function visit(id) {
-      cy.visit('http://localhost/' + id)
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`function visit(id) {
+    cy.visit('http://localhost/' + id)
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -105,12 +95,9 @@ describe('Converter', () => {
   });
 
   it('Do not convert a function when there are no cy code into playwright code', () => {
-    const result = converter(
-      `function visit() {
-      console.log('non a cypress code')
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`function visit() {
+    console.log('non a cypress code')
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -123,12 +110,9 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a arrow function and inject "page" parameter', () => {
-    const result = converter(
-      `const visit = () => {
-      cy.visit('http://localhost')
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`const visit = () => {
+    cy.visit('http://localhost')
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -141,12 +125,9 @@ describe('Converter', () => {
   });
 
   it('Convert cy code inside a arrow function with parameters and inject "page" parameter keeping the rest of parameters', () => {
-    const result = converter(
-      `const visit = (id) => {
-      cy.visit('http://localhost/' + id)
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`const visit = (id) => {
+    cy.visit('http://localhost/' + id)
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -159,12 +140,9 @@ describe('Converter', () => {
   });
 
   it('Do not convert a arrow function when there are no cy code into playwright code', () => {
-    const result = converter(
-      `const visit = () => {
-      console.log('non a cypress code')
-    }`,
-      nullLineTracker
-    );
+    const result = converter(`const visit = () => {
+    console.log('non a cypress code')
+  }`);
 
     assert.strictEqual(
       format(result),
@@ -177,17 +155,14 @@ describe('Converter', () => {
   });
 
   it('Convert a cy test case injecting page in a functions call into a playwright code', () => {
-    const result = converter(
-      `
-      it('visit', () => {
-        goToMainPage();
-      });
-      function goToMainPage() {
-        cy.visit('http://localhost/');
-      }
-    `,
-      nullLineTracker
-    );
+    const result = converter(`
+    it('visit', () => {
+      goToMainPage();
+    });
+    function goToMainPage() {
+      cy.visit('http://localhost/');
+    }
+  `);
 
     assert.strictEqual(
       format(result),
@@ -203,17 +178,14 @@ describe('Converter', () => {
   });
 
   it('Do not convert a cy test case with functions without cy references in function declaration', () => {
-    const result = converter(
-      `
-      it('visit', () => {
-        goToMainPage();
-      });
-      function goToMainPage() {
-        console.log('hey');
-      }
-    `,
-      nullLineTracker
-    );
+    const result = converter(`
+    it('visit', () => {
+      goToMainPage();
+    });
+    function goToMainPage() {
+      console.log('hey');
+    }
+  `);
 
     assert.strictEqual(
       format(result),
@@ -229,17 +201,14 @@ describe('Converter', () => {
   });
 
   it('Convert a cy test case injecting page in a arrow functions call into a playwright code', () => {
-    const result = converter(
-      `
-      it('visit', () => {
-        goToMainPage();
-      });
-      const goToMainPage = () => {
-        cy.visit('http://localhost/');
-      }
-    `,
-      nullLineTracker
-    );
+    const result = converter(`
+    it('visit', () => {
+      goToMainPage();
+    });
+    const goToMainPage = () => {
+      cy.visit('http://localhost/');
+    }
+  `);
 
     assert.strictEqual(
       format(result),
