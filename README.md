@@ -25,7 +25,7 @@
 ## Install
 
 ```sh
-npm install @11joselu/cypress-to-playwright -g
+npm install @11joselu/cypress-to-playwright -D
 ```
 
 ## Usage
