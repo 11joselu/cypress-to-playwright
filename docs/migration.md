@@ -143,3 +143,7 @@ Example of connectors:
         console.log($el, index, $list)
       })
 ```
+
+### More Tools
+
+Use tools like https://ray.run/tools/cypress-to-playwright to get more support
