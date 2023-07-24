@@ -91,6 +91,14 @@ describe('Command', () => {
     assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'cypress.config.js')), false);
   });
 
+  it('Do not load ts cypress config file ', () => {
+    createFileWithContent(resolve(ROOT_DIR, 'cypress.config.ts'), 'const library = true;');
+
+    command.execute(ROOT_DIR, nullLogger);
+
+    assert.equal(fs.existsSync(resolve(ROOT_DIR, '..', 'playwright', 'cypress.config.ts')), false);
+  });
+
   it('Print next steps', () => {
     const logger = createMemoryLogger();
     createFileWithContent(

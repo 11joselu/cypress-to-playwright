@@ -47,8 +47,8 @@ function mkdir(dir: string) {
 }
 
 function getFiles(directory: string) {
-  return globSync(`${directory}/**/*.js`, { ignore: `**/node_modules/**` })
-    .filter((file: string) => !file.endsWith('cypress.config.js'))
+  return globSync(`${directory}/**/*.{js,ts}`, { ignore: `**/node_modules/**` })
+    .filter((file: string) => !file.endsWith('cypress.config.js') && !file.endsWith('cypress.config.ts'))
     .sort((a) => {
       return a.includes('spec') || a.includes('cy') ? -1 : 1;
     });
