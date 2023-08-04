@@ -77,12 +77,21 @@ function readCyCode(path: string): File {
 }
 
 function migrateCodeToPlaywright(file: File, customCommandsTracker: CustomCommandTracker) {
-  const newCode = converter(file.code, customCommandsTracker);
-  return {
-    ...file,
-    newCode: newCode,
-    hasCyReferences: newCode.includes('cy.'),
-  };
+  try {
+    const newCode = converter(file.code, customCommandsTracker);
+    return {
+      ...file,
+      newCode: newCode,
+      hasCyReferences: newCode.includes('cy.'),
+    };
+  } catch (e) {
+    console.error("Can't migrate: " + file.path);
+    return {
+      ...file,
+      newCode: '',
+      hasCyReferences: false,
+    };
+  }
 }
 
 function getSummary(migrated: number, notMigrated: string[]) {
