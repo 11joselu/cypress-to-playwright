@@ -88,8 +88,7 @@ function migrateCodeToPlaywright(file: File, customCommandsTracker: CustomComman
     console.error("Can't migrate: " + file.path);
     return {
       ...file,
-      newCode: '',
-      hasCyReferences: false,
+      hasCyReferences: file.code.includes('cy.'),
     };
   }
 }
