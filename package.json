@@ -12,7 +12,6 @@
   ],
   "scripts": {
     "clean": "rm -rf ./lib",
-    "postinstall": "git config --local core.hooksPath .githooks/",
     "lint": "eslint {src,test}/**/*.ts --fix",
     "lint-staged": "lint-staged",
     "test": "mocha test/**/*.test.ts",
