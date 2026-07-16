@@ -60,7 +60,7 @@ export function handle(call: ts.CallExpression, factory: Factory) {
     return factory.expect(newExpression, VALIDATION.TO_HAVE_VALUE, [call.arguments[1]], isNegativeValidation);
   }
 
-  if (isCy.validation.toContain(shouldCyValidation)) {
+  if (isCy.validation.toContain(shouldCyValidation) || isCy.validation.toContainText(shouldCyValidation)) {
     return factory.expect(newExpression, VALIDATION.TO_CONTAIN_TEXT, [call.arguments[1]], isNegativeValidation);
   }
 

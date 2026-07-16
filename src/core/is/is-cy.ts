@@ -88,6 +88,9 @@ export const isCy = {
     toContain(expressionName: string) {
       return 'contain' === expressionName;
     },
+    toContainText(expressionName: string) {
+      return 'contain.text' === expressionName;
+    },
     beChecked(expressionName: string) {
       return 'be.checked' === expressionName;
     },
